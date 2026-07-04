@@ -1,0 +1,409 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  TRAINER
+  STUDENT
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum ProgramCode {
+  FP_TRAINING
+  FP_STRETCHING
+  FP_RUNNING
+  FP_HOME
+}
+
+enum MembershipStatus {
+  ACTIVE
+  PAUSED
+  INACTIVE
+}
+
+enum MetricType {
+  STRENGTH
+  DURATION
+  DISTANCE
+  CUSTOM
+}
+
+enum RoutineStatus {
+  PLANNED
+  IN_PROGRESS
+  COMPLETED
+  PARTIAL
+  CANCELLED
+}
+
+enum SubmissionStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  SUBMITTED
+}
+
+enum MediaKind {
+  VIDEO
+}
+
+enum SectionType {
+  WARMUP
+  PREPARATION
+  MAIN
+  ACCESSORY
+  CIRCUIT
+  COMPLEMENT
+  CUSTOM
+}
+
+model User {
+  id            String      @id @default(cuid())
+  name          String?
+  email         String      @unique
+  emailVerified DateTime?
+  image         String?
+  passwordHash  String?
+  role          Role
+  status        UserStatus  @default(ACTIVE)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  studentProgramMemberships StudentProgramMembership[]
+
+  trainerAssignments TrainerStudentAssignment[] @relation("TrainerAssignments")
+  studentAssignments TrainerStudentAssignment[] @relation("StudentAssignments")
+
+  createdExercises Exercise[]        @relation("ExerciseCreatedBy")
+  createdTemplates RoutineTemplate[] @relation("TemplateCreatedBy")
+
+  trainerAssignedRoutines AssignedRoutine[] @relation("AssignedRoutineTrainer")
+  studentAssignedRoutines AssignedRoutine[] @relation("AssignedRoutineStudent")
+
+  workoutSubmissions WorkoutSubmission[] @relation("WorkoutSubmissionStudent")
+  trainerFeedbacks   TrainerFeedback[]   @relation("TrainerFeedbackAuthor")
+
+  accounts Account[]
+  sessions Session[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Program {
+  id          String      @id @default(cuid())
+  code        ProgramCode @unique
+  name        String
+  description String?
+  active      Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  memberships        StudentProgramMembership[]
+  trainerAssignments TrainerStudentAssignment[]
+  templates          RoutineTemplate[]
+  assignedRoutines   AssignedRoutine[]
+}
+
+model StudentProgramMembership {
+  id        String           @id @default(cuid())
+  studentId String
+  programId String
+  status    MembershipStatus @default(ACTIVE)
+  joinedAt  DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  student User    @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  program Program @relation(fields: [programId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, programId])
+  @@index([studentId])
+  @@index([programId])
+}
+
+model TrainerStudentAssignment {
+  id         String   @id @default(cuid())
+  trainerId  String
+  studentId  String
+  programId  String
+  active     Boolean  @default(true)
+  activeFrom DateTime @default(now())
+  activeTo   DateTime?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  trainer User    @relation("TrainerAssignments", fields: [trainerId], references: [id], onDelete: Cascade)
+  student User    @relation("StudentAssignments", fields: [studentId], references: [id], onDelete: Cascade)
+  program Program @relation(fields: [programId], references: [id], onDelete: Cascade)
+
+  @@unique([trainerId, studentId, programId])
+  @@index([trainerId])
+  @@index([studentId])
+  @@index([programId])
+}
+
+model Exercise {
+  id                String     @id @default(cuid())
+  name              String
+  description       String?
+  primaryMetricType MetricType
+  active            Boolean    @default(true)
+  createdById       String?
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+
+  createdBy User? @relation("ExerciseCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  media             ExerciseMedia[]
+  templateExercises RoutineTemplateExercise[]
+  assignedExercises AssignedRoutineExercise[]
+
+  @@index([primaryMetricType])
+}
+
+model ExerciseMedia {
+  id           String    @id @default(cuid())
+  exerciseId   String
+  kind         MediaKind @default(VIDEO)
+  url          String
+  thumbnailUrl String?
+  createdAt    DateTime  @default(now())
+
+  exercise Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+
+  @@index([exerciseId])
+}
+
+model RoutineTemplate {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  programId   String
+  createdById String
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  program   Program @relation(fields: [programId], references: [id], onDelete: Restrict)
+  createdBy User    @relation("TemplateCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+
+  sections         RoutineTemplateSection[]
+  assignedRoutines AssignedRoutine[]
+
+  @@index([programId])
+  @@index([createdById])
+}
+
+model RoutineTemplateSection {
+  id           String      @id @default(cuid())
+  templateId   String
+  title        String
+  sectionType  SectionType @default(CUSTOM)
+  sectionOrder Int
+  notes        String?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  template  RoutineTemplate          @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  exercises RoutineTemplateExercise[]
+  assignedSections AssignedRoutineSection[]
+
+  @@unique([templateId, sectionOrder])
+  @@index([templateId])
+}
+
+model RoutineTemplateExercise {
+  id                  String     @id @default(cuid())
+  sectionId           String
+  exerciseId          String
+  exerciseOrder       Int
+  metricType          MetricType
+  prescriptionPayload Json
+  restLabel           String?
+  methodLabel         String?
+  complementLabel     String?
+  notes               String?
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+
+  section  RoutineTemplateSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  exercise Exercise               @relation(fields: [exerciseId], references: [id], onDelete: Restrict)
+
+  sourceAssignedExercises AssignedRoutineExercise[] @relation("SourceTemplateExercise")
+
+  @@unique([sectionId, exerciseOrder])
+  @@index([sectionId])
+  @@index([exerciseId])
+}
+
+model AssignedRoutine {
+  id          String        @id @default(cuid())
+  studentId   String
+  trainerId   String
+  programId   String
+  templateId  String?
+  title       String
+  scheduledAt DateTime
+  status      RoutineStatus @default(PLANNED)
+  notes       String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  student  User             @relation("AssignedRoutineStudent", fields: [studentId], references: [id], onDelete: Cascade)
+  trainer  User             @relation("AssignedRoutineTrainer", fields: [trainerId], references: [id], onDelete: Restrict)
+  program  Program          @relation(fields: [programId], references: [id], onDelete: Restrict)
+  template RoutineTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+
+  sections   AssignedRoutineSection[]
+  submission WorkoutSubmission?
+
+  @@index([studentId, scheduledAt])
+  @@index([trainerId, scheduledAt])
+  @@index([programId, scheduledAt])
+}
+
+model AssignedRoutineSection {
+  id                      String      @id @default(cuid())
+  assignedRoutineId       String
+  sourceTemplateSectionId String?
+  title                   String
+  sectionType             SectionType @default(CUSTOM)
+  sectionOrder            Int
+  notes                   String?
+  createdAt               DateTime    @default(now())
+  updatedAt               DateTime    @updatedAt
+
+  assignedRoutine AssignedRoutine        @relation(fields: [assignedRoutineId], references: [id], onDelete: Cascade)
+  sourceTemplate  RoutineTemplateSection? @relation(fields: [sourceTemplateSectionId], references: [id], onDelete: SetNull)
+
+  exercises AssignedRoutineExercise[]
+
+  @@unique([assignedRoutineId, sectionOrder])
+  @@index([assignedRoutineId])
+}
+
+model AssignedRoutineExercise {
+  id                       String     @id @default(cuid())
+  sectionId                String
+  exerciseId               String
+  sourceTemplateExerciseId String?
+  exerciseOrder            Int
+  metricType               MetricType
+  prescriptionSnapshot     Json
+  restLabel                String?
+  methodLabel              String?
+  complementLabel          String?
+  notes                    String?
+  createdAt                DateTime   @default(now())
+  updatedAt                DateTime   @updatedAt
+
+  section            AssignedRoutineSection   @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  exercise           Exercise                 @relation(fields: [exerciseId], references: [id], onDelete: Restrict)
+  sourceTemplate     RoutineTemplateExercise? @relation("SourceTemplateExercise", fields: [sourceTemplateExerciseId], references: [id], onDelete: SetNull)
+
+  resultEntries WorkoutResultEntry[]
+  feedbacks     TrainerFeedback[] @relation("ExerciseFeedback")
+
+  @@unique([sectionId, exerciseOrder])
+  @@index([sectionId])
+  @@index([exerciseId])
+}
+
+model WorkoutSubmission {
+  id                String           @id @default(cuid())
+  assignedRoutineId String           @unique
+  studentId         String
+  status            SubmissionStatus @default(NOT_STARTED)
+  studentNotes      String?
+  submittedAt       DateTime?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  assignedRoutine AssignedRoutine @relation(fields: [assignedRoutineId], references: [id], onDelete: Cascade)
+  student         User            @relation("WorkoutSubmissionStudent", fields: [studentId], references: [id], onDelete: Cascade)
+
+  resultEntries WorkoutResultEntry[]
+  feedbacks     TrainerFeedback[] @relation("SubmissionFeedback")
+
+  @@index([studentId])
+}
+
+model WorkoutResultEntry {
+  id                       String     @id @default(cuid())
+  submissionId             String
+  assignedRoutineExerciseId String
+  resultType               MetricType
+  resultPayload            Json
+  notes                    String?
+  createdAt                DateTime   @default(now())
+  updatedAt                DateTime   @updatedAt
+
+  submission     WorkoutSubmission      @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  assignedExercise AssignedRoutineExercise @relation(fields: [assignedRoutineExerciseId], references: [id], onDelete: Cascade)
+
+  @@index([submissionId])
+  @@index([assignedRoutineExerciseId])
+}
+
+model TrainerFeedback {
+  id                       String   @id @default(cuid())
+  trainerId                String
+  submissionId             String?
+  assignedRoutineExerciseId String?
+  comment                  String
+  createdAt                DateTime @default(now())
+
+  trainer User @relation("TrainerFeedbackAuthor", fields: [trainerId], references: [id], onDelete: Restrict)
+
+  submission       WorkoutSubmission?     @relation("SubmissionFeedback", fields: [submissionId], references: [id], onDelete: Cascade)
+  assignedExercise AssignedRoutineExercise? @relation("ExerciseFeedback", fields: [assignedRoutineExerciseId], references: [id], onDelete: Cascade)
+
+  @@index([trainerId])
+  @@index([submissionId])
+  @@index([assignedRoutineExerciseId])
+}
