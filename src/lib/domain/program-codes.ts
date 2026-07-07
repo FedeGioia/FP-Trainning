@@ -1,4 +1,4 @@
-export const programCatalog = [
+export const programCodes = [
   {
     code: 'FP_TRAINING',
     name: 'FP-Training',
@@ -21,4 +21,4 @@ export const programCatalog = [
   },
 ] as const
 
-export type ProgramCatalogItem = (typeof programCatalog)[number]
+export type ProgramCodeItem = (typeof programCodes)[number]

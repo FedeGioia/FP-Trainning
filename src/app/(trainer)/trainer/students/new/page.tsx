@@ -1,6 +1,6 @@
 import Link from 'next/link'
 
-import { programCatalog } from '@/lib/constants/programs'
+import { listProgramCatalog } from '@/modules/programs'
 
 import { createStudentAction } from './actions'
 
@@ -12,13 +12,14 @@ type TrainerStudentNewPageProps = {
 
 export default async function TrainerStudentNewPage({ searchParams }: TrainerStudentNewPageProps) {
   const params = (await searchParams) ?? {}
+  const programs = await listProgramCatalog()
 
   return (
     <div className="stack">
       <section className="section-header">
         <div className="stack" style={{ gap: '0.35rem' }}>
           <h1 className="section-title">Nuevo alumno</h1>
-          <p className="muted">Alta inicial de alumnos con programas y auto-asignación al trainer demo por programa.</p>
+          <p className="muted">Alta inicial de alumnos con programas y asignación automática al trainer actual por programa.</p>
         </div>
         <Link className="pill" href="/trainer/students">
           Volver al listado
@@ -32,10 +33,15 @@ export default async function TrainerStudentNewPage({ searchParams }: TrainerStu
       ) : null}
 
       <form action={createStudentAction} className="card stack">
+        <div className="stack" style={{ gap: '0.35rem' }}>
+          <h2 className="section-title">Datos de acceso</h2>
+          <p className="muted">Esto define cómo entra el alumno por primera vez y a qué programas queda asociado.</p>
+        </div>
+
         <div className="form-grid">
           <label className="field">
             <span>Nombre</span>
-            <input name="name" type="text" placeholder="Ej: Martín Canónico" required />
+            <input name="name" type="text" placeholder="Ej: Nombre y apellido" required />
           </label>
 
           <label className="field">
@@ -44,10 +50,23 @@ export default async function TrainerStudentNewPage({ searchParams }: TrainerStu
           </label>
         </div>
 
-        <div className="field">
-          <span>Programas</span>
+        <label className="field">
+          <span>Contraseña inicial</span>
+          <input
+            name="password"
+            type="password"
+            placeholder="Mínimo 8 caracteres"
+            autoComplete="new-password"
+            required
+            minLength={8}
+          />
+          <span className="muted">La va a usar el alumno para entrar por primera vez.</span>
+        </label>
+
+        <fieldset className="field student-programs-fieldset">
+          <legend>Programas</legend>
           <div className="grid cards">
-            {programCatalog.map((program) => (
+            {programs.map((program) => (
               <label key={program.code} className="check-card">
                 <input
                   type="checkbox"
@@ -65,7 +84,7 @@ export default async function TrainerStudentNewPage({ searchParams }: TrainerStu
           <span className="muted">
             Si elegís Training, Stretching o Running, se agrega FP-Home automáticamente según la regla actual del negocio.
           </span>
-        </div>
+        </fieldset>
 
         <div className="role-nav">
           <button className="button button-primary" type="submit">

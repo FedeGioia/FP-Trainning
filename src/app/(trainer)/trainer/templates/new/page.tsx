@@ -1,10 +1,14 @@
 import Link from 'next/link'
 
-import { programCatalog } from '@/lib/constants/programs'
+import { exerciseMetricOptions } from '@/lib/constants/exercise-metrics'
 import { templateSectionOptions } from '@/lib/constants/template-sections'
-import { exerciseCatalog } from '@/lib/constants/exercises'
+import { listExercises } from '@/modules/exercises'
+import { listProgramCatalog } from '@/modules/programs'
+import { ExercisePrescriptionGrid } from '@/components/shared/ExercisePrescriptionGrid'
 
 import { createTemplateAction } from './actions'
+
+const SECTION_SLOTS = 3
 
 type TrainerTemplateNewPageProps = {
   searchParams?: Promise<{
@@ -14,13 +18,16 @@ type TrainerTemplateNewPageProps = {
 
 export default async function TrainerTemplateNewPage({ searchParams }: TrainerTemplateNewPageProps) {
   const params = (await searchParams) ?? {}
+  const exercises = await listExercises()
+  const programs = await listProgramCatalog()
+  const noExercises = exercises.length === 0
 
   return (
     <div className="stack">
       <section className="section-header">
         <div className="stack" style={{ gap: '0.35rem' }}>
           <h1 className="section-title">Nueva plantilla</h1>
-          <p className="muted">Base inicial para crear templates reutilizables por programa.</p>
+          <p className="muted">Armá una plantilla real con hasta 3 secciones y empezá con 4 ejercicios por bloque. Podés sumar más filas si la plantilla lo necesita; los bloques vacíos se ignoran al guardar.</p>
         </div>
         <Link className="pill" href="/trainer/templates">
           Volver al listado
@@ -30,6 +37,12 @@ export default async function TrainerTemplateNewPage({ searchParams }: TrainerTe
       {params.error ? (
         <section className="card stack">
           <span className="status status--error">{decodeURIComponent(params.error)}</span>
+        </section>
+      ) : null}
+
+      {noExercises ? (
+        <section className="card stack">
+          <span className="status status--muted">Primero cargá ejercicios en tu biblioteca para poder armar plantillas completas.</span>
         </section>
       ) : null}
 
@@ -43,7 +56,7 @@ export default async function TrainerTemplateNewPage({ searchParams }: TrainerTe
           <label className="field">
             <span>Programa</span>
             <select name="programCode" defaultValue="FP_TRAINING">
-              {programCatalog.map((program) => (
+              {programs.map((program) => (
                 <option key={program.code} value={program.code}>
                   {program.name}
                 </option>
@@ -57,19 +70,22 @@ export default async function TrainerTemplateNewPage({ searchParams }: TrainerTe
           <textarea name="description" rows={4} placeholder="Qué resuelve esta plantilla y en qué contexto usarla." />
         </label>
 
-        {[1, 2, 3].map((sectionNumber) => (
-          <div key={sectionNumber} className="stack" style={{ gap: '1rem', marginTop: '2rem' }}> 
-            <h2>Sección {sectionNumber}</h2>
+        {Array.from({ length: SECTION_SLOTS }, (_, sectionIndex) => (
+          <div key={sectionIndex} className="stack" style={{ gap: '1rem', marginTop: '2rem' }}>
+            <div className="stack" style={{ gap: '0.35rem' }}>
+              <h2 style={{ margin: 0 }}>Sección {sectionIndex + 1}</h2>
+              <p className="muted">Completala solo si la vas a usar. Si queda vacía, se ignora.</p>
+            </div>
 
             <div className="form-grid">
               <label className="field">
                 <span>Título</span>
-                <input name={`section${sectionNumber}Title`} type="text" placeholder={`Título de la sección ${sectionNumber}`} required />
+                <input name={`sections.${sectionIndex}.title`} type="text" placeholder={`Ej: Bloque ${sectionIndex + 1} / Calentamiento`} />
               </label>
 
               <label className="field">
                 <span>Tipo de sección</span>
-                <select name={`section${sectionNumber}Type`} defaultValue="MAIN">
+                <select name={`sections.${sectionIndex}.type`} defaultValue="MAIN">
                   {templateSectionOptions.map((option) => (
                     <option key={option.value} value={option.value}>
                       {option.label}
@@ -79,54 +95,7 @@ export default async function TrainerTemplateNewPage({ searchParams }: TrainerTe
               </label>
             </div>
 
-            {[1, 2, 3, 4].map((exerciseNumber) => (
-              <div key={exerciseNumber} className="stack" style={{ gap: '0.5rem', marginTop: '1rem' }}> 
-                <h3>Ejercicio {exerciseNumber}</h3>
-
-                <div className="form-grid">
-                  <label className="field">
-                    <span>Ejercicio</span>
-                    <select name={`section${sectionNumber}Exercise${exerciseNumber}Id`} defaultValue="">
-                      <option value="">Seleccionar ejercicio</option>
-                      {exerciseCatalog.map((exercise) => (
-                        <option key={exercise.id} value={exercise.id}>
-                          {exercise.name}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-
-                  <label className="field">
-                    <span>Tipo de métrica</span>
-                    <input name={`section${sectionNumber}Exercise${exerciseNumber}MetricType`} type="text" placeholder="Ej: repeticiones" />
-                  </label>
-                </div>
-
-                <div className="form-grid">
-                  <label className="field">
-                    <span>Valor de la prescripción</span>
-                    <input name={`section${sectionNumber}Exercise${exerciseNumber}PrescriptionValue`} type="text" placeholder="Ej: 3x10" />
-                  </label>
-
-                  <label className="field">
-                    <span>Descanso</span>
-                    <input name={`section${sectionNumber}Exercise${exerciseNumber}RestLabel`} type="text" placeholder="Ej: 60 segundos" />
-                  </label>
-                </div>
-
-                <div className="form-grid">
-                  <label className="field">
-                    <span>Método</span>
-                    <input name={`section${sectionNumber}Exercise${exerciseNumber}MethodLabel`} type="text" placeholder="Ej: 3x10" />
-                  </label>
-
-                  <label className="field">
-                    <span>Notas</span>
-                    <input name={`section${sectionNumber}Exercise${exerciseNumber}Notes`} type="text" placeholder="Notas adicionales" />
-                  </label>
-                </div>
-              </div>
-            ))}
+            <ExercisePrescriptionGrid sectionIndex={sectionIndex} exercises={exercises} metricOptions={exerciseMetricOptions} />
           </div>
         ))}
 

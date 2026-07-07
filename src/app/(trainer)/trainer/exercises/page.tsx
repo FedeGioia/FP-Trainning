@@ -21,7 +21,7 @@ export default async function TrainerExercisesPage({ searchParams }: TrainerExer
       <SectionIntro
         eyebrow="Biblioteca"
         title="Ejercicios"
-        description="Biblioteca inicial de ejercicios. Si la base todavía no está arriba, se muestra un catálogo semilla."
+        description="Centralizá los ejercicios que usás en cada programa para reutilizarlos al crear plantillas y bloques."
         actions={
           <>
             <Link className="button button-primary" href="/trainer/exercises/new">
@@ -46,7 +46,7 @@ export default async function TrainerExercisesPage({ searchParams }: TrainerExer
         <div className="section-header">
           <div>
             <h2 className="section-title">Catálogo visible</h2>
-            <p className="muted">Base visual de ejercicios lista para crecer con filtros, edición y videos reales.</p>
+            <p className="muted">Revisá tu biblioteca actual y sumá nuevos ejercicios cuando lo necesites.</p>
           </div>
         </div>
 

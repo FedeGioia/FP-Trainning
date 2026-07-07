@@ -11,8 +11,8 @@ export default async function AdminDashboardPage() {
       <section className="workspace-hero workspace-hero--admin">
         <div className="workspace-hero__content stack" style={{ gap: '0.55rem' }}>
           <span className="eyebrow">Control</span>
-          <h1 className="workspace-title">Dashboard admin</h1>
-          <p className="muted">Vista inicial del estado del producto, catálogo base y preparación técnica general.</p>
+          <h1 className="workspace-title">Administración general</h1>
+          <p className="muted">Supervisá programas, usuarios y la estructura general de la operación.</p>
         </div>
 
         <div className="workspace-hero__actions">
@@ -26,28 +26,28 @@ export default async function AdminDashboardPage() {
       </section>
 
       <div className="grid cards">
-        <StatCard label="Programas cargados" value={programs.length} detail="Semilla o lectura desde base" />
-        <StatCard label="Auth" value="Scaffold" detail="Todavía sin integración real" />
-        <StatCard label="Base de datos" value="Preparada" detail="Prisma validado, seed listo" />
+        <StatCard label="Programas activos" value={programs.length} detail="Disponibles para organizar la operación" />
+        <StatCard label="Usuarios" value="Roles" detail="Admin, trainer y student" />
+        <StatCard label="Operación" value="Centralizada" detail="Una sola plataforma para gestionar entrenamiento" />
       </div>
 
       <section className="card stack">
-        <h2 className="section-title">Estado del proyecto</h2>
+        <h2 className="section-title">Vista general</h2>
         <p className="muted">
-          Esta base ya permite seguir con programas, ejercicios, templates y auth sin volver a discutir la arquitectura.
+          Desde acá podés ordenar la estructura general del negocio y revisar cómo se distribuyen programas y perfiles.
         </p>
       </section>
 
       <section className="grid cards">
         <article className="card stack" style={{ gap: '0.6rem' }}>
-          <span className="muted">Infra local</span>
-          <strong>Next + Prisma listos</strong>
-          <p className="muted">La base técnica ya está preparada; falta que Docker quede arriba para correr migraciones reales.</p>
+          <span className="muted">Programas</span>
+          <strong>Catálogo central</strong>
+          <p className="muted">Mantené las líneas de trabajo ordenadas para que trainers y alumnos operen con claridad.</p>
         </article>
         <article className="card stack" style={{ gap: '0.6rem' }}>
-          <span className="muted">Producto</span>
-          <strong>Core ya modelado</strong>
-          <p className="muted">Programas, ejercicios, templates, alumnos y assignments ya tienen flujos iniciales visibles.</p>
+          <span className="muted">Usuarios</span>
+          <strong>Roles y acceso</strong>
+          <p className="muted">Revisá perfiles y permisos para mantener la operación alineada al crecimiento del equipo.</p>
         </article>
       </section>
     </div>

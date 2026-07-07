@@ -13,6 +13,7 @@ export type CreateExerciseInput = {
   description?: string
   primaryMetricType: ExerciseMetricType
   videoUrl?: string
+  createdById?: string
 }
 
 export type CreateExerciseResult =

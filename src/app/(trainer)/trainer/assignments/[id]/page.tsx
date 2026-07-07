@@ -1,5 +1,6 @@
 import Link from 'next/link'
 
+import { auth } from '@/auth'
 import { getAssignmentDetailById } from '@/modules/assignments'
 
 import { addTrainerFeedbackAction } from './actions'
@@ -17,7 +18,8 @@ type TrainerAssignmentDetailPageProps = {
 export default async function TrainerAssignmentDetailPage({ params, searchParams }: TrainerAssignmentDetailPageProps) {
   const { id } = await params
   const qs = (await searchParams) ?? {}
-  const assignment = await getAssignmentDetailById(id)
+  const session = await auth()
+  const assignment = await getAssignmentDetailById(id, { trainerId: session?.user?.id })
 
   if (!assignment) {
     return (

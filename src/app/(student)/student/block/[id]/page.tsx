@@ -1,8 +1,16 @@
 import Link from 'next/link'
 
+import { auth } from '@/auth'
+import { ProgramBadge, getProgramToneClass } from '@/components/ui/program-badge'
 import { getAssignmentDetailById } from '@/modules/assignments'
 
-import { submitStudentBlockAction } from './actions'
+function getExerciseStatusClass(status: 'PENDING' | 'COMPLETED') {
+  return status === 'COMPLETED' ? 'status status--ok' : 'status status--muted'
+}
+
+function getExerciseStatusLabel(status: 'PENDING' | 'COMPLETED') {
+  return status === 'COMPLETED' ? 'Completado' : 'Pendiente'
+}
 
 type StudentBlockPageProps = {
   params: Promise<{
@@ -17,7 +25,8 @@ type StudentBlockPageProps = {
 export default async function StudentBlockPage({ params, searchParams }: StudentBlockPageProps) {
   const { id } = await params
   const qs = (await searchParams) ?? {}
-  const assignment = await getAssignmentDetailById(id)
+  const session = await auth()
+  const assignment = await getAssignmentDetailById(id, { studentId: session?.user?.id })
 
   if (!assignment) {
     return (
@@ -34,7 +43,7 @@ export default async function StudentBlockPage({ params, searchParams }: Student
 
   return (
     <div className="student-shell stack">
-      <section className="student-detail-header stack">
+      <section className={`student-detail-header stack program-surface ${getProgramToneClass(assignment.programCode)}`}>
         <Link className="pill" href="/student/today">
           Volver a hoy
         </Link>
@@ -46,7 +55,7 @@ export default async function StudentBlockPage({ params, searchParams }: Student
         </div>
 
         <div className="student-block-meta">
-          <span className="status status--ok">{assignment.programCode}</span>
+          <ProgramBadge code={assignment.programCode} />
           <span className="student-time">{scheduled}</span>
         </div>
       </section>
@@ -54,16 +63,26 @@ export default async function StudentBlockPage({ params, searchParams }: Student
       {qs.error ? <span className="status status--error">{decodeURIComponent(qs.error)}</span> : null}
       {qs.saved ? <span className="status status--ok">Resultados guardados correctamente.</span> : null}
 
-      <section className="student-progress-card">
+      <section className={`student-progress-card program-surface ${getProgramToneClass(assignment.programCode)}`}>
         <div>
-          <span className="muted">Estado actual</span>
-          <strong>{assignment.templateName ?? 'Bloque manual'}</strong>
+          <span className="muted">Progreso del bloque</span>
+          <strong>
+            {assignment.completedExerciseCount} de {assignment.totalExerciseCount} ejercicios cargados
+          </strong>
         </div>
         <span className="status status--ok">{assignment.status}</span>
       </section>
 
+      <section className={`student-progress-card program-surface ${getProgramToneClass(assignment.programCode)}`}>
+        <div>
+          <span className="muted">Template base</span>
+          <strong>{assignment.templateName ?? 'Bloque manual'}</strong>
+        </div>
+        <span className="status status--muted">Ejercicio por ejercicio</span>
+      </section>
+
       {assignment.notes ? (
-        <section className="student-progress-card">
+        <section className={`student-progress-card program-surface ${getProgramToneClass(assignment.programCode)}`}>
           <div>
             <span className="muted">Notas del trainer</span>
             <strong>{assignment.notes}</strong>
@@ -72,7 +91,7 @@ export default async function StudentBlockPage({ params, searchParams }: Student
       ) : null}
 
       {assignment.studentNotes ? (
-        <section className="student-progress-card">
+        <section className={`student-progress-card program-surface ${getProgramToneClass(assignment.programCode)}`}>
           <div>
             <span className="muted">Tus notas cargadas</span>
             <strong>{assignment.studentNotes}</strong>
@@ -91,79 +110,37 @@ export default async function StudentBlockPage({ params, searchParams }: Student
               </div>
             </div>
 
-            <ul className="list">
-              {section.exercises.map((item) => (
-                <li key={item.id} className="student-exercise-row">
-                  <span className="student-exercise-dot" />
-                  <div className="stack" style={{ gap: '0.2rem' }}>
-                    <span>{item.name}</span>
-                    <span className="muted">{item.metricType}</span>
+              <ul className="list">
+               {section.exercises.map((item) => (
+                 <li key={item.id} className="student-exercise-row">
+                   <span className="student-exercise-dot" />
+                  <div className="stack" style={{ gap: '0.35rem', width: '100%' }}>
+                    <div className="role-nav" style={{ justifyContent: 'space-between', alignItems: 'center', gap: '0.75rem' }}>
+                      <div className="stack" style={{ gap: '0.2rem' }}>
+                        <span>{item.name}</span>
+                        <span className="muted">{item.metricType}</span>
+                        {item.currentValue ? <span className="muted">Último valor: {item.currentValue}</span> : null}
+                      </div>
+                      <span className={getExerciseStatusClass(item.status)}>{getExerciseStatusLabel(item.status)}</span>
+                    </div>
+
+                    <Link className="button button-secondary" href={`/student/block/${assignment.id}/exercise/${item.id}`}>
+                      {item.status === 'COMPLETED' ? 'Editar carga' : 'Cargar ejercicio'}
+                    </Link>
                   </div>
-                </li>
-              ))}
-            </ul>
-          </article>
-        ))}
+                 </li>
+               ))}
+             </ul>
+           </article>
+         ))}
+       </section>
+
+      <section className="student-progress-card">
+        <div>
+          <span className="muted">Cómo cargar</span>
+          <strong>Entrá a cada ejercicio, guardá el resultado y volvés a este bloque.</strong>
+        </div>
       </section>
-
-      <form action={submitStudentBlockAction.bind(null, { assignmentId: assignment.id })} className="student-result-form stack">
-        <div className="section-header">
-          <div>
-            <h2 className="section-title">Cargar resultados</h2>
-            <p className="muted">Primera versión simple para registrar cómo te fue en cada ejercicio.</p>
-          </div>
-        </div>
-
-        <label className="field">
-          <span>Estado del bloque</span>
-          <select name="status" defaultValue={assignment.status === 'COMPLETED' ? 'SUBMITTED' : 'IN_PROGRESS'}>
-            <option value="NOT_STARTED">No empecé</option>
-            <option value="IN_PROGRESS">En progreso</option>
-            <option value="SUBMITTED">Completado / enviado</option>
-          </select>
-        </label>
-
-        <label className="field">
-          <span>Notas generales</span>
-          <textarea
-            name="studentNotes"
-            rows={4}
-            defaultValue={assignment.studentNotes ?? ''}
-            placeholder="Cómo te sentiste, qué ajustaste, si hubo dolor, si quedó algo pendiente..."
-          />
-        </label>
-
-        <div className="stack">
-          {assignment.sections.map((section) => (
-            <article key={section.id} className="student-section-card stack">
-              <strong>{section.title}</strong>
-              <div className="stack">
-                {section.exercises.map((exercise) => (
-                  <label key={exercise.id} className="field">
-                    <span>
-                      {exercise.name} <small className="muted">({exercise.metricType})</small>
-                    </span>
-                    <input
-                      name={`result:${exercise.id}`}
-                      type="text"
-                      placeholder="Ej: 3x8 @ 55kg / 6km / 45s / observación rápida"
-                    />
-                  </label>
-                ))}
-              </div>
-            </article>
-          ))}
-        </div>
-
-        <section className="student-action-bar">
-          <button className="button button-secondary" type="button">
-            Ver videos
-          </button>
-          <button className="button button-primary" type="submit">
-            Guardar resultados
-          </button>
-        </section>
-      </form>
     </div>
   )
 }

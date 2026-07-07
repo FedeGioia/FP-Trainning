@@ -6,6 +6,7 @@ import { LoginForm } from '@/components/auth/login-form'
 type LoginPageProps = {
   searchParams?: Promise<{
     callbackUrl?: string
+    passwordChanged?: string
   }>
 }
 
@@ -22,21 +23,23 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   }
 
   if (session?.user?.role === 'student') {
-    redirect('/student')
+    redirect(session.user.mustChangePassword ? '/student/change-password' : '/student')
   }
 
   return (
-    <main className="page-shell">
+    <main className="page-shell page-shell--public page-shell--auth">
       <div className="container hero stack">
         <span className="eyebrow">Acceso</span>
         <h1 className="headline">Entrá a FP-Training</h1>
         <p className="lead">Autenticación con credenciales, roles y redirección automática según tu perfil.</p>
 
+        {params.passwordChanged ? <span className="status status--ok">Contraseña actualizada. Volvé a ingresar con la nueva clave.</span> : null}
+
         <div className="grid cards login-layout">
           <LoginForm callbackUrl={params.callbackUrl} />
 
           <div className="card stack">
-            <h2 className="section-title">Credenciales demo</h2>
+            <h2 className="section-title">Cuentas locales</h2>
             <div className="list">
               <div className="list-item">
                 <div>

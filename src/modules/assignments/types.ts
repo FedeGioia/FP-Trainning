@@ -3,6 +3,7 @@ export type AssignmentStatus = 'PLANNED' | 'IN_PROGRESS' | 'COMPLETED' | 'PARTIA
 export type AssignmentSummary = {
   id: string
   title: string
+  studentId: string
   studentName: string
   templateName?: string | null
   programCode: string
@@ -23,12 +24,74 @@ export type AssignmentExerciseDetail = {
   id: string
   name: string
   metricType: string
+  status: 'PENDING' | 'COMPLETED'
+  currentValue?: string | null
+  expectedValue?: string | null
+  expectedStrength?: {
+    series: number | null
+    repetitions: number | null
+    weight: number | null
+  } | null
+  currentStrength?: {
+    series: number | null
+    repetitions: number | null
+    weight: number | null
+  } | null
+  restLabel?: string | null
+  methodLabel?: string | null
+  notes?: string | null
 }
 
 export type AssignmentDetail = AssignmentSummary & {
   notes?: string | null
   studentNotes?: string | null
+  completedExerciseCount: number
+  totalExerciseCount: number
   sections: AssignmentSectionDetail[]
+}
+
+export type SaveAssignmentExerciseResultInput = {
+  assignmentId: string
+  assignedExerciseId: string
+  value: string
+  strengthSeries?: string
+  strengthRepetitions?: string
+  strengthWeight?: string
+  studentId?: string
+}
+
+export type SaveAssignmentExerciseResultResult =
+  | {
+      ok: true
+    }
+  | {
+      ok: false
+      message: string
+    }
+
+export type CreateManualAssignmentInput = {
+  studentId: string
+  programId: string
+  scheduledAt: string
+  title?: string
+  notes?: string
+  trainerId: string
+  sections: Array<{
+    title: string
+    exercises: Array<{
+      exerciseId: string
+      metricType: string
+      restLabel?: string
+      methodLabel?: string
+      notes?: string
+      prescription: {
+        series?: number
+        repetitions?: number
+        weight?: number
+        value?: string
+      }
+    }>
+  }>
 }
 
 export type CreateAssignmentInput = {
@@ -37,8 +100,10 @@ export type CreateAssignmentInput = {
   scheduledAt: string
   title?: string
   notes?: string
+  trainerId: string
 }
 
+export type CreateManualAssignmentResult = CreateAssignmentResult
 export type CreateAssignmentResult =
   | {
       ok: true
@@ -53,6 +118,7 @@ export type SubmitAssignmentResultInput = {
   assignmentId: string
   studentNotes?: string
   status: 'NOT_STARTED' | 'IN_PROGRESS' | 'SUBMITTED'
+  studentId?: string
   exerciseResults: Array<{
     assignedExerciseId: string
     value: string
@@ -71,6 +137,7 @@ export type SubmitAssignmentResultResult =
 export type AddTrainerFeedbackInput = {
   assignmentId: string
   comment: string
+  trainerId: string
 }
 
 export type AddTrainerFeedbackResult =

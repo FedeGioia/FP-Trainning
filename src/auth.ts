@@ -5,6 +5,19 @@ import { compare } from 'bcryptjs'
 
 import { db } from '@/lib/db'
 
+type AppRole = 'admin' | 'trainer' | 'student'
+
+function mapDbRoleToAppRole(role: 'ADMIN' | 'TRAINER' | 'STUDENT'): AppRole {
+  switch (role) {
+    case 'ADMIN':
+      return 'admin'
+    case 'TRAINER':
+      return 'trainer'
+    case 'STUDENT':
+      return 'student'
+  }
+}
+
 export const { auth, handlers, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(db),
   session: { strategy: 'jwt' },
@@ -43,7 +56,8 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
           id: user.id,
           email: user.email,
           name: user.name,
-          role: user.role.toLowerCase(),
+          role: mapDbRoleToAppRole(user.role),
+          mustChangePassword: user.mustChangePassword,
         }
       },
     }),
@@ -51,15 +65,36 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
   callbacks: {
     jwt: async ({ token, user }) => {
       if (user) {
-        token.role = (user as { role?: string }).role ?? token.role
+        token.id = user.id
+        token.name = user.name
+        token.email = user.email
+        token.role = user.role
+        token.mustChangePassword = user.mustChangePassword
+      }
+
+      const userId = token.id ?? token.sub
+
+      if (userId) {
+        const dbUser = await db.user.findUnique({
+          where: { id: userId },
+        })
+
+        if (dbUser) {
+          token.name = dbUser.name
+          token.email = dbUser.email
+          token.role = mapDbRoleToAppRole(dbUser.role)
+        }
       }
 
       return token
     },
     session: async ({ session, token }) => {
       if (session.user) {
-        session.user.id = token.sub ?? ''
+        session.user.id = token.id ?? token.sub ?? ''
+        session.user.name = token.name ?? session.user.name ?? null
+        session.user.email = token.email ?? session.user.email ?? null
         session.user.role = (token.role as 'admin' | 'trainer' | 'student') ?? 'student'
+        session.user.mustChangePassword = token.mustChangePassword ?? false
       }
 
       return session

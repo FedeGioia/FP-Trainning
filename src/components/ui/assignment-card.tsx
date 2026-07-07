@@ -1,6 +1,7 @@
 import Link from 'next/link'
 
 import type { AssignmentSummary } from '@/modules/assignments'
+import { ProgramBadge } from './program-badge'
 
 type AssignmentCardProps = {
   assignment: AssignmentSummary
@@ -12,7 +13,7 @@ export function AssignmentCard({ assignment }: AssignmentCardProps) {
   return (
     <article className="card stack" style={{ gap: '0.75rem' }}>
       <div className="stack" style={{ gap: '0.35rem' }}>
-        <span className="eyebrow">{assignment.programCode}</span>
+        <ProgramBadge code={assignment.programCode} />
         <h2 style={{ margin: 0 }}>{assignment.title}</h2>
       </div>
 

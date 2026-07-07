@@ -1,5 +1,5 @@
-import { PlaceholderPanel } from '@/components/ui/placeholder-panel'
+import { redirect } from 'next/navigation'
 
-export default function StudentHistoryPage() {
-  return <PlaceholderPanel title="Historial" description="Resumen de sesiones y resultados cargados." />
+export default function StudentHistoryRedirectPage() {
+  redirect('/student/profile')
 }

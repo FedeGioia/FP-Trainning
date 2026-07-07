@@ -21,7 +21,7 @@ export default async function TrainerTemplatesPage({ searchParams }: TrainerTemp
       <SectionIntro
         eyebrow="Reutilización"
         title="Plantillas"
-        description="Templates reutilizables por programa, con secciones internas listas para crecer."
+        description="Armá rutinas base por programa y reutilizalas para asignar bloques con más velocidad y consistencia."
         actions={
           <>
             <Link className="button button-primary" href="/trainer/templates/new">
@@ -37,16 +37,16 @@ export default async function TrainerTemplatesPage({ searchParams }: TrainerTemp
       {params.created ? <span className="status status--ok">Plantilla creada correctamente.</span> : null}
 
       <div className="grid cards">
-        <StatCard label="Templates visibles" value={templates.length} detail="Catálogo semilla o datos reales" />
-        <StatCard label="Secciones totales" value={totalSections} detail="Base para bloques internos" />
-        <StatCard label="Promedio" value={templates.length ? (totalSections / templates.length).toFixed(1) : '0'} detail="Secciones por template" />
+        <StatCard label="Plantillas activas" value={templates.length} detail="Rutinas listas para reutilizar" />
+        <StatCard label="Secciones totales" value={totalSections} detail="Bloques internos configurados" />
+        <StatCard label="Promedio" value={templates.length ? (totalSections / templates.length).toFixed(1) : '0'} detail="Secciones por plantilla" />
       </div>
 
       <section className="stack">
         <div className="section-header">
           <div>
             <h2 className="section-title">Templates cargados</h2>
-            <p className="muted">Cada plantilla mantiene su programa y sus secciones internas desde el día uno.</p>
+            <p className="muted">Cada plantilla conserva su estructura, ejercicios e indicaciones para acelerar la planificación.</p>
           </div>
         </div>
 

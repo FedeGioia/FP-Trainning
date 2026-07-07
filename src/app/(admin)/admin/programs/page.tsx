@@ -11,13 +11,13 @@ export default async function AdminProgramsPage() {
       <section className="section-header">
         <div className="stack" style={{ gap: '0.35rem' }}>
           <h1 className="section-title">Programas</h1>
-          <p className="muted">Catálogo base del sistema y punto de entrada para memberships y ownership.</p>
+          <p className="muted">Administrá los programas que estructuran la oferta de entrenamiento y el seguimiento de alumnos.</p>
         </div>
       </section>
 
       <div className="grid cards">
-        <StatCard label="Programas totales" value={programs.length} detail="Base compartida del producto" />
-        <StatCard label="Programas activos" value={activePrograms} detail="Listos para asignarse" />
+        <StatCard label="Programas totales" value={programs.length} detail="Líneas disponibles en la plataforma" />
+        <StatCard label="Programas activos" value={activePrograms} detail="Disponibles para nuevas asignaciones" />
       </div>
 
       <div className="grid cards">

@@ -2,13 +2,19 @@
 
 import { redirect } from 'next/navigation'
 
+import { auth } from '@/auth'
 import { createExercise, isValidMetricType } from '@/modules/exercises'
 
 export async function createExerciseAction(formData: FormData) {
+  const session = await auth()
   const name = String(formData.get('name') ?? '')
   const description = String(formData.get('description') ?? '')
   const primaryMetricType = String(formData.get('primaryMetricType') ?? '')
   const videoUrl = String(formData.get('videoUrl') ?? '')
+
+  if (!session?.user?.id || session.user.role !== 'trainer') {
+    redirect('/login?error=auth')
+  }
 
   if (!isValidMetricType(primaryMetricType)) {
     redirect('/trainer/exercises/new?error=metric')
@@ -19,6 +25,7 @@ export async function createExerciseAction(formData: FormData) {
     description,
     primaryMetricType,
     videoUrl,
+    createdById: session.user.id,
   })
 
   if (!result.ok) {

@@ -15,7 +15,7 @@ export function LoginForm({ callbackUrl = '/' }: LoginFormProps) {
 
   return (
     <form
-      className="card stack"
+      className="card stack login-form"
       onSubmit={(event) => {
         event.preventDefault()
         setError(null)
@@ -44,7 +44,7 @@ export function LoginForm({ callbackUrl = '/' }: LoginFormProps) {
     >
       <div className="stack" style={{ gap: '0.35rem' }}>
         <h2 className="section-title">Ingresá a tu cuenta</h2>
-        <p className="muted">Usá una de las cuentas demo o tus futuras credenciales reales.</p>
+        <p className="muted">Usá una cuenta local o tus credenciales reales.</p>
       </div>
 
       {error ? <span className="status status--error">{error}</span> : null}

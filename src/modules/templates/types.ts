@@ -1,8 +1,22 @@
+import type { ExerciseMetricType } from '@/modules/exercises'
+
+export type TemplateExerciseSummary = {
+  id: string
+  name: string
+  metricType: ExerciseMetricType
+  prescriptionValue: string
+  restLabel?: string | null
+  methodLabel?: string | null
+  notes?: string | null
+  order: number
+}
+
 export type TemplateSectionSummary = {
   id: string
   title: string
   sectionType: string
   order: number
+  exercises: TemplateExerciseSummary[]
 }
 
 export type TemplateSummary = {
@@ -17,18 +31,26 @@ export type CreateTemplateInput = {
   name: string
   description?: string
   programCode: string
-  sections: {
-    title: string
-    type: string
-    exercises: {
-      exerciseId: string
-      metricType: string
-      prescriptionPayload: { value: string }
-      restLabel: string
-      methodLabel: string
-      notes: string
-    }[]
-  }[]
+  createdById: string
+  sections: CreateTemplateSectionInput[]
+}
+
+export type CreateTemplateSectionInput = {
+  title: string
+  type: string
+  exercises: CreateTemplateExerciseInput[]
+}
+
+export type CreateTemplateExerciseInput = {
+  exerciseId: string
+  metricType: string
+  prescriptionValue: string
+  strengthSeries?: string
+  strengthRepetitions?: string
+  strengthWeight?: string
+  restLabel?: string
+  methodLabel?: string
+  notes?: string
 }
 
 export type CreateTemplateResult =

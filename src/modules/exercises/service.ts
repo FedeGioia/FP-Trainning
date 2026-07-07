@@ -1,6 +1,5 @@
 import { db } from '@/lib/db'
 import { exerciseMetricOptions } from '@/lib/constants/exercise-metrics'
-import { exerciseCatalogSeed } from '@/lib/constants/exercises'
 
 import type { CreateExerciseInput, CreateExerciseResult, ExerciseMetricType, ExerciseSummary } from './types'
 
@@ -12,10 +11,6 @@ export async function listExercises(): Promise<ExerciseSummary[]> {
       take: 24,
     })
 
-    if (exercises.length === 0) {
-      return exerciseCatalogSeed
-    }
-
     return exercises.map((exercise) => ({
       id: exercise.id,
       name: exercise.name,
@@ -24,7 +19,7 @@ export async function listExercises(): Promise<ExerciseSummary[]> {
       hasVideo: exercise.media.length > 0,
     }))
   } catch {
-    return exerciseCatalogSeed
+    return []
   }
 }
 
@@ -49,6 +44,7 @@ export async function createExercise(input: CreateExerciseInput): Promise<Create
         name,
         description: input.description?.trim() || null,
         primaryMetricType: input.primaryMetricType,
+        createdById: input.createdById ?? null,
         media: input.videoUrl?.trim()
           ? {
               create: {

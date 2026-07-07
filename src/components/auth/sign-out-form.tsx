@@ -7,9 +7,9 @@ export function SignOutForm() {
         'use server'
         await signOut({ redirectTo: '/login' })
       }}
-    >
+      >
       <button className="button button-secondary" type="submit">
-        Salir
+        Cerrar sesión
       </button>
     </form>
   )

@@ -5,6 +5,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 enum Role {
@@ -73,6 +74,7 @@ model User {
   emailVerified DateTime?
   image         String?
   passwordHash  String?
+  mustChangePassword Boolean @default(false)
   role          Role
   status        UserStatus  @default(ACTIVE)
   createdAt     DateTime    @default(now())

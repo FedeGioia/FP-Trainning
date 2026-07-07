@@ -25,7 +25,10 @@ export default async function TrainerAssignmentsPage({ searchParams }: TrainerAs
         actions={
           <>
             <Link className="button button-primary" href="/trainer/assignments/new">
-              Nueva asignación
+              Desde plantilla
+            </Link>
+            <Link className="button button-secondary" href="/trainer/assignments/manual">
+              Rutina manual
             </Link>
             <Link className="button button-secondary" href="/trainer">
               Volver al dashboard
@@ -37,16 +40,16 @@ export default async function TrainerAssignmentsPage({ searchParams }: TrainerAs
       {params.created ? <span className="status status--ok">Asignación creada correctamente.</span> : null}
 
       <div className="grid cards">
-        <StatCard label="Asignaciones visibles" value={assignments.length} detail="Semilla o datos reales" />
-        <StatCard label="Pendientes" value={planned} detail="Aún no iniciadas por el alumno" />
-        <StatCard label="Programadas" value={assignments.length - planned >= 0 ? assignments.length : 0} detail="Base de agenda inicial" />
+        <StatCard label="Asignaciones activas" value={assignments.length} detail="Bloques visibles en agenda" />
+        <StatCard label="Por iniciar" value={planned} detail="Todavía no arrancadas por el alumno" />
+        <StatCard label="Programadas" value={assignments.length} detail="Sesiones organizadas por fecha y hora" />
       </div>
 
       <section className="stack">
         <div className="section-header">
           <div>
             <h2 className="section-title">Agenda visible</h2>
-            <p className="muted">Acá empiezan a convivir alumno, template y fecha/hora en un solo flujo real.</p>
+            <p className="muted">Revisá qué tiene cada alumno, cuándo le toca y cómo viene avanzando.</p>
           </div>
         </div>
 
