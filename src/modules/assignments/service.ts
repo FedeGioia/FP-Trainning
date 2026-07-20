@@ -17,6 +17,7 @@ import type {
   SaveAssignmentExerciseResultResult,
   SubmitAssignmentResultInput,
   SubmitAssignmentResultResult,
+  ValidationIssue,
 } from './types'
 
 function mapSubmissionStatusToAssignmentStatus(status: 'NOT_STARTED' | 'IN_PROGRESS' | 'SUBMITTED') {
@@ -523,18 +524,19 @@ export async function createManualAssignment(input: CreateManualAssignmentInput)
   const scheduledAt = new Date(input.scheduledAt)
 
   if (!input.studentId) {
-    return { ok: false, message: 'Tenés que elegir un alumno.' }
+    return { ok: false, message: 'Tenés que elegir un alumno.', issues: [{ path: 'studentId', message: 'Tenés que elegir un alumno.', kind: 'required' }] }
   }
 
   if (!input.programId) {
-    return { ok: false, message: 'Tenés que elegir un programa.' }
+    return { ok: false, message: 'Tenés que elegir un programa.', issues: [{ path: 'programId', message: 'Tenés que elegir un programa.', kind: 'required' }] }
   }
 
   if (Number.isNaN(scheduledAt.getTime())) {
-    return { ok: false, message: 'La fecha y hora elegidas no son válidas.' }
+    return { ok: false, message: 'La fecha y hora elegidas no son válidas.', issues: [{ path: 'scheduledAt', message: 'La fecha y hora elegidas no son válidas.', kind: 'invalid' }] }
   }
 
-  const normalizedSections: Array<NormalizedManualSection | { error: string } | null> = input.sections.map((section, sectionIndex) => {
+  const issues: ValidationIssue[] = []
+  const normalizedSections: Array<NormalizedManualSection | null> = input.sections.map((section, sectionIndex) => {
     const title = section.title.trim()
     const hasContent = title.length > 0 || section.exercises.some((exercise) => {
       const genericValue = String(exercise.prescription.value ?? '').trim()
@@ -556,7 +558,8 @@ export async function createManualAssignment(input: CreateManualAssignmentInput)
     }
 
     if (!title) {
-      return { error: `La sección ${sectionIndex + 1} necesita un título.` }
+      issues.push({ path: `sections.${sectionIndex}.title`, message: `La sección ${sectionIndex + 1} necesita un título.`, kind: 'required' })
+      return null
     }
 
     const normalizedExercises: NormalizedManualSection['exercises'] = []
@@ -580,16 +583,28 @@ export async function createManualAssignment(input: CreateManualAssignmentInput)
       }
 
       if (!exerciseId) {
-        return { error: `El ejercicio ${exerciseIndex + 1} de la sección ${sectionIndex + 1} necesita un ejercicio.` }
+        issues.push({ path: `sections.${sectionIndex}.exercises.${exerciseIndex}.exerciseId`, message: 'Tenés que elegir un ejercicio.', kind: 'required' })
+        continue
       }
 
       if (!['STRENGTH', 'DURATION', 'DISTANCE', 'CUSTOM'].includes(metricType)) {
-        return { error: `El tipo de métrica del ejercicio ${exerciseIndex + 1} de la sección ${sectionIndex + 1} no es válido.` }
+        issues.push({ path: `sections.${sectionIndex}.exercises.${exerciseIndex}.metricType`, message: 'Elegí una métrica válida.', kind: 'invalid' })
+        continue
       }
 
       if (metricType === 'STRENGTH') {
+        const strengthFields = [
+          ['series', 'strengthSeries', series],
+          ['repeticiones', 'strengthRepetitions', repetitions],
+          ['peso', 'strengthWeight', weight],
+        ] as const
+        for (const [label, field, value] of strengthFields) {
+          if (value === null) {
+            issues.push({ path: `sections.${sectionIndex}.exercises.${exerciseIndex}.${field}`, message: `El ${label} es obligatorio.`, kind: 'required' })
+          }
+        }
         if (series === null || repetitions === null || weight === null) {
-          return { error: `El ejercicio ${exerciseIndex + 1} de la sección ${sectionIndex + 1} necesita series, repeticiones y peso.` }
+          continue
         }
 
         normalizedExercises.push({
@@ -602,7 +617,8 @@ export async function createManualAssignment(input: CreateManualAssignmentInput)
         })
       } else {
         if (!genericValue) {
-          return { error: `La prescripción del ejercicio ${exerciseIndex + 1} de la sección ${sectionIndex + 1} es obligatoria.` }
+          issues.push({ path: `sections.${sectionIndex}.exercises.${exerciseIndex}.prescriptionValue`, message: 'La prescripción es obligatoria.', kind: 'required' })
+          continue
         }
 
         normalizedExercises.push({
@@ -617,7 +633,10 @@ export async function createManualAssignment(input: CreateManualAssignmentInput)
     }
 
     if (normalizedExercises.length === 0) {
-      return { error: `La sección ${sectionIndex + 1} debe tener al menos un ejercicio válido.` }
+      if (!issues.some((issue) => issue.path.startsWith(`sections.${sectionIndex}.`))) {
+        issues.push({ path: `sections.${sectionIndex}.title`, message: `La sección ${sectionIndex + 1} debe tener al menos un ejercicio válido.`, kind: 'required' })
+      }
+      return null
     }
 
     return {
@@ -626,15 +645,14 @@ export async function createManualAssignment(input: CreateManualAssignmentInput)
     }
   })
 
-  const normalizationError = normalizedSections.find((section): section is { error: string } => Boolean(section && 'error' in section))
-  if (normalizationError) {
-    return { ok: false, message: normalizationError.error }
+  if (issues.length > 0) {
+    return { ok: false, message: issues[0].message, issues }
   }
 
-  const sectionsToCreate = normalizedSections.filter((section): section is NormalizedManualSection => Boolean(section && !('error' in section)))
+  const sectionsToCreate = normalizedSections.filter((section): section is NormalizedManualSection => Boolean(section))
 
   if (sectionsToCreate.length === 0) {
-    return { ok: false, message: 'La rutina debe tener al menos una sección con ejercicios válidos.' }
+    return { ok: false, message: 'La rutina debe tener al menos una sección con ejercicios válidos.', issues: [{ path: 'sections', message: 'La rutina debe tener al menos una sección con ejercicios válidos.', kind: 'required' }] }
   }
 
   try {
@@ -723,15 +741,15 @@ export async function createAssignment(input: CreateAssignmentInput): Promise<Cr
   const scheduledAt = new Date(input.scheduledAt)
 
   if (!input.studentId) {
-    return { ok: false, message: 'Tenés que elegir un alumno.' }
+    return { ok: false, message: 'Tenés que elegir un alumno.', issues: [{ path: 'studentId', message: 'Tenés que elegir un alumno.', kind: 'required' }] }
   }
 
   if (!input.templateId) {
-    return { ok: false, message: 'Tenés que elegir una plantilla.' }
+    return { ok: false, message: 'Tenés que elegir una plantilla.', issues: [{ path: 'templateId', message: 'Tenés que elegir una plantilla.', kind: 'required' }] }
   }
 
   if (Number.isNaN(scheduledAt.getTime())) {
-    return { ok: false, message: 'La fecha y hora elegidas no son válidas.' }
+    return { ok: false, message: 'La fecha y hora elegidas no son válidas.', issues: [{ path: 'scheduledAt', message: 'La fecha y hora elegidas no son válidas.', kind: 'invalid' }] }
   }
 
   try {

@@ -6,6 +6,7 @@ import { LoginForm } from '@/components/auth/login-form'
 type LoginPageProps = {
   searchParams?: Promise<{
     callbackUrl?: string
+    error?: string
     passwordChanged?: string
   }>
 }
@@ -33,6 +34,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         <h1 className="headline">Entrá a FP-Training</h1>
         <p className="lead">Autenticación con credenciales, roles y redirección automática según tu perfil.</p>
 
+        {params.error ? <span className="status status--error">No pudimos iniciar sesión. Reintentá.</span> : null}
         {params.passwordChanged ? <span className="status status--ok">Contraseña actualizada. Volvé a ingresar con la nueva clave.</span> : null}
 
         <div className="grid cards login-layout">

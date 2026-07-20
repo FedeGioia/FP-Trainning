@@ -2,7 +2,7 @@ import Link from 'next/link'
 
 import { exerciseMetricOptions } from '@/lib/constants/exercise-metrics'
 import { templateSectionOptions } from '@/lib/constants/template-sections'
-import { listExercises } from '@/modules/exercises'
+import { listExercisesWithCategoryPaths } from '@/modules/exercises'
 import { listProgramCatalog } from '@/modules/programs'
 import { ExercisePrescriptionGrid } from '@/components/shared/ExercisePrescriptionGrid'
 
@@ -18,7 +18,7 @@ type TrainerTemplateNewPageProps = {
 
 export default async function TrainerTemplateNewPage({ searchParams }: TrainerTemplateNewPageProps) {
   const params = (await searchParams) ?? {}
-  const exercises = await listExercises()
+  const exercises = await listExercisesWithCategoryPaths()
   const programs = await listProgramCatalog()
   const noExercises = exercises.length === 0
 

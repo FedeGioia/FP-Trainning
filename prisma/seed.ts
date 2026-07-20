@@ -1,9 +1,20 @@
-import { PrismaClient, ProgramCode } from '@prisma/client'
+import {
+  MediaKind,
+  MetricType,
+  MembershipStatus,
+  PrismaClient,
+  ProgramCode,
+  RoutineStatus,
+  Role,
+  SectionType,
+  SubmissionStatus,
+  UserStatus,
+} from '@prisma/client'
 import { hash } from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
-const programs = [
+const programSeeds = [
   {
     code: ProgramCode.FP_TRAINING,
     name: 'FP-Training',
@@ -24,192 +35,682 @@ const programs = [
     name: 'FP-Home',
     description: 'Programa base de entrenamiento en casa.',
   },
-]
+] as const
 
-const users = [
+const userSeeds = [
+  { email: 'admin@fptraining.local', name: 'Admin Demo', role: Role.ADMIN, password: 'admin1234' },
+  { email: 'trainer@fptraining.local', name: 'Trainer Demo', role: Role.TRAINER, password: 'trainer1234' },
+  { email: 'student@fptraining.local', name: 'Student Demo', role: Role.STUDENT, password: 'student1234' },
+  { email: 'student2@fptraining.local', name: 'Student Two', role: Role.STUDENT, password: 'student1234' },
+  { email: 'student3@fptraining.local', name: 'Student Three', role: Role.STUDENT, password: 'student1234' },
+  { email: 'student4@fptraining.local', name: 'Student Four', role: Role.STUDENT, password: 'student1234' },
+] as const
+
+const exerciseSeeds = [
   {
-    email: 'admin@fptraining.local',
-    name: 'Admin Demo',
-    role: 'ADMIN' as const,
-    password: 'admin1234',
+    name: 'Squat',
+    description: 'Patrón base de fuerza para piernas.',
+    primaryMetricType: MetricType.STRENGTH,
+    media: [{ kind: MediaKind.VIDEO, url: 'https://example.com/videos/squat.mp4', thumbnailUrl: 'https://example.com/images/squat.jpg' }],
   },
   {
-    email: 'trainer@fptraining.local',
-    name: 'Trainer Demo',
-    role: 'TRAINER' as const,
-    password: 'trainer1234',
+    name: 'Push-up',
+    description: 'Empuje de tren superior con peso corporal.',
+    primaryMetricType: MetricType.STRENGTH,
+    media: [{ kind: MediaKind.VIDEO, url: 'https://example.com/videos/push-up.mp4', thumbnailUrl: 'https://example.com/images/push-up.jpg' }],
   },
   {
-    email: 'student@fptraining.local',
-    name: 'Student Demo',
-    role: 'STUDENT' as const,
-    password: 'student1234',
+    name: 'Row',
+    description: 'Tirón para espalda y postura.',
+    primaryMetricType: MetricType.STRENGTH,
+    media: [{ kind: MediaKind.VIDEO, url: 'https://example.com/videos/row.mp4', thumbnailUrl: 'https://example.com/images/row.jpg' }],
   },
-]
+  {
+    name: 'Plank',
+    description: 'Core isométrico para estabilidad.',
+    primaryMetricType: MetricType.DURATION,
+    media: [{ kind: MediaKind.VIDEO, url: 'https://example.com/videos/plank.mp4', thumbnailUrl: 'https://example.com/images/plank.jpg' }],
+  },
+  {
+    name: 'Mobility Flow',
+    description: 'Secuencia corta de movilidad general.',
+    primaryMetricType: MetricType.DURATION,
+    media: [{ kind: MediaKind.VIDEO, url: 'https://example.com/videos/mobility-flow.mp4', thumbnailUrl: 'https://example.com/images/mobility-flow.jpg' }],
+  },
+  {
+    name: 'Run Intervals',
+    description: 'Intervalos cortos de carrera para cardio.',
+    primaryMetricType: MetricType.DISTANCE,
+    media: [{ kind: MediaKind.VIDEO, url: 'https://example.com/videos/run-intervals.mp4', thumbnailUrl: 'https://example.com/images/run-intervals.jpg' }],
+  },
+  {
+    name: 'Easy Run',
+    description: 'Rodaje suave para acumular volumen.',
+    primaryMetricType: MetricType.DISTANCE,
+    media: [{ kind: MediaKind.VIDEO, url: 'https://example.com/videos/easy-run.mp4', thumbnailUrl: 'https://example.com/images/easy-run.jpg' }],
+  },
+  {
+    name: 'Home Circuit',
+    description: 'Circuito mixto para entrenamiento en casa.',
+    primaryMetricType: MetricType.CUSTOM,
+    media: [{ kind: MediaKind.VIDEO, url: 'https://example.com/videos/home-circuit.mp4', thumbnailUrl: 'https://example.com/images/home-circuit.jpg' }],
+  },
+] as const
+
+type TemplateExerciseSeed = {
+  exerciseName: string
+  metricType: MetricType
+  prescriptionPayload: Record<string, unknown>
+  restLabel?: string | null
+  methodLabel?: string | null
+  complementLabel?: string | null
+  notes?: string | null
+}
+
+type TemplateSectionSeed = {
+  title: string
+  sectionType: SectionType
+  notes?: string | null
+  exercises: TemplateExerciseSeed[]
+}
+
+const templateSeeds: Array<{
+  name: string
+  description: string
+  programCode: ProgramCode
+  sections: TemplateSectionSeed[]
+}> = [
+  {
+    name: 'Full Body Strength',
+    description: 'Plantilla de fuerza general con base de gimnasio.',
+    programCode: ProgramCode.FP_TRAINING,
+    sections: [
+      {
+        title: 'Warm-up',
+        sectionType: SectionType.WARMUP,
+        exercises: [
+          {
+            exerciseName: 'Mobility Flow',
+            metricType: MetricType.DURATION,
+            prescriptionPayload: { duration: 300 },
+            restLabel: '30s',
+            notes: 'Preparación articular y movilidad general.',
+          },
+          {
+            exerciseName: 'Plank',
+            metricType: MetricType.DURATION,
+            prescriptionPayload: { duration: 45 },
+            restLabel: '30s',
+            notes: 'Activación del core antes del trabajo principal.',
+          },
+        ],
+      },
+      {
+        title: 'Main Workout',
+        sectionType: SectionType.MAIN,
+        exercises: [
+          {
+            exerciseName: 'Squat',
+            metricType: MetricType.STRENGTH,
+            prescriptionPayload: { series: 4, repetitions: 10, weight: 50 },
+            restLabel: '60s',
+          },
+          {
+            exerciseName: 'Push-up',
+            metricType: MetricType.STRENGTH,
+            prescriptionPayload: { series: 3, repetitions: 15 },
+            restLabel: '45s',
+          },
+          {
+            exerciseName: 'Row',
+            metricType: MetricType.STRENGTH,
+            prescriptionPayload: { series: 3, repetitions: 12, weight: 30 },
+            restLabel: '45s',
+          },
+        ],
+      },
+    ],
+  },
+  {
+    name: 'Running Intervals',
+    description: 'Trabajo cardiovascular por intervalos.',
+    programCode: ProgramCode.FP_RUNNING,
+    sections: [
+      {
+        title: 'Warm-up',
+        sectionType: SectionType.WARMUP,
+        exercises: [
+          {
+            exerciseName: 'Easy Run',
+            metricType: MetricType.DISTANCE,
+            prescriptionPayload: { distance: 1500 },
+            restLabel: '60s',
+          },
+        ],
+      },
+      {
+        title: 'Intervals',
+        sectionType: SectionType.MAIN,
+        exercises: [
+          {
+            exerciseName: 'Run Intervals',
+            metricType: MetricType.DISTANCE,
+            prescriptionPayload: { rounds: 6, distance: 400 },
+            restLabel: '90s',
+          },
+          {
+            exerciseName: 'Plank',
+            metricType: MetricType.DURATION,
+            prescriptionPayload: { duration: 30 },
+            restLabel: '30s',
+            notes: 'Bloque de estabilización entre series.',
+          },
+        ],
+      },
+    ],
+  },
+  {
+    name: 'Mobility Reset',
+    description: 'Plantilla de recuperación y movilidad.',
+    programCode: ProgramCode.FP_STRETCHING,
+    sections: [
+      {
+        title: 'Preparation',
+        sectionType: SectionType.PREPARATION,
+        exercises: [
+          {
+            exerciseName: 'Mobility Flow',
+            metricType: MetricType.DURATION,
+            prescriptionPayload: { duration: 420 },
+            restLabel: '20s',
+          },
+        ],
+      },
+      {
+        title: 'Main Session',
+        sectionType: SectionType.CUSTOM,
+        exercises: [
+          {
+            exerciseName: 'Home Circuit',
+            metricType: MetricType.CUSTOM,
+            prescriptionPayload: { rounds: 3, focus: 'mobility' },
+            restLabel: '45s',
+            methodLabel: 'Controlled tempo',
+          },
+          {
+            exerciseName: 'Plank',
+            metricType: MetricType.DURATION,
+            prescriptionPayload: { duration: 60 },
+            restLabel: '30s',
+          },
+        ],
+      },
+    ],
+  },
+  {
+    name: 'Home Circuit',
+    description: 'Circuito mixto para entrenar desde casa.',
+    programCode: ProgramCode.FP_HOME,
+    sections: [
+      {
+        title: 'Activation',
+        sectionType: SectionType.WARMUP,
+        exercises: [
+          {
+            exerciseName: 'Mobility Flow',
+            metricType: MetricType.DURATION,
+            prescriptionPayload: { duration: 240 },
+            restLabel: '20s',
+          },
+        ],
+      },
+      {
+        title: 'Circuit',
+        sectionType: SectionType.CIRCUIT,
+        exercises: [
+          {
+            exerciseName: 'Push-up',
+            metricType: MetricType.STRENGTH,
+            prescriptionPayload: { series: 4, repetitions: 12 },
+            restLabel: '30s',
+          },
+          {
+            exerciseName: 'Squat',
+            metricType: MetricType.STRENGTH,
+            prescriptionPayload: { series: 4, repetitions: 15 },
+            restLabel: '30s',
+          },
+          {
+            exerciseName: 'Home Circuit',
+            metricType: MetricType.CUSTOM,
+            prescriptionPayload: { rounds: 4, exercises: 3 },
+            restLabel: '60s',
+          },
+        ],
+      },
+    ],
+  },
+] as const
+
+type RoutineResultSeed = {
+  sectionOrder: number
+  exerciseOrder: number
+  resultType: MetricType
+  resultPayload: Record<string, unknown>
+  notes?: string | null
+}
+
+type RoutineFeedbackSeed = {
+  comment: string
+}
+
+type RoutineSubmissionSeed = {
+  status: SubmissionStatus
+  studentNotes?: string | null
+  resultEntries: RoutineResultSeed[]
+  feedbacks: RoutineFeedbackSeed[]
+}
+
+const routineSeeds: Array<{
+  title: string
+  programCode: ProgramCode
+  scheduledOffsetDays: number
+  scheduledHour: number
+  studentEmail: string
+  templateName: string
+  status: RoutineStatus
+  notes?: string | null
+  submission?: RoutineSubmissionSeed
+}> = [
+  {
+    title: 'Lunes - Full Body Strength',
+    programCode: ProgramCode.FP_TRAINING,
+    scheduledOffsetDays: 0,
+    scheduledHour: 18,
+    studentEmail: 'student@fptraining.local',
+    templateName: 'Full Body Strength',
+    status: RoutineStatus.IN_PROGRESS,
+    notes: 'Sesión activa para demo del student principal.',
+    submission: {
+      status: SubmissionStatus.IN_PROGRESS,
+      studentNotes: 'Voy por la mitad.',
+      resultEntries: [
+        {
+          sectionOrder: 2,
+          exerciseOrder: 1,
+          resultType: MetricType.STRENGTH,
+          resultPayload: { series: 2, repetitions: 10, weight: 50 },
+          notes: 'Primer bloque completado.',
+        },
+      ],
+      feedbacks: [{ comment: 'Buen arranque, mantené la técnica.' }],
+    },
+  },
+  {
+    title: 'Martes - Running Intervals',
+    programCode: ProgramCode.FP_RUNNING,
+    scheduledOffsetDays: 1,
+    scheduledHour: 19,
+    studentEmail: 'student2@fptraining.local',
+    templateName: 'Running Intervals',
+    status: RoutineStatus.PLANNED,
+  },
+  {
+    title: 'Miércoles - Mobility Reset',
+    programCode: ProgramCode.FP_STRETCHING,
+    scheduledOffsetDays: 2,
+    scheduledHour: 17,
+    studentEmail: 'student3@fptraining.local',
+    templateName: 'Mobility Reset',
+    status: RoutineStatus.COMPLETED,
+    submission: {
+      status: SubmissionStatus.SUBMITTED,
+      studentNotes: 'Me dejó más suelto para correr.',
+      resultEntries: [
+        {
+          sectionOrder: 1,
+          exerciseOrder: 1,
+          resultType: MetricType.DURATION,
+          resultPayload: { duration: 420 },
+        },
+        {
+          sectionOrder: 2,
+          exerciseOrder: 1,
+          resultType: MetricType.CUSTOM,
+          resultPayload: { rounds: 3, focus: 'mobility' },
+        },
+      ],
+      feedbacks: [{ comment: 'Excelente para recuperación.' }],
+    },
+  },
+  {
+    title: 'Jueves - Home Circuit',
+    programCode: ProgramCode.FP_HOME,
+    scheduledOffsetDays: 3,
+    scheduledHour: 20,
+    studentEmail: 'student4@fptraining.local',
+    templateName: 'Home Circuit',
+    status: RoutineStatus.PARTIAL,
+    submission: {
+      status: SubmissionStatus.SUBMITTED,
+      studentNotes: 'Hice solo la mitad por tiempo.',
+      resultEntries: [
+        {
+          sectionOrder: 2,
+          exerciseOrder: 1,
+          resultType: MetricType.STRENGTH,
+          resultPayload: { series: 4, repetitions: 12 },
+        },
+      ],
+      feedbacks: [{ comment: 'Bien, pero completá el circuito entero.' }],
+    },
+  },
+  {
+    title: 'Viernes - Full Body Strength',
+    programCode: ProgramCode.FP_TRAINING,
+    scheduledOffsetDays: 4,
+    scheduledHour: 18,
+    studentEmail: 'student4@fptraining.local',
+    templateName: 'Full Body Strength',
+    status: RoutineStatus.PLANNED,
+  },
+  {
+    title: 'Sábado - Running Intervals',
+    programCode: ProgramCode.FP_RUNNING,
+    scheduledOffsetDays: 5,
+    scheduledHour: 9,
+    studentEmail: 'student@fptraining.local',
+    templateName: 'Running Intervals',
+    status: RoutineStatus.COMPLETED,
+    submission: {
+      status: SubmissionStatus.SUBMITTED,
+      studentNotes: 'Gran salida matutina.',
+      resultEntries: [
+        {
+          sectionOrder: 1,
+          exerciseOrder: 1,
+          resultType: MetricType.DISTANCE,
+          resultPayload: { distance: 1500 },
+        },
+        {
+          sectionOrder: 2,
+          exerciseOrder: 1,
+          resultType: MetricType.DISTANCE,
+          resultPayload: { rounds: 6, distance: 400 },
+        },
+      ],
+      feedbacks: [{ comment: 'Muy bien sostenido el ritmo.' }],
+    },
+  },
+] as const
+
+function startOfToday() {
+  const now = new Date()
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate())
+}
+
+function buildScheduledAt(offsetDays: number, hour: number) {
+  const date = startOfToday()
+  date.setDate(date.getDate() + offsetDays)
+  date.setHours(hour, 0, 0, 0)
+  return date
+}
+
+async function resetDemoData() {
+  await prisma.trainerFeedback.deleteMany({})
+  await prisma.workoutResultEntry.deleteMany({})
+  await prisma.workoutSubmission.deleteMany({})
+  await prisma.assignedRoutineExercise.deleteMany({})
+  await prisma.assignedRoutineSection.deleteMany({})
+  await prisma.assignedRoutine.deleteMany({})
+  await prisma.routineTemplateExercise.deleteMany({})
+  await prisma.routineTemplateSection.deleteMany({})
+  await prisma.routineTemplate.deleteMany({})
+  await prisma.exerciseMedia.deleteMany({})
+  await prisma.exercise.deleteMany({})
+  await prisma.exerciseCategory.deleteMany({})
+  await prisma.trainerStudentAssignment.deleteMany({})
+  await prisma.studentProgramMembership.deleteMany({})
+  await prisma.session.deleteMany({})
+  await prisma.account.deleteMany({})
+  await prisma.user.deleteMany({})
+  await prisma.program.deleteMany({})
+}
 
 async function main() {
-  for (const program of programs) {
-    await prisma.program.upsert({
-      where: { code: program.code },
-      update: {
+  await resetDemoData()
+
+  const createdPrograms = new Map<string, Awaited<ReturnType<typeof prisma.program.create>>>()
+  for (const program of programSeeds) {
+    const created = await prisma.program.create({
+      data: {
+        code: program.code,
         name: program.name,
         description: program.description,
         active: true,
       },
-      create: program,
     })
+    createdPrograms.set(program.code, created)
   }
 
-  const seededPrograms = await prisma.program.findMany({
-    where: { code: { in: programs.map((program) => program.code) } },
-  })
-
-  for (const user of users) {
+  const createdUsers = new Map<string, Awaited<ReturnType<typeof prisma.user.create>>>()
+  for (const user of userSeeds) {
     const passwordHash = await hash(user.password, 10)
-
-    await prisma.user.upsert({
-      where: { email: user.email },
-      update: {
-        name: user.name,
-        passwordHash,
-        role: user.role,
-        status: 'ACTIVE',
-        mustChangePassword: false,
-      },
-      create: {
+    const created = await prisma.user.create({
+      data: {
         email: user.email,
         name: user.name,
         role: user.role,
         passwordHash,
-        status: 'ACTIVE',
+        status: UserStatus.ACTIVE,
         mustChangePassword: false,
       },
     })
+    createdUsers.set(user.email, created)
   }
 
-  const trainer = await prisma.user.findUnique({
-    where: { email: 'trainer@fptraining.local' },
-  })
+  for (const student of [
+    { email: 'student@fptraining.local', programs: [ProgramCode.FP_TRAINING, ProgramCode.FP_HOME] },
+    { email: 'student2@fptraining.local', programs: [ProgramCode.FP_RUNNING, ProgramCode.FP_HOME] },
+    { email: 'student3@fptraining.local', programs: [ProgramCode.FP_STRETCHING, ProgramCode.FP_HOME] },
+    { email: 'student4@fptraining.local', programs: [ProgramCode.FP_TRAINING, ProgramCode.FP_RUNNING, ProgramCode.FP_STRETCHING, ProgramCode.FP_HOME] },
+  ] as const) {
+    const studentUser = createdUsers.get(student.email)
+    const trainerUser = createdUsers.get('trainer@fptraining.local')
 
-  const student = await prisma.user.findUnique({
-    where: { email: 'student@fptraining.local' },
-  })
+    if (!studentUser || !trainerUser) continue
 
-  if (trainer && student) {
-    await prisma.studentProgramMembership.createMany({
-      data: seededPrograms.map((program) => ({
-        studentId: student.id,
-        programId: program.id,
-      })),
-      skipDuplicates: true,
-    })
-
-    await prisma.trainerStudentAssignment.createMany({
-      data: seededPrograms.map((program) => ({
-        trainerId: trainer.id,
-        studentId: student.id,
-        programId: program.id,
-      })),
-      skipDuplicates: true,
-    })
-  }
-
-  const demoExercise =
-    (await prisma.exercise.findFirst({ where: { name: 'Demo Exercise' } })) ??
-    (await prisma.exercise.create({
-      data: {
-        name: 'Demo Exercise',
-        primaryMetricType: 'STRENGTH',
-        description: 'Ejercicio de demostración para asignaciones manuales.',
-        createdById: trainer?.id ?? null,
-      },
+    const membershipData = student.programs.map((programCode) => ({
+      studentId: studentUser.id,
+      programId: createdPrograms.get(programCode)!.id,
+      status: MembershipStatus.ACTIVE,
     }))
 
-  const demoTemplateExists = await prisma.routineTemplate.findFirst({
-    where: { name: 'Demo Template', programId: seededPrograms.find((program) => program.code === ProgramCode.FP_TRAINING)?.id ?? '' },
-  })
+    const assignmentData = student.programs.map((programCode) => ({
+      trainerId: trainerUser.id,
+      studentId: studentUser.id,
+      programId: createdPrograms.get(programCode)!.id,
+      active: true,
+    }))
 
-  if (!demoTemplateExists && trainer) {
-    const demoProgram = seededPrograms.find((program) => program.code === ProgramCode.FP_TRAINING)
+    await prisma.studentProgramMembership.createMany({ data: membershipData, skipDuplicates: true })
+    await prisma.trainerStudentAssignment.createMany({ data: assignmentData, skipDuplicates: true })
+  }
 
-    if (demoProgram) {
-      await prisma.routineTemplate.create({
-        data: {
-          name: 'Demo Template',
-          description: 'Plantilla mínima para probar el flujo de asignación.',
-          programId: demoProgram.id,
-          createdById: trainer.id,
-          sections: {
-            create: [
-              {
-                title: 'Demo Section',
-                sectionType: 'CUSTOM',
-                sectionOrder: 1,
-                exercises: {
-                  create: [
-                    {
-                      exerciseId: demoExercise.id,
-                      exerciseOrder: 1,
-                      metricType: 'STRENGTH',
-                      prescriptionPayload: { series: 3, repetitions: 10, weight: 20 },
-                      restLabel: '60s',
-                      methodLabel: null,
-                      notes: 'Plantilla de demostración',
-                    },
-                  ],
-                },
-              },
-            ],
+  const createdExercises = new Map<string, Awaited<ReturnType<typeof prisma.exercise.create>>>()
+  const trainer = createdUsers.get('trainer@fptraining.local')
+  const categories = new Map<string, Awaited<ReturnType<typeof prisma.exerciseCategory.create>>>()
+
+  if (trainer) {
+    const strength = await prisma.exerciseCategory.create({ data: { name: 'Fuerza', createdById: trainer.id } })
+    const upperBody = await prisma.exerciseCategory.create({ data: { name: 'Tren superior', parentId: strength.id, createdById: trainer.id } })
+    const lowerBody = await prisma.exerciseCategory.create({ data: { name: 'Tren inferior', parentId: strength.id, createdById: trainer.id } })
+    const conditioning = await prisma.exerciseCategory.create({ data: { name: 'Acondicionamiento', createdById: trainer.id } })
+    categories.set('upper-body', upperBody)
+    categories.set('lower-body', lowerBody)
+    categories.set('conditioning', conditioning)
+  }
+
+  for (const exerciseSeed of exerciseSeeds) {
+    const created = await prisma.exercise.create({
+      data: {
+        name: exerciseSeed.name,
+        description: exerciseSeed.description,
+        primaryMetricType: exerciseSeed.primaryMetricType,
+        active: true,
+        createdById: trainer?.id ?? null,
+        categoryId: exerciseSeed.name === 'Squat'
+          ? categories.get('lower-body')?.id ?? null
+          : exerciseSeed.name === 'Push-up' || exerciseSeed.name === 'Row'
+            ? categories.get('upper-body')?.id ?? null
+            : exerciseSeed.name.includes('Run')
+              ? categories.get('conditioning')?.id ?? null
+              : null,
+        media: {
+          create: exerciseSeed.media.map((media) => ({
+            kind: media.kind,
+            url: media.url,
+            thumbnailUrl: media.thumbnailUrl,
+          })),
+        },
+      },
+    })
+    createdExercises.set(exerciseSeed.name, created)
+  }
+
+  const createdTemplates = new Map<string, Awaited<ReturnType<typeof prisma.routineTemplate.create>>>()
+
+  for (const templateSeed of templateSeeds) {
+    const program = createdPrograms.get(templateSeed.programCode)
+    if (!program || !trainer) continue
+
+    const createdTemplate = await prisma.routineTemplate.create({
+      data: {
+        name: templateSeed.name,
+        description: templateSeed.description,
+        programId: program.id,
+        createdById: trainer.id,
+        active: true,
+        sections: {
+          create: templateSeed.sections.map((section, sectionIndex) => ({
+            title: section.title,
+            sectionType: section.sectionType,
+            sectionOrder: sectionIndex + 1,
+            notes: section.notes ?? null,
+            exercises: {
+              create: section.exercises.map((exerciseSeed, exerciseIndex) => ({
+                exerciseId: createdExercises.get(exerciseSeed.exerciseName)!.id,
+                exerciseOrder: exerciseIndex + 1,
+                metricType: exerciseSeed.metricType,
+                prescriptionPayload: exerciseSeed.prescriptionPayload,
+                restLabel: exerciseSeed.restLabel ?? null,
+                methodLabel: exerciseSeed.methodLabel ?? null,
+                complementLabel: exerciseSeed.complementLabel ?? null,
+                notes: exerciseSeed.notes ?? null,
+              })),
+            },
+          })),
+        },
+      },
+      include: {
+        sections: {
+          include: {
+            exercises: true,
           },
         },
-      })
-    }
-  }
-
-  // Create weekly assignments for the demo student
-  if (trainer && student && demoTemplateExists) {
-    // Clean up existing demo assignments first
-    await prisma.assignedRoutine.deleteMany({
-      where: {
-        studentId: student.id,
-        title: { contains: '-' } // Demo assignment pattern
-      }
+      },
     })
 
-    const now = new Date()
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-    const daysOfWeek = [
-      { dayOffset: 0, hour: 18, minute: 0, programCode: 'FP_RUNNING', label: 'Running' },
-      { dayOffset: 1, hour: 19, minute: 0, programCode: 'FP_TRAINING', label: 'Training' },
-      { dayOffset: 2, hour: 17, minute: 30, programCode: 'FP_STRETCHING', label: 'Stretching' },
-      { dayOffset: 2, hour: 20, minute: 0, programCode: 'FP_HOME', label: 'Home' },
-    ]
-
-    const seededProgramMap = new Map(seededPrograms.map(program => [program.code, program]))
-
-    for (const { dayOffset, hour, minute, programCode, label } of daysOfWeek) {
-      const program = seededProgramMap.get(programCode)
-      if (!program) continue
-
-      const scheduledAt = new Date(today)
-      scheduledAt.setDate(today.getDate() + dayOffset)
-      scheduledAt.setHours(hour, minute, 0, 0)
-
-      await prisma.assignedRoutine.create({
-        data: {
-          title: `${label} - ${scheduledAt.toLocaleDateString('es-AR', { weekday: 'long' })}`,
-          scheduledAt,
-          status: 'PLANNED',
-          studentId: student.id,
-          trainerId: trainer.id,
-          programId: program.id,
-          templateId: demoTemplateExists.id,
-        }
-      })
-    }
+    createdTemplates.set(templateSeed.name, createdTemplate)
   }
 
-  console.log(`Seed completo: ${programs.length} programas, ${users.length} usuarios y demo de asignaciones sincronizada.`)
+  for (const routineSeed of routineSeeds) {
+    const student = createdUsers.get(routineSeed.studentEmail)
+    const trainerUser = createdUsers.get('trainer@fptraining.local')
+    const program = createdPrograms.get(routineSeed.programCode)
+    const template = createdTemplates.get(routineSeed.templateName)
+
+    if (!student || !trainerUser || !program || !template) continue
+
+    const createdRoutine = await prisma.assignedRoutine.create({
+      data: {
+        title: routineSeed.title,
+        scheduledAt: buildScheduledAt(routineSeed.scheduledOffsetDays, routineSeed.scheduledHour),
+        status: routineSeed.status,
+        notes: routineSeed.notes ?? null,
+        studentId: student.id,
+        trainerId: trainerUser.id,
+        programId: program.id,
+        templateId: template.id,
+        sections: {
+          create: template.sections.map((section) => ({
+            title: section.title,
+            sectionType: section.sectionType,
+            sectionOrder: section.sectionOrder,
+            notes: section.notes ?? null,
+            sourceTemplateSectionId: section.id,
+            exercises: {
+              create: section.exercises.map((templateExercise) => ({
+                exerciseId: templateExercise.exerciseId,
+                sourceTemplateExerciseId: templateExercise.id,
+                exerciseOrder: templateExercise.exerciseOrder,
+                metricType: templateExercise.metricType,
+                prescriptionSnapshot: templateExercise.prescriptionPayload,
+                restLabel: templateExercise.restLabel,
+                methodLabel: templateExercise.methodLabel,
+                complementLabel: templateExercise.complementLabel,
+                notes: templateExercise.notes,
+              })),
+            },
+          })),
+        },
+      },
+      include: {
+        sections: {
+          include: {
+            exercises: true,
+          },
+        },
+      },
+    })
+
+    if (!routineSeed.submission) continue
+
+    const exerciseLookup = new Map<string, string>()
+    for (const section of createdRoutine.sections) {
+      for (const exercise of section.exercises) {
+        exerciseLookup.set(`${section.sectionOrder}-${exercise.exerciseOrder}`, exercise.id)
+      }
+    }
+
+    await prisma.workoutSubmission.create({
+      data: {
+        assignedRoutineId: createdRoutine.id,
+        studentId: student.id,
+        status: routineSeed.submission.status,
+        studentNotes: routineSeed.submission.studentNotes ?? null,
+        submittedAt: routineSeed.submission.status === SubmissionStatus.NOT_STARTED ? null : new Date(),
+        resultEntries: {
+          create: routineSeed.submission.resultEntries.map((result) => ({
+            assignedRoutineExerciseId: exerciseLookup.get(`${result.sectionOrder}-${result.exerciseOrder}`)!,
+            resultType: result.resultType,
+            resultPayload: result.resultPayload,
+            notes: result.notes ?? null,
+          })),
+        },
+        feedbacks: {
+          create: routineSeed.submission.feedbacks.map((feedback) => ({
+            trainerId: trainerUser.id,
+            comment: feedback.comment,
+          })),
+        },
+      },
+    })
+  }
+
+  console.log(
+    `Seed demo completo: ${programSeeds.length} programas, ${userSeeds.length} usuarios, ${exerciseSeeds.length} ejercicios, ${templateSeeds.length} plantillas y ${routineSeeds.length} rutinas.`,
+  )
 }
 
 main()

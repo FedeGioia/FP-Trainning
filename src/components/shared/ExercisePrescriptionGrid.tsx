@@ -2,17 +2,20 @@
 
 import { useState } from 'react'
 
+import type { ManualExerciseValidationValues } from '@/modules/assignments/types'
+import { type PickerExercise } from './ExerciseModalPicker'
+import { ExerciseModalPickerTrigger } from './ExerciseModalPickerTrigger'
+
 type ExercisePrescriptionGridProps = {
   sectionIndex: number
-  exercises: Array<{
-    id: string
-    name: string
-    primaryMetricType: string
-  }>
+  exercises: PickerExercise[]
   metricOptions: Array<{
     value: string
     label: string
   }>
+  initialRows?: Array<{ metricType: string }>
+  initialValues?: ManualExerciseValidationValues[]
+  fieldErrors?: Record<string, string>
 }
 
 type GridRow = {
@@ -42,8 +45,19 @@ function getNonStrengthPlaceholder(metricType: string) {
   }
 }
 
-export function ExercisePrescriptionGrid({ sectionIndex, exercises, metricOptions }: ExercisePrescriptionGridProps) {
-  const [rows, setRows] = useState<GridRow[]>(() => Array.from({ length: INITIAL_EXERCISE_ROWS }, createRow))
+export function ExercisePrescriptionGrid({
+  sectionIndex,
+  exercises,
+  metricOptions,
+  initialRows,
+  initialValues,
+  fieldErrors = {},
+}: ExercisePrescriptionGridProps) {
+  const [rows, setRows] = useState<GridRow[]>(() =>
+    initialRows?.length
+      ? initialRows.map((row) => ({ ...createRow(), metricType: row.metricType }))
+      : Array.from({ length: INITIAL_EXERCISE_ROWS }, createRow),
+  )
 
   const addExercise = () => {
     setRows((current) => [...current, createRow()])
@@ -68,6 +82,9 @@ export function ExercisePrescriptionGrid({ sectionIndex, exercises, metricOption
 
       {rows.map((row, exerciseIndex) => {
         const isStrength = row.metricType === 'STRENGTH'
+        const values = initialValues?.[exerciseIndex]
+        const fieldName = (field: string) => `sections.${sectionIndex}.exercises.${exerciseIndex}.${field}`
+        const errorFor = (field: string) => fieldErrors[fieldName(field)]
 
         return (
           <div key={row.id} className="exercise-grid__row">
@@ -85,19 +102,19 @@ export function ExercisePrescriptionGrid({ sectionIndex, exercises, metricOption
             </div>
 
             <div className="grid-cell">
-              <select name={`sections.${sectionIndex}.exercises.${exerciseIndex}.exerciseId`} defaultValue="" aria-label={`Ejercicio ${exerciseIndex + 1}`}>
-                <option value="">Seleccionar ejercicio</option>
-                {exercises.map((exercise) => (
-                  <option key={exercise.id} value={exercise.id}>
-                    {exercise.name} · {exercise.primaryMetricType}
-                  </option>
-                ))}
-              </select>
+              <ExerciseModalPickerTrigger
+                exercises={exercises}
+                fieldName={fieldName('exerciseId')}
+                initialSelectedId={values?.exerciseId}
+                ariaLabel={`Ejercicio ${exerciseIndex + 1}`}
+                invalid={Boolean(errorFor('exerciseId'))}
+              />
+              {errorFor('exerciseId') ? <small className="field-error">{errorFor('exerciseId')}</small> : null}
             </div>
 
             <div className="grid-cell">
               <select
-                name={`sections.${sectionIndex}.exercises.${exerciseIndex}.metricType`}
+                name={fieldName('metricType')}
                 value={row.metricType}
                 aria-label={`Métrica ${exerciseIndex + 1}`}
                 onChange={(event) => {
@@ -112,20 +129,21 @@ export function ExercisePrescriptionGrid({ sectionIndex, exercises, metricOption
                   </option>
                 ))}
               </select>
+              {errorFor('metricType') ? <small className="field-error">{errorFor('metricType')}</small> : null}
             </div>
 
             <div className="grid-cell exercise-grid__generic-cell">
               <div className="exercise-grid__generic-inner">
                 <input
                   name={
-                    isStrength
-                      ? `sections.${sectionIndex}.exercises.${exerciseIndex}.methodLabel`
-                      : `sections.${sectionIndex}.exercises.${exerciseIndex}.prescriptionValue`
+                    isStrength ? fieldName('methodLabel') : fieldName('prescriptionValue')
                   }
                   type="text"
                   placeholder={isStrength ? 'Ej: tempo / lineal / circuito' : getNonStrengthPlaceholder(row.metricType)}
-                  aria-label={isStrength ? `Técnica ${exerciseIndex + 1}` : `Consigna ${exerciseIndex + 1}`}
-                />
+                    aria-label={isStrength ? `Técnica ${exerciseIndex + 1}` : `Consigna ${exerciseIndex + 1}`}
+                    defaultValue={isStrength ? values?.methodLabel ?? '' : values?.prescriptionValue ?? ''}
+                  />
+                  {errorFor(isStrength ? 'methodLabel' : 'prescriptionValue') ? <small className="field-error">{errorFor(isStrength ? 'methodLabel' : 'prescriptionValue')}</small> : null}
               </div>
             </div>
 
@@ -133,38 +151,44 @@ export function ExercisePrescriptionGrid({ sectionIndex, exercises, metricOption
               <>
                 <div className="grid-cell">
                   <input
-                    name={`sections.${sectionIndex}.exercises.${exerciseIndex}.strengthSeries`}
-                    type="number"
+                    name={fieldName('strengthSeries')}
+                    type="text"
                     min="0"
                     step="1"
                     inputMode="numeric"
                     placeholder="3"
                     aria-label={`Series ${exerciseIndex + 1}`}
+                    defaultValue={values?.strengthSeries ?? ''}
                   />
+                  {errorFor('strengthSeries') ? <small className="field-error">{errorFor('strengthSeries')}</small> : null}
                 </div>
 
                 <div className="grid-cell">
                   <input
-                    name={`sections.${sectionIndex}.exercises.${exerciseIndex}.strengthRepetitions`}
-                    type="number"
+                    name={fieldName('strengthRepetitions')}
+                    type="text"
                     min="0"
                     step="1"
                     inputMode="numeric"
                     placeholder="8"
                     aria-label={`Repeticiones ${exerciseIndex + 1}`}
+                    defaultValue={values?.strengthRepetitions ?? ''}
                   />
+                  {errorFor('strengthRepetitions') ? <small className="field-error">{errorFor('strengthRepetitions')}</small> : null}
                 </div>
 
                 <div className="grid-cell">
                   <input
-                    name={`sections.${sectionIndex}.exercises.${exerciseIndex}.strengthWeight`}
-                    type="number"
+                    name={fieldName('strengthWeight')}
+                    type="text"
                     min="0"
                     step="0.5"
                     inputMode="decimal"
                     placeholder="60"
                     aria-label={`Peso ${exerciseIndex + 1}`}
+                    defaultValue={values?.strengthWeight ?? ''}
                   />
+                  {errorFor('strengthWeight') ? <small className="field-error">{errorFor('strengthWeight')}</small> : null}
                 </div>
               </>
             ) : (
@@ -177,11 +201,13 @@ export function ExercisePrescriptionGrid({ sectionIndex, exercises, metricOption
 
             <div className="grid-cell">
               <input
-                name={`sections.${sectionIndex}.exercises.${exerciseIndex}.restLabel`}
+                name={fieldName('restLabel')}
                 type="text"
                 placeholder="60s"
                 aria-label={`Descanso ${exerciseIndex + 1}`}
+                defaultValue={values?.restLabel ?? ''}
               />
+              {errorFor('restLabel') ? <small className="field-error">{errorFor('restLabel')}</small> : null}
             </div>
           </div>
         )

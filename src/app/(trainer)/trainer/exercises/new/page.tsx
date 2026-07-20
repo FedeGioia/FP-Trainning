@@ -1,6 +1,7 @@
 import Link from 'next/link'
 
 import { exerciseMetricOptions } from '@/lib/constants/exercise-metrics'
+import { listCategoryTree } from '@/modules/exercises'
 
 import { createExerciseAction } from './actions'
 
@@ -12,6 +13,10 @@ type TrainerExerciseNewPageProps = {
 
 export default async function TrainerExerciseNewPage({ searchParams }: TrainerExerciseNewPageProps) {
   const params = (await searchParams) ?? {}
+  const categoryTree = await listCategoryTree()
+  const categories = categoryTree.flatMap(function flatten(category): typeof categoryTree {
+    return [category, ...category.children.flatMap(flatten)]
+  })
 
   return (
     <div className="stack">
@@ -43,6 +48,17 @@ export default async function TrainerExerciseNewPage({ searchParams }: TrainerEx
               <span>Nombre del ejercicio</span>
               <small>Usá el nombre exacto con el que lo reconocen trainer y alumno.</small>
               <input name="name" type="text" placeholder="Ej: Press banca" required />
+            </label>
+
+            <label className="field">
+              <span>Categoría</span>
+              <small>Opcional. Elegí una carpeta para ordenar este ejercicio.</small>
+              <select name="categoryId" defaultValue="">
+                <option value="">Sin categoría</option>
+                {categories.map((category) => (
+                  <option key={category.id} value={category.id}>{category.path}</option>
+                ))}
+              </select>
             </label>
 
             <label className="field">

@@ -11,6 +11,7 @@ export async function createExerciseAction(formData: FormData) {
   const description = String(formData.get('description') ?? '')
   const primaryMetricType = String(formData.get('primaryMetricType') ?? '')
   const videoUrl = String(formData.get('videoUrl') ?? '')
+  const categoryId = String(formData.get('categoryId') ?? '')
 
   if (!session?.user?.id || session.user.role !== 'trainer') {
     redirect('/login?error=auth')
@@ -26,6 +27,7 @@ export async function createExerciseAction(formData: FormData) {
     primaryMetricType,
     videoUrl,
     createdById: session.user.id,
+    categoryId: categoryId || null,
   })
 
   if (!result.ok) {

@@ -4,8 +4,25 @@ import { redirect } from 'next/navigation'
 
 import { auth } from '@/auth'
 import { createAssignment } from '@/modules/assignments'
+import type { CreateAssignmentResult, TemplateValidationState } from '@/modules/assignments/types'
 
-export async function createAssignmentAction(formData: FormData) {
+type TemplateFormValues = Pick<TemplateValidationState, 'studentId' | 'templateId' | 'scheduledAt' | 'title' | 'notes'>
+
+export function buildTemplateValidationState(
+  values: TemplateFormValues,
+  result: Extract<CreateAssignmentResult, { ok: false }>,
+): TemplateValidationState {
+  return {
+    ...values,
+    issues: result.issues ?? [],
+    formError: result.message,
+  }
+}
+
+export async function createAssignmentAction(
+  _previousState: TemplateValidationState | null,
+  formData: FormData,
+): Promise<TemplateValidationState | null> {
   const session = await auth()
   const studentId = String(formData.get('studentId') ?? '')
   const templateId = String(formData.get('templateId') ?? '')
@@ -27,7 +44,7 @@ export async function createAssignmentAction(formData: FormData) {
   })
 
   if (!result.ok) {
-    redirect(`/trainer/assignments/new?error=${encodeURIComponent(result.message)}`)
+    return buildTemplateValidationState({ studentId, templateId, scheduledAt, title, notes }, result)
   }
 
   redirect('/trainer/assignments?created=1')

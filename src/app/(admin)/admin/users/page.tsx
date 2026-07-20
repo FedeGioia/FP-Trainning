@@ -12,6 +12,7 @@ type AdminUsersPageProps = {
   searchParams?: Promise<{
     error?: string
     reset?: string
+    status?: string
   }>
 }
 

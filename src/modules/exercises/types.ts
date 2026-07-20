@@ -6,7 +6,30 @@ export type ExerciseSummary = {
   description?: string | null
   primaryMetricType: ExerciseMetricType
   hasVideo: boolean
+  categoryPath: string | null
 }
+
+export type ExerciseCategoryNode = {
+  id: string
+  name: string
+  parentId: string | null
+  path: string
+  children: ExerciseCategoryNode[]
+}
+
+export type CreateCategoryInput = {
+  name: string
+  parentId?: string | null
+  createdById?: string
+}
+
+export type CreateCategoryResult =
+  | { ok: true; categoryId: string }
+  | { ok: false; message: string }
+
+export type DeleteCategoryResult =
+  | { ok: true }
+  | { ok: false; message: string }
 
 export type CreateExerciseInput = {
   name: string
@@ -14,6 +37,7 @@ export type CreateExerciseInput = {
   primaryMetricType: ExerciseMetricType
   videoUrl?: string
   createdById?: string
+  categoryId?: string | null
 }
 
 export type CreateExerciseResult =

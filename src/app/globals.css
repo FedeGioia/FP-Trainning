@@ -883,6 +883,174 @@ summary:focus-visible {
   align-items: center;
 }
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.category-tree {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.category-tree__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-alt);
+}
+
+.category-tree__content {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.category-tree__content summary {
+  color: var(--primary-strong);
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.category-tree__child-form {
+  display: flex;
+  gap: 0.45rem;
+  padding-top: 0.35rem;
+}
+
+.category-tree__child-form input {
+  min-width: 0;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.category-tree__child-form .button {
+  min-height: 34px;
+  padding: 0.45rem 0.7rem;
+}
+
+.category-tree__delete {
+  min-height: 34px;
+  padding: 0.45rem 0.7rem;
+  color: var(--danger);
+}
+
+.exercise-picker-trigger {
+  display: grid;
+  width: 100%;
+  min-height: 40px;
+  gap: 0.1rem;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid rgba(43, 53, 86, 0.18);
+  border-radius: 11px;
+  background: var(--surface-alt);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.exercise-picker-trigger small {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 0.75rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.exercise-picker-trigger.is-invalid {
+  border-color: var(--danger);
+}
+
+.exercise-category-assignment {
+  display: flex;
+  gap: 0.45rem;
+}
+
+.exercise-category-assignment select {
+  width: 100%;
+  min-height: 38px;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-alt);
+  color: var(--text);
+}
+
+.exercise-category-assignment label {
+  flex: 1;
+}
+
+.exercise-category-assignment .button {
+  min-height: 38px;
+  padding: 0.45rem 0.7rem;
+}
+
+.exercise-picker-modal {
+  width: min(100%, 680px);
+  display: grid;
+  gap: 1rem;
+  max-height: min(90vh, 720px);
+  overflow-y: auto;
+}
+
+.exercise-picker-modal__groups {
+  display: grid;
+  gap: 1rem;
+}
+
+.exercise-picker-modal__group {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.exercise-picker-modal__group h3 {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  text-transform: uppercase;
+}
+
+.exercise-picker-modal__option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-alt);
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+}
+
+.exercise-picker-modal__option:hover {
+  border-color: rgba(31, 111, 255, 0.35);
+  background: rgba(31, 111, 255, 0.08);
+}
+
+.exercise-picker-modal__option span {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
 .student-programs-fieldset {
   border: 0;
   padding: 0;
@@ -1348,6 +1516,17 @@ summary:focus-visible {
   color: var(--muted);
   font-size: 0.92rem;
   line-height: 1.45;
+}
+
+.field-error {
+  color: var(--danger, #f87171) !important;
+  font-weight: 600;
+}
+
+input[aria-invalid='true'],
+textarea[aria-invalid='true'],
+select[aria-invalid='true'] {
+  border-color: var(--danger, #f87171);
 }
 
 .field input,

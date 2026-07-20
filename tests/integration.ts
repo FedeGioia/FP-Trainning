@@ -13,6 +13,9 @@ type Fixture = {
   assignmentExerciseId: string
 }
 
+type DbClient = typeof import('@/lib/db').db
+type CreateManualAssignment = typeof import('@/modules/assignments').createManualAssignment
+
 function test(name: string, fn: () => Promise<void>) {
   return fn()
     .then(() => {
@@ -25,8 +28,8 @@ function test(name: string, fn: () => Promise<void>) {
 }
 
 async function seedFixture(
-  db: Awaited<ReturnType<typeof import('@/lib/db')>>['db'],
-  createManualAssignment: typeof import('@/modules/assignments')['createManualAssignment'],
+  db: DbClient,
+  createManualAssignment: CreateManualAssignment,
 ): Promise<Fixture> {
   const suffix = randomUUID().slice(0, 8)
 
@@ -155,7 +158,7 @@ async function seedFixture(
   }
 }
 
-async function cleanupFixture(db: Awaited<ReturnType<typeof import('@/lib/db')>>['db'], fixture: Fixture) {
+async function cleanupFixture(db: DbClient, fixture: Fixture) {
   await db.trainerFeedback.deleteMany({
     where: {
       trainerId: {
@@ -196,8 +199,10 @@ async function main() {
     throw new Error('Set DATABASE_URL or DATABASE_URL_TEST before running integration tests.')
   }
 
-  process.env.DATABASE_URL = databaseUrl
-  process.env.NODE_ENV = 'test'
+  Object.assign(process.env, {
+    DATABASE_URL: databaseUrl,
+    NODE_ENV: 'test',
+  })
 
   const { db } = await import('@/lib/db')
   const {

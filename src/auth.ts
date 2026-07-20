@@ -7,6 +7,14 @@ import { db } from '@/lib/db'
 
 type AppRole = 'admin' | 'trainer' | 'student'
 
+type AuthUser = {
+  id: string
+  name?: string | null
+  email?: string | null
+  role?: AppRole
+  mustChangePassword?: boolean
+}
+
 function mapDbRoleToAppRole(role: 'ADMIN' | 'TRAINER' | 'STUDENT'): AppRole {
   switch (role) {
     case 'ADMIN':
@@ -20,6 +28,8 @@ function mapDbRoleToAppRole(role: 'ADMIN' | 'TRAINER' | 'STUDENT'): AppRole {
 
 export const { auth, handlers, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(db),
+  trustHost: true,
+  secret: process.env.AUTH_SECRET,
   session: { strategy: 'jwt' },
   pages: {
     signIn: '/login',
@@ -65,25 +75,13 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
   callbacks: {
     jwt: async ({ token, user }) => {
       if (user) {
-        token.id = user.id
-        token.name = user.name
-        token.email = user.email
-        token.role = user.role
-        token.mustChangePassword = user.mustChangePassword
-      }
+        const authUser = user as AuthUser
 
-      const userId = token.id ?? token.sub
-
-      if (userId) {
-        const dbUser = await db.user.findUnique({
-          where: { id: userId },
-        })
-
-        if (dbUser) {
-          token.name = dbUser.name
-          token.email = dbUser.email
-          token.role = mapDbRoleToAppRole(dbUser.role)
-        }
+        token.id = authUser.id
+        token.name = authUser.name
+        token.email = authUser.email
+        token.role = authUser.role
+        token.mustChangePassword = authUser.mustChangePassword
       }
 
       return token

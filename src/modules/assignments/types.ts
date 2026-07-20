@@ -94,6 +94,47 @@ export type CreateManualAssignmentInput = {
   }>
 }
 
+export type ValidationIssue = {
+  path: string
+  message: string
+  kind: 'required' | 'invalid'
+}
+
+export type TemplateValidationState = {
+  studentId: string
+  templateId: string
+  scheduledAt: string
+  title: string
+  notes: string
+  issues: ValidationIssue[]
+  formError: string
+}
+
+export type ManualExerciseValidationValues = {
+  exerciseId: string
+  metricType: string
+  prescriptionValue: string
+  strengthSeries: string
+  strengthRepetitions: string
+  strengthWeight: string
+  restLabel: string
+  methodLabel: string
+}
+
+export type ManualValidationState = {
+  studentId: string
+  programId: string
+  scheduledAt: string
+  title: string
+  notes: string
+  sections: Array<{
+    title: string
+    exercises: ManualExerciseValidationValues[]
+  }>
+  issues: ValidationIssue[]
+  formError: string
+}
+
 export type CreateAssignmentInput = {
   studentId: string
   templateId: string
@@ -112,6 +153,7 @@ export type CreateAssignmentResult =
   | {
       ok: false
       message: string
+      issues?: ValidationIssue[]
     }
 
 export type SubmitAssignmentResultInput = {

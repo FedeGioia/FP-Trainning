@@ -86,6 +86,7 @@ model User {
   studentAssignments TrainerStudentAssignment[] @relation("StudentAssignments")
 
   createdExercises Exercise[]        @relation("ExerciseCreatedBy")
+  createdExerciseCategories ExerciseCategory[] @relation("ExerciseCategoryCreatedBy")
   createdTemplates RoutineTemplate[] @relation("TemplateCreatedBy")
 
   trainerAssignedRoutines AssignedRoutine[] @relation("AssignedRoutineTrainer")
@@ -196,16 +197,36 @@ model Exercise {
   primaryMetricType MetricType
   active            Boolean    @default(true)
   createdById       String?
+  categoryId        String?
   createdAt         DateTime   @default(now())
   updatedAt         DateTime   @updatedAt
 
   createdBy User? @relation("ExerciseCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  category  ExerciseCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
 
   media             ExerciseMedia[]
   templateExercises RoutineTemplateExercise[]
   assignedExercises AssignedRoutineExercise[]
 
   @@index([primaryMetricType])
+  @@index([categoryId])
+}
+
+model ExerciseCategory {
+  id          String   @id @default(cuid())
+  name        String
+  parentId    String?
+  createdById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  parent    ExerciseCategory?  @relation("ExerciseCategoryHierarchy", fields: [parentId], references: [id], onDelete: Restrict)
+  children  ExerciseCategory[] @relation("ExerciseCategoryHierarchy")
+  createdBy User?              @relation("ExerciseCategoryCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  exercises Exercise[]
+
+  @@index([parentId])
+  @@index([createdById])
 }
 
 model ExerciseMedia {
