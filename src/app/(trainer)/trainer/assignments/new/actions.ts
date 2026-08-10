@@ -4,20 +4,8 @@ import { redirect } from 'next/navigation'
 
 import { auth } from '@/auth'
 import { createAssignment } from '@/modules/assignments'
-import type { CreateAssignmentResult, TemplateValidationState } from '@/modules/assignments/types'
-
-type TemplateFormValues = Pick<TemplateValidationState, 'studentId' | 'templateId' | 'scheduledAt' | 'title' | 'notes'>
-
-export function buildTemplateValidationState(
-  values: TemplateFormValues,
-  result: Extract<CreateAssignmentResult, { ok: false }>,
-): TemplateValidationState {
-  return {
-    ...values,
-    issues: result.issues ?? [],
-    formError: result.message,
-  }
-}
+import type { TemplateValidationState } from '@/modules/assignments/types'
+import { buildTemplateValidationState } from './validation'
 
 export async function createAssignmentAction(
   _previousState: TemplateValidationState | null,
