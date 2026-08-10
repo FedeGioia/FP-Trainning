@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 
 import { auth } from '@/auth'
 import { SignOutForm } from '@/components/auth/sign-out-form'
-import { RoleNavigation } from '@/components/layout/role-navigation'
+import { RoleNavigation } from '@/components/layout/role-navigation-menu'
 import type { RoleNavGroup, RoleNavItem } from '@/components/layout/role-navigation'
 
 type RoleShellProps = {

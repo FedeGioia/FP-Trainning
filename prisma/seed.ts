@@ -2,6 +2,7 @@ import {
   MediaKind,
   MetricType,
   MembershipStatus,
+  Prisma,
   PrismaClient,
   ProgramCode,
   RoutineStatus,
@@ -100,7 +101,7 @@ const exerciseSeeds = [
 type TemplateExerciseSeed = {
   exerciseName: string
   metricType: MetricType
-  prescriptionPayload: Record<string, unknown>
+  prescriptionPayload: Prisma.InputJsonObject
   restLabel?: string | null
   methodLabel?: string | null
   complementLabel?: string | null
@@ -113,6 +114,16 @@ type TemplateSectionSeed = {
   notes?: string | null
   exercises: TemplateExerciseSeed[]
 }
+
+type SeededRoutineTemplate = Prisma.RoutineTemplateGetPayload<{
+  include: {
+    sections: {
+      include: {
+        exercises: true
+      }
+    }
+  }
+}>
 
 const templateSeeds: Array<{
   name: string
@@ -296,7 +307,7 @@ type RoutineResultSeed = {
   sectionOrder: number
   exerciseOrder: number
   resultType: MetricType
-  resultPayload: Record<string, unknown>
+  resultPayload: Prisma.InputJsonObject
   notes?: string | null
 }
 
@@ -456,6 +467,10 @@ function buildScheduledAt(offsetDays: number, hour: number) {
   return date
 }
 
+function toInputJsonValue(value: Prisma.JsonValue): Prisma.InputJsonValue | Prisma.JsonNullValueInput {
+  return value === null ? Prisma.JsonNull : value as Prisma.InputJsonValue
+}
+
 async function resetDemoData() {
   await prisma.trainerFeedback.deleteMany({})
   await prisma.workoutResultEntry.deleteMany({})
@@ -580,7 +595,7 @@ async function main() {
     createdExercises.set(exerciseSeed.name, created)
   }
 
-  const createdTemplates = new Map<string, Awaited<ReturnType<typeof prisma.routineTemplate.create>>>()
+  const createdTemplates = new Map<string, SeededRoutineTemplate>()
 
   for (const templateSeed of templateSeeds) {
     const program = createdPrograms.get(templateSeed.programCode)
@@ -601,7 +616,7 @@ async function main() {
             notes: section.notes ?? null,
             exercises: {
               create: section.exercises.map((exerciseSeed, exerciseIndex) => ({
-                exerciseId: createdExercises.get(exerciseSeed.exerciseName)!.id,
+                exercise: { connect: { id: createdExercises.get(exerciseSeed.exerciseName)!.id } },
                 exerciseOrder: exerciseIndex + 1,
                 metricType: exerciseSeed.metricType,
                 prescriptionPayload: exerciseSeed.prescriptionPayload,
@@ -650,14 +665,14 @@ async function main() {
             sectionType: section.sectionType,
             sectionOrder: section.sectionOrder,
             notes: section.notes ?? null,
-            sourceTemplateSectionId: section.id,
+            sourceTemplate: { connect: { id: section.id } },
             exercises: {
               create: section.exercises.map((templateExercise) => ({
-                exerciseId: templateExercise.exerciseId,
-                sourceTemplateExerciseId: templateExercise.id,
+                exercise: { connect: { id: templateExercise.exerciseId } },
+                sourceTemplate: { connect: { id: templateExercise.id } },
                 exerciseOrder: templateExercise.exerciseOrder,
                 metricType: templateExercise.metricType,
-                prescriptionSnapshot: templateExercise.prescriptionPayload,
+                prescriptionSnapshot: toInputJsonValue(templateExercise.prescriptionPayload),
                 restLabel: templateExercise.restLabel,
                 methodLabel: templateExercise.methodLabel,
                 complementLabel: templateExercise.complementLabel,
@@ -694,7 +709,7 @@ async function main() {
         submittedAt: routineSeed.submission.status === SubmissionStatus.NOT_STARTED ? null : new Date(),
         resultEntries: {
           create: routineSeed.submission.resultEntries.map((result) => ({
-            assignedRoutineExerciseId: exerciseLookup.get(`${result.sectionOrder}-${result.exerciseOrder}`)!,
+            assignedExercise: { connect: { id: exerciseLookup.get(`${result.sectionOrder}-${result.exerciseOrder}`)! } },
             resultType: result.resultType,
             resultPayload: result.resultPayload,
             notes: result.notes ?? null,
@@ -702,7 +717,7 @@ async function main() {
         },
         feedbacks: {
           create: routineSeed.submission.feedbacks.map((feedback) => ({
-            trainerId: trainerUser.id,
+            trainer: { connect: { id: trainerUser.id } },
             comment: feedback.comment,
           })),
         },
