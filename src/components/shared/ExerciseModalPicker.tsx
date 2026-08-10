@@ -6,8 +6,8 @@ export type PickerExercise = {
   id: string
   name: string
   primaryMetricType: string
-  categoryId: string | null
-  categoryPath: string | null
+  categoryId: string
+  categoryPath: string
 }
 
 type ExerciseModalPickerProps = {
@@ -25,10 +25,10 @@ export function ExerciseModalPicker({ exercises, selectedId, onClose, onClear, o
   const groupedExercises = useMemo(() => {
     const groups = new Map<string, { category: string; exercises: PickerExercise[] }>()
     for (const exercise of exercises) {
-      const searchable = `${exercise.name} ${exercise.primaryMetricType} ${exercise.categoryPath ?? ''}`.toLocaleLowerCase('es')
+      const searchable = `${exercise.name} ${exercise.primaryMetricType} ${exercise.categoryPath}`.toLocaleLowerCase('es')
       if (normalizedQuery && !searchable.includes(normalizedQuery)) continue
-      const categoryId = exercise.categoryId ?? 'uncategorized'
-      const group = groups.get(categoryId) ?? { category: exercise.categoryPath ?? 'Sin categoría', exercises: [] }
+      const categoryId = exercise.categoryId
+      const group = groups.get(categoryId) ?? { category: exercise.categoryPath, exercises: [] }
       group.exercises.push(exercise)
       groups.set(categoryId, group)
     }
@@ -38,11 +38,7 @@ export function ExerciseModalPicker({ exercises, selectedId, onClose, onClear, o
         category: group.category,
         exercises: [...group.exercises].sort((a, b) => a.name.localeCompare(b.name, 'es') || a.id.localeCompare(b.id)),
       }))
-      .sort((a, b) => {
-        if (a.category === 'Sin categoría') return 1
-        if (b.category === 'Sin categoría') return -1
-        return a.category.localeCompare(b.category, 'es') || a.categoryId.localeCompare(b.categoryId)
-      })
+      .sort((a, b) => a.category.localeCompare(b.category, 'es') || a.categoryId.localeCompare(b.categoryId))
   }, [exercises, normalizedQuery])
 
   useEffect(() => {

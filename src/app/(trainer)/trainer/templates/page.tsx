@@ -27,9 +27,6 @@ export default async function TrainerTemplatesPage({ searchParams }: TrainerTemp
             <Link className="button button-primary" href="/trainer/templates/new">
               Nueva plantilla
             </Link>
-            <Link className="button button-secondary" href="/trainer">
-              Volver al dashboard
-            </Link>
           </>
         }
       />

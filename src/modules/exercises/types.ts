@@ -6,8 +6,8 @@ export type ExerciseSummary = {
   description?: string | null
   primaryMetricType: ExerciseMetricType
   hasVideo: boolean
-  categoryId: string | null
-  categoryPath: string | null
+  categoryId: string
+  categoryPath: string
 }
 
 export type ExerciseCategoryNode = {
@@ -38,7 +38,7 @@ export type CreateExerciseInput = {
   primaryMetricType: ExerciseMetricType
   videoUrl?: string
   createdById?: string
-  categoryId?: string | null
+  categoryId: string
 }
 
 export type CreateExerciseResult =

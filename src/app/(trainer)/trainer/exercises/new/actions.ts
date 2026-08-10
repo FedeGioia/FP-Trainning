@@ -27,7 +27,7 @@ export async function createExerciseAction(formData: FormData) {
     primaryMetricType,
     videoUrl,
     createdById: session.user.id,
-    categoryId: categoryId || null,
+    categoryId,
   })
 
   if (!result.ok) {

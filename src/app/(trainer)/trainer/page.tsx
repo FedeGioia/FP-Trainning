@@ -1,5 +1,3 @@
-import Link from 'next/link'
-
 import { StatCard } from '@/components/ui/stat-card'
 import { listExercises } from '@/modules/exercises'
 import { listProgramCatalog } from '@/modules/programs'
@@ -25,14 +23,6 @@ export default async function TrainerDashboardPage() {
           <p className="muted">Gestioná ejercicios, armá plantillas, asigná bloques y revisá el avance de cada alumno.</p>
         </div>
 
-        <div className="workspace-hero__actions">
-          <Link className="button button-primary" href="/trainer/assignments/new">
-            Asignar rutina
-          </Link>
-          <Link className="button button-secondary" href="/trainer/exercises/new">
-            Nuevo ejercicio
-          </Link>
-        </div>
       </section>
 
       <div className="grid cards">
@@ -47,9 +37,6 @@ export default async function TrainerDashboardPage() {
             <h2 className="section-title">Alumnos y membresías</h2>
             <p className="muted">Resumen real de alumnos activos y programas, dejando FP-Home aparte.</p>
           </div>
-          <Link className="pill" href="/trainer/students">
-            Ir a alumnos
-          </Link>
         </div>
 
         <div className="grid cards">

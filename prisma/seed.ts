@@ -542,6 +542,7 @@ async function main() {
   const categories = new Map<string, Awaited<ReturnType<typeof prisma.exerciseCategory.create>>>()
 
   if (trainer) {
+    const uncategorized = await prisma.exerciseCategory.create({ data: { name: 'Sin categoría', createdById: trainer.id } })
     const strength = await prisma.exerciseCategory.create({ data: { name: 'Fuerza', createdById: trainer.id } })
     const upperBody = await prisma.exerciseCategory.create({ data: { name: 'Tren superior', parentId: strength.id, createdById: trainer.id } })
     const lowerBody = await prisma.exerciseCategory.create({ data: { name: 'Tren inferior', parentId: strength.id, createdById: trainer.id } })
@@ -549,6 +550,7 @@ async function main() {
     categories.set('upper-body', upperBody)
     categories.set('lower-body', lowerBody)
     categories.set('conditioning', conditioning)
+    categories.set('uncategorized', uncategorized)
   }
 
   for (const exerciseSeed of exerciseSeeds) {
@@ -565,7 +567,7 @@ async function main() {
             ? categories.get('upper-body')?.id ?? null
             : exerciseSeed.name.includes('Run')
               ? categories.get('conditioning')?.id ?? null
-              : null,
+              : categories.get('uncategorized')!.id,
         media: {
           create: exerciseSeed.media.map((media) => ({
             kind: media.kind,

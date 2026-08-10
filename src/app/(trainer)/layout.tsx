@@ -20,12 +20,28 @@ export default async function TrainerLayout({ children }: Readonly<{ children: R
       role="trainer"
       title="Trainer"
       description="Experiencia desktop-first para alumnos, ejercicios, plantillas y seguimiento."
-      navItems={[
-        { href: '/trainer', label: 'Dashboard' },
-        { href: '/trainer/students', label: 'Alumnos' },
-        { href: '/trainer/exercises', label: 'Ejercicios' },
-        { href: '/trainer/templates', label: 'Plantillas' },
-        { href: '/trainer/assignments', label: 'Asignaciones' },
+      navGroups={[
+        {
+          label: 'Operación',
+          items: [
+            { href: '/trainer', label: 'Dashboard', exact: true },
+            { href: '/trainer/assignments', label: 'Asignaciones' },
+            { href: '/trainer/students', label: 'Alumnos' },
+          ],
+        },
+        {
+          label: 'Biblioteca',
+          items: [
+            { href: '/trainer/exercises', label: 'Ejercicios' },
+            { href: '/trainer/templates', label: 'Plantillas' },
+          ],
+        },
+      ]}
+      quickActions={[
+        { href: '/trainer/students/new', label: 'Nuevo alumno' },
+        { href: '/trainer/assignments/new', label: 'Asignar rutina' },
+        { href: '/trainer/templates/new', label: 'Nueva plantilla' },
+        { href: '/trainer/exercises/new', label: 'Nuevo ejercicio' },
       ]}
     >
       {children}

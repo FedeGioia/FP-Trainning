@@ -11,7 +11,8 @@ import { getWeekDaysFrom, formatLocalDateKey } from '@/lib/date'
 import { createAssignment, createManualAssignment } from '@/modules/assignments/service'
 import { buildManualValidationState, parseOptionalNumber } from '@/app/(trainer)/trainer/assignments/manual/actions'
 import { buildTemplateValidationState } from '@/app/(trainer)/trainer/assignments/new/actions'
-import { buildCategoryTree, normalizeCategoryName } from '@/modules/exercises'
+import { buildCategoryTree, normalizeCategoryName, requireCategoryId } from '@/modules/exercises'
+import { isNavItemActive } from '@/components/layout/role-navigation'
 
 async function test(name: string, fn: () => void | Promise<void>) {
   try {
@@ -84,6 +85,13 @@ await test('getWeekDaysFrom returns a Sunday-to-Saturday range', () => {
   assert.equal(formatLocalDateKey(week[6]), '2026-07-11')
 })
 
+await test('isNavItemActive highlights exact routes and their nested pages only', () => {
+  assert.equal(isNavItemActive('/trainer/assignments/new', '/trainer/assignments'), true)
+  assert.equal(isNavItemActive('/trainer/assignments', '/trainer', true), false)
+  assert.equal(isNavItemActive('/trainer', '/trainer', true), true)
+  assert.equal(isNavItemActive('/trainer', '/'), false)
+})
+
 await test('buildCategoryTree creates nested paths in parent-to-child order', () => {
   const tree = buildCategoryTree([
     { id: 'child', name: 'Tren superior', parentId: 'root' },
@@ -107,6 +115,13 @@ await test('category helpers normalize duplicate names and sort siblings determi
 
   assert.deepEqual(tree.map((category) => category.name), ['Abdominales', 'Zancadas'])
   assert.deepEqual(tree[0]?.children.map((category) => category.name), ['Bíceps', 'Core'])
+})
+
+await test('requireCategoryId rejects missing category assignments', () => {
+  assert.equal(requireCategoryId(undefined), null)
+  assert.equal(requireCategoryId(null), null)
+  assert.equal(requireCategoryId('   '), null)
+  assert.equal(requireCategoryId(' category-1 '), 'category-1')
 })
 
 await test('createAssignment returns stable structured issues for invalid template submissions', async () => {

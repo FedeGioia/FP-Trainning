@@ -27,7 +27,7 @@ export function ExerciseModalPickerTrigger({ exercises, fieldName, initialSelect
       <input name={fieldName} type="hidden" value={selectedId} />
       <button ref={triggerRef} type="button" className={`exercise-picker-trigger${invalid ? ' is-invalid' : ''}`} aria-label={ariaLabel} onClick={() => setIsOpen(true)}>
         <span>{selectedExercise?.name ?? 'Seleccionar ejercicio'}</span>
-        <small>{selectedExercise ? `${selectedExercise.categoryPath ?? 'Sin categoría'} · ${selectedExercise.primaryMetricType}` : 'Abrir catálogo'}</small>
+        <small>{selectedExercise ? `${selectedExercise.categoryPath} · ${selectedExercise.primaryMetricType}` : 'Abrir catálogo'}</small>
       </button>
       {isOpen ? (
         <ExerciseModalPicker

@@ -36,6 +36,12 @@ export default async function TrainerExerciseNewPage({ searchParams }: TrainerEx
         </section>
       ) : null}
 
+      {categories.length === 0 ? (
+        <section className="card stack">
+          <span className="status status--error">No hay categorías disponibles. Creá una categoría antes de cargar un ejercicio.</span>
+          <Link className="button button-primary" href="/trainer/exercises">Ir a gestionar categorías</Link>
+        </section>
+      ) : (
       <form action={createExerciseAction} className="card stack" style={{ gap: '1.25rem' }}>
         <section className="form-panel stack">
           <div className="stack" style={{ gap: '0.25rem' }}>
@@ -52,9 +58,9 @@ export default async function TrainerExerciseNewPage({ searchParams }: TrainerEx
 
             <label className="field">
               <span>Categoría</span>
-              <small>Opcional. Elegí una carpeta para ordenar este ejercicio.</small>
-              <select name="categoryId" defaultValue="">
-                <option value="">Sin categoría</option>
+              <small>Elegí la carpeta donde se va a organizar este ejercicio.</small>
+              <select name="categoryId" required defaultValue="">
+                <option value="" disabled>Elegí una categoría</option>
                 {categories.map((category) => (
                   <option key={category.id} value={category.id}>{category.path}</option>
                 ))}
@@ -119,6 +125,7 @@ export default async function TrainerExerciseNewPage({ searchParams }: TrainerEx
           </Link>
         </div>
       </form>
+      )}
     </div>
   )
 }

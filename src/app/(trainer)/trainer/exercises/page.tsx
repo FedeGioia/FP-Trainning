@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { ExerciseCard } from '@/components/ui/exercise-card'
 import { SectionIntro } from '@/components/ui/section-intro'
 import { StatCard } from '@/components/ui/stat-card'
-import { listCategoryTree, listExercises } from '@/modules/exercises'
+import { BACKFILL_CATEGORY_NAME, listCategoryTree, listExercises } from '@/modules/exercises'
 
 import { createCategoryAction, deleteCategoryAction, updateExerciseCategoryAction } from './actions'
 
@@ -26,13 +26,11 @@ export default async function TrainerExercisesPage({ searchParams }: TrainerExer
   })
   const exercisesByCategory = new Map<string, typeof exercises>()
   for (const exercise of exercises) {
-    const categoryId = exercise.categoryId ?? 'uncategorized'
-    exercisesByCategory.set(categoryId, [...(exercisesByCategory.get(categoryId) ?? []), exercise])
+    exercisesByCategory.set(exercise.categoryId, [...(exercisesByCategory.get(exercise.categoryId) ?? []), exercise])
   }
-  const categoryGroups = [
-    ...categories.map((category) => ({ id: category.id, path: category.path, exercises: exercisesByCategory.get(category.id) ?? [] })),
-    { id: 'uncategorized', path: 'Sin categoría', exercises: exercisesByCategory.get('uncategorized') ?? [] },
-  ].filter((category) => category.exercises.length > 0)
+  const categoryGroups = categories
+    .map((category) => ({ id: category.id, path: category.path, exercises: exercisesByCategory.get(category.id) ?? [] }))
+    .filter((category) => category.exercises.length > 0)
 
   return (
     <div className="stack">
@@ -45,16 +43,13 @@ export default async function TrainerExercisesPage({ searchParams }: TrainerExer
             <Link className="button button-primary" href="/trainer/exercises/new">
               Nuevo ejercicio
             </Link>
-            <Link className="button button-secondary" href="/trainer">
-              Volver al dashboard
-            </Link>
           </>
         }
       />
 
       {params.created ? <span className="status status--ok">Ejercicio creado correctamente.</span> : null}
       {params.categoryCreated ? <span className="status status--ok">Categoría creada correctamente.</span> : null}
-      {params.categoryDeleted ? <span className="status status--ok">Categoría eliminada; sus ejercicios quedaron sin categoría.</span> : null}
+      {params.categoryDeleted ? <span className="status status--ok">Categoría eliminada; sus ejercicios se reasignaron a Sin categoría.</span> : null}
       {params.exerciseCategoryUpdated ? <span className="status status--ok">Categoría del ejercicio actualizada.</span> : null}
       {params.categoryError ? <span className="status status--error">{decodeURIComponent(params.categoryError)}</span> : null}
 
@@ -68,7 +63,7 @@ export default async function TrainerExercisesPage({ searchParams }: TrainerExer
         <div className="section-header">
           <div>
             <h2 className="section-title">Carpetas de categorías</h2>
-            <p className="muted">Creá carpetas raíz o elegí una existente como padre para anidarlas.</p>
+            <p className="muted">Creá carpetas raíz o elegí una existente como padre para anidarlas. Sin categoría es la carpeta obligatoria de respaldo.</p>
           </div>
         </div>
         <form action={createCategoryAction} className="form-grid">
@@ -86,7 +81,7 @@ export default async function TrainerExercisesPage({ searchParams }: TrainerExer
           <button className="button button-primary" type="submit">Crear categoría</button>
         </form>
         {categories.length === 0 ? (
-          <p className="status status--muted">Todavía no hay categorías. Los ejercicios sin carpeta siguen disponibles.</p>
+          <p className="status status--muted">Todavía no hay categorías. Creá una antes de cargar ejercicios.</p>
         ) : (
           <ul className="category-tree">
             {categories.map((category) => (
@@ -102,10 +97,14 @@ export default async function TrainerExercisesPage({ searchParams }: TrainerExer
                     </form>
                   </details>
                 </div>
-                <form action={deleteCategoryAction}>
-                  <input name="categoryId" type="hidden" value={category.id} />
-                  <button className="button button-secondary category-tree__delete" type="submit">Eliminar</button>
-                </form>
+                {category.name === BACKFILL_CATEGORY_NAME && category.parentId === null ? (
+                  <span className="status status--muted">Categoría de respaldo obligatoria</span>
+                ) : (
+                  <form action={deleteCategoryAction}>
+                    <input name="categoryId" type="hidden" value={category.id} />
+                    <button className="button button-secondary category-tree__delete" type="submit">Eliminar</button>
+                  </form>
+                )}
               </li>
             ))}
           </ul>
@@ -131,8 +130,7 @@ export default async function TrainerExercisesPage({ searchParams }: TrainerExer
                     <input name="exerciseId" type="hidden" value={exercise.id} />
                     <label>
                       <span className="sr-only">Categoría para {exercise.name}</span>
-                      <select name="categoryId" defaultValue={exercise.categoryId ?? ''}>
-                        <option value="">Sin categoría</option>
+                      <select name="categoryId" required defaultValue={exercise.categoryId}>
                         {categories.map((category) => <option key={category.id} value={category.id}>{category.path}</option>)}
                       </select>
                     </label>

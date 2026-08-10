@@ -15,7 +15,7 @@ export function ExerciseCard({ exercise }: ExerciseCardProps) {
       <p className="muted">{exercise.description ?? 'Sin descripción todavía.'}</p>
 
       <div className="role-nav">
-        <span className="status status--muted">{exercise.categoryPath ?? 'Sin categoría'}</span>
+        <span className="status status--muted">{exercise.categoryPath}</span>
         <span className={exercise.hasVideo ? 'status status--ok' : 'status status--muted'}>
           {exercise.hasVideo ? 'Con video' : 'Sin video'}
         </span>

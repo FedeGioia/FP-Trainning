@@ -1,23 +1,21 @@
-import Link from 'next/link'
 import type { ReactNode } from 'react'
 
 import { auth } from '@/auth'
 import { SignOutForm } from '@/components/auth/sign-out-form'
-
-type NavItem = {
-  href: string
-  label: string
-}
+import { RoleNavigation } from '@/components/layout/role-navigation'
+import type { RoleNavGroup, RoleNavItem } from '@/components/layout/role-navigation'
 
 type RoleShellProps = {
   role: 'admin' | 'trainer' | 'student'
   title: string
   description: string
-  navItems: NavItem[]
+  navItems?: RoleNavItem[]
+  navGroups?: RoleNavGroup[]
+  quickActions?: RoleNavItem[]
   children: ReactNode
 }
 
-export async function RoleShell({ role, title, description, navItems, children }: RoleShellProps) {
+export async function RoleShell({ role, title, description, navItems, navGroups, quickActions, children }: RoleShellProps) {
   const session = await auth()
 
   return (
@@ -47,16 +45,7 @@ export async function RoleShell({ role, title, description, navItems, children }
                 <span className="muted">Navegación</span>
                 <SignOutForm />
               </div>
-              <nav className="role-nav" aria-label={`Navegación ${role}`}>
-                <Link className="pill" href="/">
-                  Inicio
-                </Link>
-                {navItems.map((item) => (
-                  <Link key={item.href} className="pill" href={item.href}>
-                    {item.label}
-                  </Link>
-                ))}
-              </nav>
+              <RoleNavigation role={role} navItems={navItems} navGroups={navGroups} quickActions={quickActions} />
             </div>
           </div>
         </header>

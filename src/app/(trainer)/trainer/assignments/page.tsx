@@ -30,9 +30,6 @@ export default async function TrainerAssignmentsPage({ searchParams }: TrainerAs
             <Link className="button button-secondary" href="/trainer/assignments/manual">
               Rutina manual
             </Link>
-            <Link className="button button-secondary" href="/trainer">
-              Volver al dashboard
-            </Link>
           </>
         }
       />

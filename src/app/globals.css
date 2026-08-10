@@ -243,6 +243,25 @@ summary:focus-visible {
   flex-wrap: wrap;
 }
 
+.role-nav-groups {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.role-nav-group,
+.role-quick-actions {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.role-nav-group__label {
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .pill {
   display: inline-flex;
   align-items: center;
@@ -881,6 +900,22 @@ summary:focus-visible {
 
 .student-modal__actions {
   align-items: center;
+}
+
+.pill.is-active {
+  border-color: rgba(31, 111, 255, 0.34);
+  background: rgba(31, 111, 255, 0.12);
+  color: var(--primary-strong);
+  font-weight: 700;
+}
+
+.role-quick-actions {
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--border);
+}
+
+.role-quick-action {
+  color: var(--primary-strong);
 }
 
 .sr-only {

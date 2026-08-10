@@ -197,12 +197,12 @@ model Exercise {
   primaryMetricType MetricType
   active            Boolean    @default(true)
   createdById       String?
-  categoryId        String?
+  categoryId        String
   createdAt         DateTime   @default(now())
   updatedAt         DateTime   @updatedAt
 
   createdBy User? @relation("ExerciseCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
-  category  ExerciseCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  category  ExerciseCategory  @relation(fields: [categoryId], references: [id], onDelete: Restrict)
 
   media             ExerciseMedia[]
   templateExercises RoutineTemplateExercise[]

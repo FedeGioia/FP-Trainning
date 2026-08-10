@@ -14,8 +14,29 @@ import type {
 
 type CategoryRecord = { id: string; name: string; parentId: string | null }
 
+export const BACKFILL_CATEGORY_NAME = 'Sin categoría'
+
 export function normalizeCategoryName(name: string) {
   return name.trim().normalize('NFC').toLocaleLowerCase('es')
+}
+
+export function requireCategoryId(categoryId: string | null | undefined): string | null {
+  const normalizedCategoryId = categoryId?.trim()
+  return normalizedCategoryId || null
+}
+
+async function getBackfillCategoryId(): Promise<string> {
+  const category = await db.exerciseCategory.findFirst({
+    where: { name: BACKFILL_CATEGORY_NAME, parentId: null },
+    select: { id: true },
+  })
+  if (category) return category.id
+
+  const created = await db.exerciseCategory.create({
+    data: { name: BACKFILL_CATEGORY_NAME, parentId: null },
+    select: { id: true },
+  })
+  return created.id
 }
 
 export function buildCategoryTree(categories: CategoryRecord[]): ExerciseCategoryNode[] {
@@ -97,13 +118,18 @@ export async function deleteCategory(id: string): Promise<DeleteCategoryResult> 
   try {
     const category = await db.exerciseCategory.findUnique({
       where: { id },
-      select: { id: true, _count: { select: { children: true } } },
+      select: { id: true, name: true, parentId: true, _count: { select: { children: true } } },
     })
     if (!category) return { ok: false, message: 'La categoría no existe.' }
+    if (category.name === BACKFILL_CATEGORY_NAME && category.parentId === null) {
+      return { ok: false, message: 'No podés eliminar la categoría obligatoria Sin categoría.' }
+    }
     if (category._count.children > 0) return { ok: false, message: 'No podés eliminar una categoría que tiene subcategorías.' }
 
+    const backfillCategoryId = await getBackfillCategoryId()
+
     await db.$transaction([
-      db.exercise.updateMany({ where: { categoryId: id }, data: { categoryId: null } }),
+      db.exercise.updateMany({ where: { categoryId: id }, data: { categoryId: backfillCategoryId } }),
       db.exerciseCategory.delete({ where: { id } }),
     ])
     return { ok: true }
@@ -112,16 +138,17 @@ export async function deleteCategory(id: string): Promise<DeleteCategoryResult> 
   }
 }
 
-export async function updateExerciseCategory(exerciseId: string, categoryId?: string | null): Promise<DeleteCategoryResult> {
+export async function updateExerciseCategory(exerciseId: string, categoryId: string | null | undefined): Promise<DeleteCategoryResult> {
+  const requiredCategoryId = requireCategoryId(categoryId)
+  if (!requiredCategoryId) return { ok: false, message: 'Tenés que elegir una categoría.' }
+
   try {
-    if (categoryId) {
-      const category = await db.exerciseCategory.findUnique({ where: { id: categoryId }, select: { id: true } })
-      if (!category) return { ok: false, message: 'La categoría elegida ya no existe.' }
-    }
+    const category = await db.exerciseCategory.findUnique({ where: { id: requiredCategoryId }, select: { id: true } })
+    if (!category) return { ok: false, message: 'La categoría elegida ya no existe.' }
 
     const exercise = await db.exercise.updateMany({
       where: { id: exerciseId },
-      data: { categoryId: categoryId || null },
+      data: { categoryId: requiredCategoryId },
     })
     if (exercise.count === 0) return { ok: false, message: 'El ejercicio no existe.' }
     return { ok: true }
@@ -140,19 +167,26 @@ export async function listExercisesWithCategoryPaths(): Promise<ExerciseSummary[
       }),
       listCategoryTree(),
     ])
-    const paths = new Map(flattenCategoryTree(tree).map((category) => [category.id, category.path]))
-    const categoryOrder = new Map(flattenCategoryTree(tree).map((category, index) => [category.id, index]))
-    return exercises.map((exercise) => ({
-      id: exercise.id,
-      name: exercise.name,
-      description: exercise.description,
-      primaryMetricType: exercise.primaryMetricType,
-      hasVideo: exercise.media.length > 0,
-      categoryId: exercise.categoryId,
-      categoryPath: exercise.categoryId ? paths.get(exercise.categoryId) ?? null : null,
-    })).sort((a, b) => {
-      const categoryComparison = (categoryOrder.get(a.categoryId ?? '') ?? Number.MAX_SAFE_INTEGER)
-        - (categoryOrder.get(b.categoryId ?? '') ?? Number.MAX_SAFE_INTEGER)
+    const categories = flattenCategoryTree(tree)
+    const paths = new Map(categories.map((category) => [category.id, category.path]))
+    const categoryOrder = new Map(categories.map((category, index) => [category.id, index]))
+    const backfillCategoryId = categories.find((category) => category.name === BACKFILL_CATEGORY_NAME && category.parentId === null)?.id
+    return exercises.flatMap((exercise) => {
+      const categoryId = exercise.categoryId ?? backfillCategoryId
+      if (!categoryId) return []
+
+      return [{
+        id: exercise.id,
+        name: exercise.name,
+        description: exercise.description,
+        primaryMetricType: exercise.primaryMetricType,
+        hasVideo: exercise.media.length > 0,
+        categoryId,
+        categoryPath: paths.get(categoryId) ?? BACKFILL_CATEGORY_NAME,
+      }]
+    }).sort((a, b) => {
+      const categoryComparison = (categoryOrder.get(a.categoryId) ?? Number.MAX_SAFE_INTEGER)
+        - (categoryOrder.get(b.categoryId) ?? Number.MAX_SAFE_INTEGER)
       return categoryComparison || a.name.localeCompare(b.name, 'es') || a.id.localeCompare(b.id)
     })
   } catch {
@@ -166,6 +200,7 @@ export function isValidMetricType(value: string): value is ExerciseMetricType {
 
 export async function createExercise(input: CreateExerciseInput): Promise<CreateExerciseResult> {
   const name = input.name.trim()
+  const categoryId = requireCategoryId(input.categoryId)
 
   if (!name) {
     return { ok: false, message: 'El nombre del ejercicio es obligatorio.' }
@@ -175,18 +210,20 @@ export async function createExercise(input: CreateExerciseInput): Promise<Create
     return { ok: false, message: 'El tipo de métrica no es válido.' }
   }
 
+  if (!categoryId) {
+    return { ok: false, message: 'Tenés que elegir una categoría.' }
+  }
+
   try {
-    if (input.categoryId) {
-      const category = await db.exerciseCategory.findUnique({ where: { id: input.categoryId } })
-      if (!category) return { ok: false, message: 'La categoría elegida ya no existe.' }
-    }
+    const category = await db.exerciseCategory.findUnique({ where: { id: categoryId } })
+    if (!category) return { ok: false, message: 'La categoría elegida ya no existe.' }
     const exercise = await db.exercise.create({
       data: {
         name,
         description: input.description?.trim() || null,
         primaryMetricType: input.primaryMetricType,
         createdById: input.createdById ?? null,
-        categoryId: input.categoryId || null,
+        categoryId,
         media: input.videoUrl?.trim()
           ? {
               create: {

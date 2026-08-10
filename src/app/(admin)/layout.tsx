@@ -21,7 +21,7 @@ export default async function AdminLayout({ children }: Readonly<{ children: Rea
       title="Admin"
       description="Gestión operativa global de usuarios, programas y catálogo base."
       navItems={[
-        { href: '/admin', label: 'Dashboard' },
+        { href: '/admin', label: 'Dashboard', exact: true },
         { href: '/admin/users', label: 'Usuarios' },
         { href: '/admin/programs', label: 'Programas' },
       ]}

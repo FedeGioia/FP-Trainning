@@ -43,7 +43,7 @@ export async function updateExerciseCategoryAction(formData: FormData) {
   await requireTrainer()
   const result = await updateExerciseCategory(
     String(formData.get('exerciseId') ?? ''),
-    String(formData.get('categoryId') ?? '') || null,
+    String(formData.get('categoryId') ?? ''),
   )
   if (!result.ok) redirect(`/trainer/exercises?categoryError=${encodeURIComponent(result.message)}`)
   revalidatePath('/trainer/exercises')

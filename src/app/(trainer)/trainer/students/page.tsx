@@ -30,9 +30,6 @@ export default async function TrainerStudentsPage({ searchParams }: TrainerStude
             <Link className="button button-primary" href="/trainer/students/new">
               Nuevo alumno
             </Link>
-            <Link className="button button-secondary" href="/trainer">
-              Volver al dashboard
-            </Link>
           </>
         }
       />
