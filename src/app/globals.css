@@ -543,6 +543,7 @@ summary:focus-visible {
 .trainer-dashboard {
   gap: 1rem;
   max-width: 1080px;
+  margin: 0 auto;
 }
 
 .trainer-dashboard__intro,
