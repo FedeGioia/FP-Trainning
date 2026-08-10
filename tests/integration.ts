@@ -8,6 +8,7 @@ type Fixture = {
   trainerOtherId: string
   studentOwnerId: string
   studentOtherId: string
+  categoryId: string
   exerciseId: string
   assignmentId: string
   assignmentExerciseId: string
@@ -92,12 +93,20 @@ async function seedFixture(
     },
   })
 
+  const category = await db.exerciseCategory.create({
+    data: {
+      name: `Pecho ${suffix}`,
+      createdById: trainerOwner.id,
+    },
+  })
+
   const exercise = await db.exercise.create({
     data: {
       name: `Press banca ${suffix}`,
       description: 'Fixture integration',
       primaryMetricType: 'STRENGTH',
       createdById: trainerOwner.id,
+      categoryId: category.id,
     },
   })
 
@@ -152,6 +161,7 @@ async function seedFixture(
     trainerOtherId: trainerOther.id,
     studentOwnerId: studentOwner.id,
     studentOtherId: studentOther.id,
+    categoryId: category.id,
     exerciseId: exercise.id,
     assignmentId: assignment.assignmentId,
     assignmentExerciseId,
@@ -173,6 +183,10 @@ async function cleanupFixture(db: DbClient, fixture: Fixture) {
 
   await db.exercise.deleteMany({
     where: { id: fixture.exerciseId },
+  })
+
+  await db.exerciseCategory.deleteMany({
+    where: { id: fixture.categoryId },
   })
 
   await db.studentProgramMembership.deleteMany({

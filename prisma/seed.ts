@@ -556,17 +556,17 @@ async function main() {
   const trainer = createdUsers.get('trainer@fptraining.local')
   const categories = new Map<string, Awaited<ReturnType<typeof prisma.exerciseCategory.create>>>()
 
-  if (trainer) {
-    const uncategorized = await prisma.exerciseCategory.create({ data: { name: 'Sin categoría', createdById: trainer.id } })
-    const strength = await prisma.exerciseCategory.create({ data: { name: 'Fuerza', createdById: trainer.id } })
-    const upperBody = await prisma.exerciseCategory.create({ data: { name: 'Tren superior', parentId: strength.id, createdById: trainer.id } })
-    const lowerBody = await prisma.exerciseCategory.create({ data: { name: 'Tren inferior', parentId: strength.id, createdById: trainer.id } })
-    const conditioning = await prisma.exerciseCategory.create({ data: { name: 'Acondicionamiento', createdById: trainer.id } })
-    categories.set('upper-body', upperBody)
-    categories.set('lower-body', lowerBody)
-    categories.set('conditioning', conditioning)
-    categories.set('uncategorized', uncategorized)
-  }
+  if (!trainer) throw new Error('No se encontró el entrenador de demo para crear las categorías.')
+
+  const uncategorized = await prisma.exerciseCategory.create({ data: { name: 'Sin categoría', createdById: trainer.id } })
+  const strength = await prisma.exerciseCategory.create({ data: { name: 'Fuerza', createdById: trainer.id } })
+  const upperBody = await prisma.exerciseCategory.create({ data: { name: 'Tren superior', parentId: strength.id, createdById: trainer.id } })
+  const lowerBody = await prisma.exerciseCategory.create({ data: { name: 'Tren inferior', parentId: strength.id, createdById: trainer.id } })
+  const conditioning = await prisma.exerciseCategory.create({ data: { name: 'Acondicionamiento', createdById: trainer.id } })
+  categories.set('upper-body', upperBody)
+  categories.set('lower-body', lowerBody)
+  categories.set('conditioning', conditioning)
+  categories.set('uncategorized', uncategorized)
 
   for (const exerciseSeed of exerciseSeeds) {
     const created = await prisma.exercise.create({
@@ -577,11 +577,11 @@ async function main() {
         active: true,
         createdById: trainer?.id ?? null,
         categoryId: exerciseSeed.name === 'Squat'
-          ? categories.get('lower-body')?.id ?? null
+          ? categories.get('lower-body')!.id
           : exerciseSeed.name === 'Push-up' || exerciseSeed.name === 'Row'
-            ? categories.get('upper-body')?.id ?? null
+            ? categories.get('upper-body')!.id
             : exerciseSeed.name.includes('Run')
-              ? categories.get('conditioning')?.id ?? null
+              ? categories.get('conditioning')!.id
               : categories.get('uncategorized')!.id,
         media: {
           create: exerciseSeed.media.map((media) => ({
