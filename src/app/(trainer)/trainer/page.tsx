@@ -2,14 +2,7 @@ import Link from 'next/link'
 
 import { listAssignments } from '@/modules/assignments'
 import { listStudents } from '@/modules/users'
-
-const statusLabel = {
-  PLANNED: 'Por iniciar',
-  IN_PROGRESS: 'En curso',
-  COMPLETED: 'Completada',
-  PARTIAL: 'Parcial',
-  CANCELLED: 'Cancelada',
-} as const
+import { getWeekDaysFrom } from '@/lib/date'
 
 function formatAssignmentDate(scheduledAt: string) {
   return new Intl.DateTimeFormat('es-AR', {
@@ -25,33 +18,44 @@ export default async function TrainerDashboardPage() {
   const [assignments, students] = await Promise.all([listAssignments(), listStudents()])
   const now = new Date()
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const weekDays = getWeekDaysFrom(now)
+  const weekStart = weekDays[0] ?? today
+  const weekEnd = weekDays[6] ?? today
+  weekEnd.setHours(23, 59, 59, 999)
   const planned = assignments.filter((assignment) => assignment.status === 'PLANNED')
-  const needsAttention = assignments.filter(
-    (assignment) => assignment.status === 'IN_PROGRESS' || (assignment.status === 'PLANNED' && new Date(assignment.scheduledAt) < today),
+  const isThisWeek = (scheduledAt: string) => {
+    const date = new Date(scheduledAt)
+    return date >= weekStart && date <= weekEnd
+  }
+  const overdue = planned.filter((assignment) => new Date(assignment.scheduledAt) < today)
+  const inProgress = assignments.filter((assignment) => assignment.status === 'IN_PROGRESS')
+  const thisWeekAssignments = assignments.filter(
+    (assignment) => assignment.status !== 'CANCELLED' && isThisWeek(assignment.scheduledAt),
   )
-  const upcoming = planned.filter((assignment) => new Date(assignment.scheduledAt) >= today).slice(0, 4)
-  const workQueue = needsAttention.slice(0, 3)
+  const studentsWithoutRoutine = students.filter(
+    (student) => !thisWeekAssignments.some((assignment) => assignment.studentId === student.id),
+  )
+  const upcoming = planned.filter((assignment) => {
+    const scheduledAt = new Date(assignment.scheduledAt)
+    return scheduledAt >= today && scheduledAt <= weekEnd
+  }).slice(0, 4)
+  const workQueue = [
+    ...overdue.map((assignment) => ({ assignment, signal: 'Vencida' })),
+    ...inProgress.map((assignment) => ({ assignment, signal: 'En curso' })),
+  ].slice(0, 4)
 
   return (
     <div className="trainer-dashboard stack">
       <section className="trainer-dashboard__intro">
         <div>
           <span className="eyebrow">Operación diaria</span>
-          <h1>Todo listo para avanzar</h1>
-          <p>Priorizá las rutinas que requieren seguimiento y organizá lo próximo.</p>
+          <h1>Resumen operativo</h1>
+          <p>Seguimiento de la semana y próximos entrenamientos.</p>
         </div>
-        <Link className="button button-primary" href="/trainer/assignments/new">
-          Asignar rutina
-        </Link>
       </section>
 
       <section className="trainer-dashboard__overview" aria-label="Resumen de operación">
         <div className="trainer-dashboard__actions">
-          <Link className="trainer-dashboard__action trainer-dashboard__action--primary" href="/trainer/assignments/new">
-            <span>Planificar</span>
-            <strong>Asignar una rutina</strong>
-            <small>Desde una plantilla existente</small>
-          </Link>
           <Link className="trainer-dashboard__action" href="/trainer/students/new">
             <span>Alumnos</span>
             <strong>Nuevo alumno</strong>
@@ -66,25 +70,33 @@ export default async function TrainerDashboardPage() {
 
         <div className="trainer-dashboard__metrics">
           <article className="trainer-dashboard__metric">
-            <span>Alumnos activos</span>
+            <span>Alumnos</span>
             <strong>{students.length}</strong>
           </article>
-          <article className="trainer-dashboard__metric">
-            <span>Por iniciar</span>
-            <strong>{planned.length}</strong>
+          <article className="trainer-dashboard__metric trainer-dashboard__metric--attention">
+            <span>Sin rutina esta semana</span>
+            <strong>{studentsWithoutRoutine.length}</strong>
           </article>
           <article className="trainer-dashboard__metric trainer-dashboard__metric--attention">
-            <span>Requieren atención</span>
-            <strong>{needsAttention.length}</strong>
+            <span>Vencidas sin iniciar</span>
+            <strong>{overdue.length}</strong>
+          </article>
+          <article className="trainer-dashboard__metric">
+            <span>En curso</span>
+            <strong>{inProgress.length}</strong>
+          </article>
+          <article className="trainer-dashboard__metric">
+            <span>Próximas esta semana</span>
+            <strong>{upcoming.length}</strong>
           </article>
         </div>
       </section>
 
-      <section className="trainer-dashboard__work" aria-label="Trabajo pendiente">
+      <section className="trainer-dashboard__work" aria-label="Seguimiento operativo">
         <div className="trainer-dashboard__section-heading">
           <div>
-            <span className="eyebrow">Para revisar</span>
-            <h2>Tu foco ahora</h2>
+            <span className="eyebrow">Seguimiento</span>
+            <h2>Vencidas y en curso</h2>
           </div>
           <Link className="pill" href="/trainer/assignments">
             Ver agenda completa
@@ -93,10 +105,10 @@ export default async function TrainerDashboardPage() {
 
         {workQueue.length > 0 ? (
           <div className="trainer-dashboard__queue">
-            {workQueue.map((assignment) => (
+            {workQueue.map(({ assignment, signal }) => (
               <Link className="trainer-dashboard__assignment" href={`/trainer/assignments/${assignment.id}`} key={assignment.id}>
                 <div className="trainer-dashboard__assignment-main">
-                  <span className="trainer-dashboard__assignment-status">{statusLabel[assignment.status]}</span>
+                  <span className="trainer-dashboard__assignment-status">{signal}</span>
                   <strong>{assignment.title}</strong>
                   <span>{assignment.studentName}</span>
                 </div>
@@ -109,15 +121,15 @@ export default async function TrainerDashboardPage() {
           </div>
         ) : (
           <div className="trainer-dashboard__empty">
-            <strong>No hay rutinas que requieran seguimiento ahora.</strong>
-            <span>Podés preparar próximas asignaciones o revisar la agenda.</span>
+            <strong>No hay rutinas vencidas ni en curso.</strong>
+            <span>La operación está al día.</span>
           </div>
         )}
 
         <div className="trainer-dashboard__section-heading trainer-dashboard__section-heading--upcoming">
           <div>
-            <h2>Próximas asignaciones</h2>
-            <p>Rutinas programadas para empezar.</p>
+            <h2>Próximas de la semana</h2>
+            <p>Incluye las rutinas de hoy y mañana.</p>
           </div>
         </div>
 
@@ -135,7 +147,7 @@ export default async function TrainerDashboardPage() {
           </div>
         ) : (
           <div className="trainer-dashboard__empty trainer-dashboard__empty--compact">
-            <span>No hay rutinas próximas. Creá una asignación para organizar la semana.</span>
+            <span>No hay rutinas programadas para lo que queda de la semana.</span>
           </div>
         )}
       </section>
