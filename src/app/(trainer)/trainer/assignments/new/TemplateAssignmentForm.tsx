@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useState } from 'react'
 
 import { createAssignmentAction } from './actions'
 import type { TemplateValidationState } from '@/modules/assignments/types'
@@ -16,7 +16,8 @@ export function TemplateAssignmentForm({ students, templates, initialStudentId =
   const [state, formAction] = useActionState(createAssignmentAction, initialState ?? null)
   const values = state ?? initialState
   const errors = new Map(values?.issues.map((issue) => [issue.path, issue.message]))
-  const studentId = values?.studentId ?? initialStudentId
+  const [studentId, setStudentId] = useState(values?.studentId ?? initialStudentId)
+  const [templateId, setTemplateId] = useState(values?.templateId ?? '')
   const selectedStudent = students.find((student) => student.id === studentId)
   const filteredTemplates = selectedStudent
     ? templates.filter((template) => selectedStudent.programCodes.includes(template.programCode))
@@ -30,7 +31,7 @@ export function TemplateAssignmentForm({ students, templates, initialStudentId =
       <div className="form-grid">
         <label className="field">
           <span>Alumno</span>
-            <select name="studentId" defaultValue={studentId} aria-invalid={Boolean(errors.get('studentId'))} aria-describedby={errors.get('studentId') ? 'studentId-error' : undefined}>
+            <select name="studentId" value={studentId} onChange={(event) => { setStudentId(event.target.value); setTemplateId('') }} aria-invalid={Boolean(errors.get('studentId'))} aria-describedby={errors.get('studentId') ? 'studentId-error' : undefined}>
             <option value="" disabled>Elegí un alumno</option>
             {students.map((student) => <option key={student.id} value={student.id}>{student.name} — {student.programCodes.join(', ')}</option>)}
           </select>
@@ -39,7 +40,7 @@ export function TemplateAssignmentForm({ students, templates, initialStudentId =
 
         <label className="field">
           <span>Template</span>
-          <select name="templateId" defaultValue={values?.templateId ?? ''} aria-invalid={Boolean(errors.get('templateId'))} aria-describedby={errors.get('templateId') ? 'templateId-error' : undefined}>
+          <select name="templateId" value={templateId} onChange={(event) => setTemplateId(event.target.value)} aria-invalid={Boolean(errors.get('templateId'))} aria-describedby={errors.get('templateId') ? 'templateId-error' : undefined}>
             <option value="" disabled>Elegí una plantilla</option>
             {filteredTemplates.map((template) => <option key={template.id} value={template.id}>{template.name} — {template.programCode}</option>)}
           </select>

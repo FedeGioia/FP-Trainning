@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useState } from 'react'
 
 import { ExercisePrescriptionGrid } from '@/components/shared/ExercisePrescriptionGrid'
 import type { ManualValidationState } from '@/modules/assignments/types'
@@ -25,13 +25,36 @@ function fieldErrorsForSection(state: ManualValidationState | undefined, section
   )
 }
 
+function sectionsFromState(state: ManualValidationState | undefined) {
+  return Array.from({ length: SECTION_SLOTS }, (_, sectionIndex) => state?.sections[sectionIndex] ?? { title: '', exercises: [] })
+}
+
 export function ManualAssignmentForm({ students, programs, exercises, categories, initialStudentId = '', initialState }: ManualAssignmentFormProps) {
   const [state, formAction] = useActionState(createManualAssignmentAction, initialState ?? null)
   const values = state ?? initialState
   const errors = new Map(values?.issues.map((issue) => [issue.path, issue.message]))
-  const studentId = values?.studentId ?? initialStudentId
+  const [studentId, setStudentId] = useState(values?.studentId ?? initialStudentId)
+  const [programId, setProgramId] = useState(values?.programId ?? '')
+  const [scheduledAt, setScheduledAt] = useState(values?.scheduledAt ?? '')
+  const [title, setTitle] = useState(values?.title ?? '')
+  const [notes, setNotes] = useState(values?.notes ?? '')
+  const [sections, setSections] = useState(() => sectionsFromState(values))
+  const [previousValues, setPreviousValues] = useState(values)
+  const [previousInitialStudentId, setPreviousInitialStudentId] = useState(initialStudentId)
+
+  if (values !== previousValues || initialStudentId !== previousInitialStudentId) {
+    setPreviousValues(values)
+    setPreviousInitialStudentId(initialStudentId)
+    setStudentId(values?.studentId ?? initialStudentId)
+    setProgramId(values?.programId ?? '')
+    setScheduledAt(values?.scheduledAt ?? '')
+    setTitle(values?.title ?? '')
+    setNotes(values?.notes ?? '')
+    setSections(sectionsFromState(values))
+  }
+
   const selectedStudent = students.find((student) => student.id === studentId)
-  const programOptions = selectedStudent ? programs.filter((program) => selectedStudent.programCodes.includes(program.code)) : programs
+  const programOptions = selectedStudent ? programs.filter((program) => selectedStudent.programCodes.includes(program.code)) : []
 
   return (
     <form action={formAction} className="card stack">
@@ -40,7 +63,7 @@ export function ManualAssignmentForm({ students, programs, exercises, categories
         <div className="form-grid">
           <label className="field">
             <span>Alumno</span><small>Solo aparecen alumnos ya cargados en la plataforma.</small>
-            <select name="studentId" defaultValue={studentId} aria-invalid={Boolean(errors.get('studentId'))}>
+            <select name="studentId" value={studentId} onChange={(event) => { setStudentId(event.target.value); setProgramId('') }} aria-invalid={Boolean(errors.get('studentId'))}>
               <option value="" disabled>Elegí un alumno</option>
               {students.map((student) => <option key={student.id} value={student.id}>{student.name} — {student.programCodes.join(', ')}</option>)}
             </select>
@@ -48,7 +71,7 @@ export function ManualAssignmentForm({ students, programs, exercises, categories
           </label>
           <label className="field">
             <span>Programa</span><small>La rutina se guarda asociada a uno de los programas del alumno.</small>
-            <select name="programId" defaultValue={values?.programId ?? ''} aria-invalid={Boolean(errors.get('programId'))}>
+            <select name="programId" value={programId} onChange={(event) => setProgramId(event.target.value)} disabled={!selectedStudent} aria-invalid={Boolean(errors.get('programId'))}>
               <option value="" disabled>Elegí un programa</option>
               {programOptions.map((program) => <option key={program.id} value={program.id}>{program.name}</option>)}
             </select>
@@ -56,14 +79,14 @@ export function ManualAssignmentForm({ students, programs, exercises, categories
           </label>
         </div>
         <div className="form-grid">
-          <label className="field"><span>Fecha y hora</span><input name="scheduledAt" type="datetime-local" required defaultValue={values?.scheduledAt ?? ''} aria-invalid={Boolean(errors.get('scheduledAt'))} />{errors.get('scheduledAt') ? <small className="field-error">{errors.get('scheduledAt')}</small> : null}</label>
-          <label className="field"><span>Título opcional</span><input name="title" type="text" defaultValue={values?.title ?? ''} placeholder="Ej: Empuje técnico + accesorios" /></label>
+          <label className="field"><span>Fecha y hora</span><input name="scheduledAt" type="datetime-local" required value={scheduledAt} onChange={(event) => setScheduledAt(event.target.value)} aria-invalid={Boolean(errors.get('scheduledAt'))} />{errors.get('scheduledAt') ? <small className="field-error">{errors.get('scheduledAt')}</small> : null}</label>
+          <label className="field"><span>Título opcional</span><input name="title" type="text" value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Ej: Empuje técnico + accesorios" /></label>
         </div>
-        <label className="field"><span>Notas generales</span><textarea name="notes" rows={4} defaultValue={values?.notes ?? ''} placeholder="Contexto del día, foco de la sesión o indicaciones para el alumno." /></label>
+        <label className="field"><span>Notas generales</span><textarea name="notes" rows={4} value={notes} onChange={(event) => setNotes(event.target.value)} placeholder="Contexto del día, foco de la sesión o indicaciones para el alumno." /></label>
       </section>
 
       {Array.from({ length: SECTION_SLOTS }, (_, sectionIndex) => {
-        const section = values?.sections[sectionIndex]
+        const section = sections[sectionIndex]
         const sectionErrors = fieldErrorsForSection(values, sectionIndex)
         return (
           <details key={sectionIndex} className="card stack reveal-panel" open={sectionIndex === 0 || Boolean(section?.title || section?.exercises.length)}>
@@ -71,15 +94,14 @@ export function ManualAssignmentForm({ students, programs, exercises, categories
             <div className="stack reveal-panel__body form-panel" style={{ gap: '1rem' }}>
               <label className="field">
                 <span>Título de la sección</span>
-                <input name={`sections.${sectionIndex}.title`} type="text" defaultValue={section?.title ?? ''} placeholder={`Ej: Sección ${sectionIndex + 1} / Accesorios`} aria-invalid={Boolean(sectionErrors[`sections.${sectionIndex}.title`])} />
+                <input name={`sections.${sectionIndex}.title`} type="text" value={section.title} onChange={(event) => setSections((current) => current.map((currentSection, currentIndex) => currentIndex === sectionIndex ? { ...currentSection, title: event.target.value } : currentSection))} placeholder={`Ej: Sección ${sectionIndex + 1} / Accesorios`} aria-invalid={Boolean(sectionErrors[`sections.${sectionIndex}.title`])} />
                 {sectionErrors[`sections.${sectionIndex}.title`] ? <small className="field-error">{sectionErrors[`sections.${sectionIndex}.title`]}</small> : null}
               </label>
               <ExercisePrescriptionGrid
                 sectionIndex={sectionIndex}
                 exercises={exercises}
                 categories={categories}
-                initialRows={section?.exercises.map((exercise) => ({ exerciseId: exercise.exerciseId }))}
-                initialValues={section?.exercises}
+                initialValues={section.exercises}
                 fieldErrors={sectionErrors}
               />
             </div>
