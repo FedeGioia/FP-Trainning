@@ -48,6 +48,7 @@ export default async function TrainerDashboardPage() {
     <div className="trainer-dashboard stack">
       <section className="trainer-dashboard__intro">
         <div>
+          <span className="eyebrow">Esta semana</span>
           <h1>Resumen operativo</h1>
           <p>Seguimiento de la semana y próximos entrenamientos.</p>
         </div>

@@ -19,7 +19,7 @@ export default async function TrainerLayout({ children }: Readonly<{ children: R
     <RoleShell
       role="trainer"
       title="Trainer"
-      description="Gestión de alumnos y rutinas."
+      description="Alumnos, rutinas y seguimiento."
       navGroups={[
         {
           label: 'Operación',

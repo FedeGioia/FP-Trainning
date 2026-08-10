@@ -24,11 +24,11 @@ export async function RoleShell({ role, title, description, navItems, navGroups,
         <header className="role-header">
           <div className="container role-header-inner">
             <div className="role-header-panel">
-              <div className="stack" style={{ gap: '0.45rem' }}>
+              <div className="role-header-brand">
                 <span className="eyebrow">{role}</span>
-                <div className="stack" style={{ gap: '0.3rem' }}>
+                <div className="role-header-copy">
                   <strong className="role-title">{title}</strong>
-                  <p className="muted" style={{ margin: 0 }}>
+                  <p className="muted role-description">
                     {description}
                   </p>
                 </div>
