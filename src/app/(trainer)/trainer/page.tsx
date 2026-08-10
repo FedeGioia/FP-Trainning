@@ -56,7 +56,7 @@ export default async function TrainerDashboardPage() {
 
       <section className="trainer-dashboard__overview" aria-label="Resumen de operación">
         <div className="trainer-dashboard__actions">
-          <Link className="trainer-dashboard__action" href="/trainer/students/new">
+          <Link className="trainer-dashboard__action trainer-dashboard__action--primary" href="/trainer/students/new">
             <span>Alumnos</span>
             <strong>Nuevo alumno</strong>
             <small>Crear acceso y programas</small>
