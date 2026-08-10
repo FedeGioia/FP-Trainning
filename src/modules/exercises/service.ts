@@ -97,8 +97,13 @@ export async function createCategory(input: CreateCategoryInput): Promise<Create
       data: { name, parentId: input.parentId || null, createdById: input.createdById ?? null },
     })
     return { ok: true, categoryId: category.id }
-  } catch {
-    return { ok: false, message: 'No se pudo crear la categoría.' }
+  } catch (error) {
+    console.error('Failed to create exercise category:', error)
+    return {
+      ok: false,
+      message:
+        'No se pudo crear la categoría. Verificá que PostgreSQL esté arriba y que las migraciones estén aplicadas.',
+    }
   }
 }
 
