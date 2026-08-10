@@ -3,7 +3,6 @@
 import { useActionState } from 'react'
 
 import { ExercisePrescriptionGrid } from '@/components/shared/ExercisePrescriptionGrid'
-import { exerciseMetricOptions } from '@/lib/constants/exercise-metrics'
 import type { ManualValidationState } from '@/modules/assignments/types'
 import { createManualAssignmentAction } from './actions'
 
@@ -13,6 +12,8 @@ type ManualAssignmentFormProps = {
   students: Array<{ id: string; name: string; programCodes: string[] }>
   programs: Array<{ id: string; name: string; code: string }>
   exercises: Array<{ id: string; name: string; primaryMetricType: string; categoryId: string; categoryPath: string }>
+  categories: Parameters<typeof ExercisePrescriptionGrid>[0]['categories']
+  initialStudentId?: string
   initialState?: ManualValidationState
 }
 
@@ -24,11 +25,12 @@ function fieldErrorsForSection(state: ManualValidationState | undefined, section
   )
 }
 
-export function ManualAssignmentForm({ students, programs, exercises, initialState }: ManualAssignmentFormProps) {
+export function ManualAssignmentForm({ students, programs, exercises, categories, initialStudentId = '', initialState }: ManualAssignmentFormProps) {
   const [state, formAction] = useActionState(createManualAssignmentAction, initialState ?? null)
   const values = state ?? initialState
   const errors = new Map(values?.issues.map((issue) => [issue.path, issue.message]))
-  const selectedStudent = students.find((student) => student.id === values?.studentId)
+  const studentId = values?.studentId ?? initialStudentId
+  const selectedStudent = students.find((student) => student.id === studentId)
   const programOptions = selectedStudent ? programs.filter((program) => selectedStudent.programCodes.includes(program.code)) : programs
 
   return (
@@ -38,7 +40,7 @@ export function ManualAssignmentForm({ students, programs, exercises, initialSta
         <div className="form-grid">
           <label className="field">
             <span>Alumno</span><small>Solo aparecen alumnos ya cargados en la plataforma.</small>
-            <select name="studentId" defaultValue={values?.studentId ?? ''} aria-invalid={Boolean(errors.get('studentId'))}>
+            <select name="studentId" defaultValue={studentId} aria-invalid={Boolean(errors.get('studentId'))}>
               <option value="" disabled>Elegí un alumno</option>
               {students.map((student) => <option key={student.id} value={student.id}>{student.name} — {student.programCodes.join(', ')}</option>)}
             </select>
@@ -75,8 +77,8 @@ export function ManualAssignmentForm({ students, programs, exercises, initialSta
               <ExercisePrescriptionGrid
                 sectionIndex={sectionIndex}
                 exercises={exercises}
-                metricOptions={exerciseMetricOptions}
-                initialRows={section?.exercises.map((exercise) => ({ metricType: exercise.metricType }))}
+                categories={categories}
+                initialRows={section?.exercises.map((exercise) => ({ exerciseId: exercise.exerciseId }))}
                 initialValues={section?.exercises}
                 fieldErrors={sectionErrors}
               />

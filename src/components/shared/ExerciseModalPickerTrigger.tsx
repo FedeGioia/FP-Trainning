@@ -2,19 +2,20 @@
 
 import { useRef, useState } from 'react'
 
-import { ExerciseModalPicker, type PickerExercise } from './ExerciseModalPicker'
+import { ExerciseModalPicker, type PickerCategory, type PickerExercise } from './ExerciseModalPicker'
 
 type ExerciseModalPickerTriggerProps = {
   exercises: PickerExercise[]
+  categories: PickerCategory[]
   fieldName: string
-  initialSelectedId?: string
+  selectedId: string
+  onSelectedIdChange: (exerciseId: string) => void
   ariaLabel: string
   invalid?: boolean
 }
 
-export function ExerciseModalPickerTrigger({ exercises, fieldName, initialSelectedId = '', ariaLabel, invalid }: ExerciseModalPickerTriggerProps) {
+export function ExerciseModalPickerTrigger({ exercises, categories, fieldName, selectedId, onSelectedIdChange, ariaLabel, invalid }: ExerciseModalPickerTriggerProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const [selectedId, setSelectedId] = useState(initialSelectedId)
   const triggerRef = useRef<HTMLButtonElement>(null)
   const selectedExercise = exercises.find((exercise) => exercise.id === selectedId)
   const closePicker = () => {
@@ -32,14 +33,15 @@ export function ExerciseModalPickerTrigger({ exercises, fieldName, initialSelect
       {isOpen ? (
         <ExerciseModalPicker
           exercises={exercises}
+          categories={categories}
           selectedId={selectedId}
           onClose={closePicker}
           onClear={() => {
-            setSelectedId('')
+            onSelectedIdChange('')
             closePicker()
           }}
           onSelect={(exercise) => {
-            setSelectedId(exercise.id)
+            onSelectedIdChange(exercise.id)
             closePicker()
           }}
         />

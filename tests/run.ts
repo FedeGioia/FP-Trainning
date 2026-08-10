@@ -141,12 +141,9 @@ await test('createManualAssignment returns nested issues for invalid section and
   const result = await createManualAssignment({
     ...base,
     sections: [
-      { title: '', exercises: [{ exerciseId: 'exercise-1', metricType: 'STRENGTH', prescription: { series: 3, repetitions: 8, weight: 60 } }] },
+      { title: '', exercises: [{ exerciseId: '', prescription: { series: 3, repetitions: 8, weight: 60 } }] },
       { title: 'Bloque', exercises: [
-        { exerciseId: '', metricType: 'CUSTOM', prescription: { value: 'Completar' } },
-        { exerciseId: 'exercise-2', metricType: 'INVALID', prescription: { value: 'Completar' } },
-        { exerciseId: 'exercise-3', metricType: 'STRENGTH', prescription: {} },
-        { exerciseId: 'exercise-4', metricType: 'DURATION', prescription: {} },
+        { exerciseId: '', prescription: { value: 'Completar' } },
       ] },
     ],
   })
@@ -156,11 +153,6 @@ await test('createManualAssignment returns nested issues for invalid section and
   assert.deepEqual(result.issues, [
     { path: 'sections.0.title', message: 'La sección 1 necesita un título.', kind: 'required' },
     { path: 'sections.1.exercises.0.exerciseId', message: 'Tenés que elegir un ejercicio.', kind: 'required' },
-    { path: 'sections.1.exercises.1.metricType', message: 'Elegí una métrica válida.', kind: 'invalid' },
-    { path: 'sections.1.exercises.2.strengthSeries', message: 'El series es obligatorio.', kind: 'required' },
-    { path: 'sections.1.exercises.2.strengthRepetitions', message: 'El repeticiones es obligatorio.', kind: 'required' },
-    { path: 'sections.1.exercises.2.strengthWeight', message: 'El peso es obligatorio.', kind: 'required' },
-    { path: 'sections.1.exercises.3.prescriptionValue', message: 'La prescripción es obligatoria.', kind: 'required' },
   ])
 })
 

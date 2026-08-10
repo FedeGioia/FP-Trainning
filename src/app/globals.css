@@ -1069,6 +1069,36 @@ summary:focus-visible {
   text-transform: uppercase;
 }
 
+.exercise-picker-modal__folder,
+.exercise-picker-modal__back,
+.exercise-grid__metric {
+  width: 100%;
+  min-height: 40px;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  background: var(--surface-alt);
+  color: var(--text);
+  text-align: left;
+}
+
+.exercise-picker-modal__folder {
+  display: grid;
+  gap: 0.2rem;
+  cursor: pointer;
+}
+
+.exercise-picker-modal__folder span,
+.exercise-grid__metric {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.exercise-picker-modal__back {
+  width: fit-content;
+  cursor: pointer;
+}
+
 .exercise-picker-modal__option {
   display: flex;
   align-items: center;

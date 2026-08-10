@@ -43,7 +43,8 @@ export type CreateTemplateSectionInput = {
 
 export type CreateTemplateExerciseInput = {
   exerciseId: string
-  metricType: string
+  /** @deprecated Derived server-side from the exercise; ignored when supplied. */
+  metricType?: string
   prescriptionValue: string
   strengthSeries?: string
   strengthRepetitions?: string

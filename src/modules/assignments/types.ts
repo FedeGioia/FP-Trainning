@@ -80,7 +80,8 @@ export type CreateManualAssignmentInput = {
     title: string
     exercises: Array<{
       exerciseId: string
-      metricType: string
+      /** @deprecated Derived server-side from the exercise; ignored when supplied. */
+      metricType?: string
       restLabel?: string
       methodLabel?: string
       notes?: string

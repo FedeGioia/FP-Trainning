@@ -4,8 +4,11 @@ import { listTemplates } from '@/modules/templates'
 import { listStudents } from '@/modules/users'
 import { TemplateAssignmentForm } from './TemplateAssignmentForm'
 
-export default async function TrainerAssignmentNewPage() {
+type TrainerAssignmentNewPageProps = { searchParams?: Promise<{ studentId?: string }> }
+
+export default async function TrainerAssignmentNewPage({ searchParams }: TrainerAssignmentNewPageProps) {
   const [students, templates] = await Promise.all([listStudents(), listTemplates()])
+  const params = (await searchParams) ?? {}
 
   return (
     <div className="stack">
@@ -16,7 +19,7 @@ export default async function TrainerAssignmentNewPage() {
         </div>
         <div className="role-nav"><Link className="pill" href="/trainer/assignments/manual">Crear rutina manual</Link><Link className="pill" href="/trainer/assignments">Volver al listado</Link></div>
       </section>
-      <TemplateAssignmentForm students={students} templates={templates} />
+      <TemplateAssignmentForm students={students} templates={templates} initialStudentId={params.studentId} />
     </div>
   )
 }

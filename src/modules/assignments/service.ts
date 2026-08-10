@@ -536,13 +536,22 @@ export async function createManualAssignment(input: CreateManualAssignmentInput)
   }
 
   const issues: ValidationIssue[] = []
+  const requestedExerciseIds = [...new Set(input.sections.flatMap((section) => section.exercises.map((exercise) => exercise.exerciseId.trim()).filter(Boolean)))]
+  let metricTypesByExerciseId = new Map<string, string>()
+  if (requestedExerciseIds.length > 0) {
+    try {
+      const exercises = await db.exercise.findMany({ where: { id: { in: requestedExerciseIds }, active: true }, select: { id: true, primaryMetricType: true } })
+      metricTypesByExerciseId = new Map(exercises.map((exercise) => [exercise.id, exercise.primaryMetricType]))
+    } catch {
+      return { ok: false, message: 'No se pudieron validar los ejercicios elegidos.' }
+    }
+  }
   const normalizedSections: Array<NormalizedManualSection | null> = input.sections.map((section, sectionIndex) => {
     const title = section.title.trim()
     const hasContent = title.length > 0 || section.exercises.some((exercise) => {
       const genericValue = String(exercise.prescription.value ?? '').trim()
       return [
         exercise.exerciseId,
-        exercise.metricType,
         genericValue,
         exercise.prescription.series,
         exercise.prescription.repetitions,
@@ -566,7 +575,7 @@ export async function createManualAssignment(input: CreateManualAssignmentInput)
 
     for (const [exerciseIndex, exercise] of section.exercises.entries()) {
       const exerciseId = exercise.exerciseId.trim()
-      const metricType = exercise.metricType.trim()
+      const metricType = metricTypesByExerciseId.get(exerciseId) ?? ''
       const restLabel = exercise.restLabel?.trim() || null
       const methodLabel = exercise.methodLabel?.trim() || null
       const notes = exercise.notes?.trim() || null
@@ -575,7 +584,7 @@ export async function createManualAssignment(input: CreateManualAssignmentInput)
       const repetitions = exercise.prescription.repetitions ?? null
       const weight = exercise.prescription.weight ?? null
 
-      const hasExerciseContent = [exerciseId, metricType, genericValue, series, repetitions, weight, restLabel, methodLabel, notes]
+      const hasExerciseContent = [exerciseId, genericValue, series, repetitions, weight, restLabel, methodLabel, notes]
         .some((value) => String(value ?? '').trim().length > 0)
 
       if (!hasExerciseContent) {
@@ -587,8 +596,8 @@ export async function createManualAssignment(input: CreateManualAssignmentInput)
         continue
       }
 
-      if (!['STRENGTH', 'DURATION', 'DISTANCE', 'CUSTOM'].includes(metricType)) {
-        issues.push({ path: `sections.${sectionIndex}.exercises.${exerciseIndex}.metricType`, message: 'Elegí una métrica válida.', kind: 'invalid' })
+      if (!metricType) {
+        issues.push({ path: `sections.${sectionIndex}.exercises.${exerciseIndex}.exerciseId`, message: 'El ejercicio elegido ya no existe o no está disponible.', kind: 'invalid' })
         continue
       }
 

@@ -1,5 +1,4 @@
 import { db } from '@/lib/db'
-import { exerciseMetricOptions } from '@/lib/constants/exercise-metrics'
 import { templateSectionOptions } from '@/lib/constants/template-sections'
 
 import type { CreateTemplateInput, CreateTemplateResult, TemplateSummary } from './types'
@@ -20,13 +19,9 @@ type NormalizedTemplateSection = {
   }>
 }
 
-function isValidMetricType(value: string) {
-  return exerciseMetricOptions.some((option) => option.value === value)
-}
-
 function hasAnyExerciseContent(exercise: {
-  exerciseId: string
-  metricType: string
+    exerciseId: string
+    metricType?: string
   prescriptionValue: string
   strengthSeries?: string
   strengthRepetitions?: string
@@ -37,7 +32,6 @@ function hasAnyExerciseContent(exercise: {
 }) {
   return [
     exercise.exerciseId,
-    exercise.metricType,
     exercise.prescriptionValue,
     exercise.strengthSeries,
     exercise.strengthRepetitions,
@@ -146,6 +140,17 @@ export async function createTemplate(input: CreateTemplateInput): Promise<Create
     return { ok: false, message: 'El nombre de la plantilla es obligatorio.' }
   }
 
+  const requestedExerciseIds = [...new Set(input.sections.flatMap((section) => section.exercises.map((exercise) => exercise.exerciseId.trim()).filter(Boolean)))]
+  let metricTypesByExerciseId = new Map<string, string>()
+  if (requestedExerciseIds.length > 0) {
+    try {
+      const exercises = await db.exercise.findMany({ where: { id: { in: requestedExerciseIds }, active: true }, select: { id: true, primaryMetricType: true } })
+      metricTypesByExerciseId = new Map(exercises.map((exercise) => [exercise.id, exercise.primaryMetricType]))
+    } catch {
+      return { ok: false, message: 'No se pudieron validar los ejercicios elegidos.' }
+    }
+  }
+
   const normalizedSections: Array<NormalizedTemplateSection | { error: string } | null> = input.sections
     .map((section, sectionIndex) => {
       const title = section.title.trim()
@@ -168,7 +173,7 @@ export async function createTemplate(input: CreateTemplateInput): Promise<Create
 
       for (const [exerciseIndex, exercise] of section.exercises.entries()) {
         const exerciseId = exercise.exerciseId.trim()
-        const metricType = exercise.metricType.trim()
+        const metricType = metricTypesByExerciseId.get(exerciseId) ?? ''
         const prescriptionValue = exercise.prescriptionValue.trim()
         const strengthSeries = parseOptionalNumber(exercise.strengthSeries)
         const strengthRepetitions = parseOptionalNumber(exercise.strengthRepetitions)
@@ -185,8 +190,8 @@ export async function createTemplate(input: CreateTemplateInput): Promise<Create
           return { error: `El ejercicio ${exerciseIndex + 1} de la sección ${sectionIndex + 1} necesita un ejercicio.` as const }
         }
 
-        if (!isValidMetricType(metricType)) {
-          return { error: `El tipo de métrica del ejercicio ${exerciseIndex + 1} de la sección ${sectionIndex + 1} no es válido.` as const }
+        if (!metricType) {
+          return { error: `El ejercicio ${exerciseIndex + 1} de la sección ${sectionIndex + 1} ya no existe o no está disponible.` as const }
         }
 
         if (metricType === 'STRENGTH') {

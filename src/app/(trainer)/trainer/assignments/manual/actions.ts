@@ -51,7 +51,7 @@ export async function createManualAssignmentAction(
 
         return {
           exerciseId: String(formData.get(`sections.${sectionIndex}.exercises.${exerciseIndex}.exerciseId`) ?? ''),
-          metricType: String(formData.get(`sections.${sectionIndex}.exercises.${exerciseIndex}.metricType`) ?? ''),
+          metricType: '',
           restLabel: String(formData.get(`sections.${sectionIndex}.exercises.${exerciseIndex}.restLabel`) ?? ''),
           methodLabel: String(formData.get(`sections.${sectionIndex}.exercises.${exerciseIndex}.methodLabel`) ?? ''),
           prescriptionValue: String(formData.get(`sections.${sectionIndex}.exercises.${exerciseIndex}.prescriptionValue`) ?? ''),
@@ -83,7 +83,6 @@ export async function createManualAssignmentAction(
     title: section.title,
     exercises: section.exercises.map((exercise) => ({
       exerciseId: exercise.exerciseId,
-      metricType: exercise.metricType,
       restLabel: exercise.restLabel,
       methodLabel: exercise.methodLabel,
       prescription: {

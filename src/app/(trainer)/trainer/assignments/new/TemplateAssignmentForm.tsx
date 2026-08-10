@@ -8,14 +8,16 @@ import type { TemplateValidationState } from '@/modules/assignments/types'
 type TemplateAssignmentFormProps = {
   students: Array<{ id: string; name: string; programCodes: string[] }>
   templates: Array<{ id: string; name: string; programCode: string }>
+  initialStudentId?: string
   initialState?: TemplateValidationState
 }
 
-export function TemplateAssignmentForm({ students, templates, initialState }: TemplateAssignmentFormProps) {
+export function TemplateAssignmentForm({ students, templates, initialStudentId = '', initialState }: TemplateAssignmentFormProps) {
   const [state, formAction] = useActionState(createAssignmentAction, initialState ?? null)
   const values = state ?? initialState
   const errors = new Map(values?.issues.map((issue) => [issue.path, issue.message]))
-  const selectedStudent = students.find((student) => student.id === values?.studentId)
+  const studentId = values?.studentId ?? initialStudentId
+  const selectedStudent = students.find((student) => student.id === studentId)
   const filteredTemplates = selectedStudent
     ? templates.filter((template) => selectedStudent.programCodes.includes(template.programCode))
     : templates
@@ -28,7 +30,7 @@ export function TemplateAssignmentForm({ students, templates, initialState }: Te
       <div className="form-grid">
         <label className="field">
           <span>Alumno</span>
-          <select name="studentId" defaultValue={values?.studentId ?? ''} aria-invalid={Boolean(errors.get('studentId'))} aria-describedby={errors.get('studentId') ? 'studentId-error' : undefined}>
+            <select name="studentId" defaultValue={studentId} aria-invalid={Boolean(errors.get('studentId'))} aria-describedby={errors.get('studentId') ? 'studentId-error' : undefined}>
             <option value="" disabled>Elegí un alumno</option>
             {students.map((student) => <option key={student.id} value={student.id}>{student.name} — {student.programCodes.join(', ')}</option>)}
           </select>

@@ -41,7 +41,6 @@ export async function createTemplateAction(formData: FormData) {
       type: sectionType,
       exercises: exerciseIndices.map((exerciseIndex) => ({
         exerciseId: String(formData.get(`sections.${sectionIndex}.exercises.${exerciseIndex}.exerciseId`) ?? ''),
-        metricType: String(formData.get(`sections.${sectionIndex}.exercises.${exerciseIndex}.metricType`) ?? ''),
         methodLabel: String(formData.get(`sections.${sectionIndex}.exercises.${exerciseIndex}.methodLabel`) ?? ''),
         prescriptionValue: String(formData.get(`sections.${sectionIndex}.exercises.${exerciseIndex}.prescriptionValue`) ?? ''),
         strengthSeries: String(formData.get(`sections.${sectionIndex}.exercises.${exerciseIndex}.strengthSeries`) ?? ''),

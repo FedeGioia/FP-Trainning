@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 
 export type PickerExercise = {
   id: string
@@ -10,36 +11,42 @@ export type PickerExercise = {
   categoryPath: string
 }
 
+export type PickerCategory = {
+  id: string
+  name: string
+  path: string
+  children: PickerCategory[]
+}
+
 type ExerciseModalPickerProps = {
   exercises: PickerExercise[]
+  categories: PickerCategory[]
   selectedId: string
   onClose: () => void
   onClear: () => void
   onSelect: (exercise: PickerExercise) => void
 }
 
-export function ExerciseModalPicker({ exercises, selectedId, onClose, onClear, onSelect }: ExerciseModalPickerProps) {
+export function ExerciseModalPicker({ exercises, categories, selectedId, onClose, onClear, onSelect }: ExerciseModalPickerProps) {
   const [query, setQuery] = useState('')
+  const [categoryId, setCategoryId] = useState<string | null>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
   const normalizedQuery = query.trim().toLocaleLowerCase('es')
-  const groupedExercises = useMemo(() => {
-    const groups = new Map<string, { category: string; exercises: PickerExercise[] }>()
-    for (const exercise of exercises) {
-      const searchable = `${exercise.name} ${exercise.primaryMetricType} ${exercise.categoryPath}`.toLocaleLowerCase('es')
-      if (normalizedQuery && !searchable.includes(normalizedQuery)) continue
-      const categoryId = exercise.categoryId
-      const group = groups.get(categoryId) ?? { category: exercise.categoryPath, exercises: [] }
-      group.exercises.push(exercise)
-      groups.set(categoryId, group)
-    }
-    return Array.from(groups.entries())
-      .map(([categoryId, group]) => ({
-        categoryId,
-        category: group.category,
-        exercises: [...group.exercises].sort((a, b) => a.name.localeCompare(b.name, 'es') || a.id.localeCompare(b.id)),
-      }))
-      .sort((a, b) => a.category.localeCompare(b.category, 'es') || a.categoryId.localeCompare(b.categoryId))
-  }, [exercises, normalizedQuery])
+  const categoryIndex = useMemo(() => {
+    const index = new Map<string, PickerCategory>()
+    const visit = (items: PickerCategory[]) => items.forEach((category) => {
+      index.set(category.id, category)
+      visit(category.children)
+    })
+    visit(categories)
+    return index
+  }, [categories])
+  const currentCategory = categoryId ? categoryIndex.get(categoryId) : undefined
+  const visibleExercises = useMemo(() => exercises
+    .filter((exercise) => normalizedQuery
+      ? `${exercise.name} ${exercise.primaryMetricType} ${exercise.categoryPath}`.toLocaleLowerCase('es').includes(normalizedQuery)
+      : exercise.categoryId === categoryId)
+    .sort((a, b) => a.name.localeCompare(b.name, 'es') || a.id.localeCompare(b.id)), [categoryId, exercises, normalizedQuery])
 
   useEffect(() => {
     searchInputRef.current?.focus()
@@ -50,7 +57,7 @@ export function ExerciseModalPicker({ exercises, selectedId, onClose, onClear, o
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [onClose])
 
-  return (
+  return createPortal(
     <div className="student-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose() }}>
       <section className="card exercise-picker-modal" role="dialog" aria-modal="true" aria-labelledby="exercise-picker-title">
         <div className="student-modal__header">
@@ -67,26 +74,26 @@ export function ExerciseModalPicker({ exercises, selectedId, onClose, onClear, o
           <span className="sr-only">Buscar ejercicio</span>
           <input ref={searchInputRef} type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar ejercicio o categoría" />
         </label>
-        {exercises.length === 0 ? (
-          <p className="status status--muted">No hay ejercicios disponibles. Creá uno en la biblioteca antes de armar la rutina.</p>
-        ) : groupedExercises.length === 0 ? (
-          <p className="status status--muted">No encontramos ejercicios para esa búsqueda.</p>
-        ) : (
+        {exercises.length === 0 ? <p className="status status--muted">No hay ejercicios disponibles. Creá uno en la biblioteca antes de armar la rutina.</p> : null}
+        {exercises.length > 0 && normalizedQuery && visibleExercises.length === 0 ? <p className="status status--muted">No encontramos ejercicios para esa búsqueda.</p> : null}
+        {exercises.length > 0 && (!normalizedQuery || visibleExercises.length > 0) ? (
           <div className="exercise-picker-modal__groups">
-            {groupedExercises.map((group) => (
-              <section key={group.categoryId} className="exercise-picker-modal__group">
-                <h3>{group.category}</h3>
-                {group.exercises.map((exercise) => (
-                  <button key={exercise.id} type="button" className="exercise-picker-modal__option" onClick={() => onSelect(exercise)}>
-                    <strong>{exercise.name}</strong>
-                    <span>{exercise.primaryMetricType}</span>
-                  </button>
-                ))}
-              </section>
+            {!normalizedQuery && currentCategory ? <button type="button" className="exercise-picker-modal__back" onClick={() => setCategoryId(null)}>← Volver a categorías</button> : null}
+            {!normalizedQuery && (currentCategory?.children ?? categories).map((category) => (
+              <button key={category.id} type="button" className="exercise-picker-modal__folder" onClick={() => setCategoryId(category.id)}>
+                <strong>{category.name}</strong><span>{category.path}</span>
+              </button>
+            ))}
+            {visibleExercises.map((exercise) => (
+              <button key={exercise.id} type="button" className="exercise-picker-modal__option" onClick={() => onSelect(exercise)}>
+                <strong>{exercise.name}</strong>
+                <span>{normalizedQuery ? `${exercise.categoryPath} · ${exercise.primaryMetricType}` : exercise.primaryMetricType}</span>
+              </button>
             ))}
           </div>
-        )}
+        ) : null}
       </section>
-    </div>
+    </div>,
+    document.body,
   )
 }
