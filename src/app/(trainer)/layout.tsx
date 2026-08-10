@@ -37,9 +37,6 @@ export default async function TrainerLayout({ children }: Readonly<{ children: R
           ],
         },
       ]}
-      quickActions={[
-        { href: '/trainer/students/new', label: 'Nuevo alumno' },
-      ]}
     >
       {children}
     </RoleShell>
