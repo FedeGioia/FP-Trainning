@@ -540,6 +540,134 @@ summary:focus-visible {
   width: min(100% - 2rem, 1400px);
 }
 
+.role-shell--trainer .role-header .container {
+  width: min(100% - 2rem, 1080px);
+}
+
+.role-shell--trainer .role-header {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.role-shell--trainer .role-header-inner {
+  gap: 0.45rem;
+  padding: 0.7rem 0;
+}
+
+.role-shell--trainer .role-header-panel {
+  padding: 0.1rem 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.role-shell--trainer .role-header-panel .eyebrow {
+  padding: 0;
+  background: transparent;
+  color: var(--primary-strong);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.role-shell--trainer .role-title {
+  font-size: 1.08rem;
+  font-style: normal;
+}
+
+.role-shell--trainer .role-header-panel .muted {
+  font-size: 0.88rem;
+}
+
+.role-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.role-header-user {
+  color: var(--muted);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.role-shell--trainer .role-sign-out {
+  min-height: 32px;
+  padding: 0.35rem 0.55rem;
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.role-shell--trainer .role-sign-out:hover {
+  border-color: var(--border);
+  background: var(--surface-alt);
+  color: var(--text);
+}
+
+.role-shell--trainer .role-nav-card {
+  gap: 0.55rem;
+  padding: 0.55rem 0 0;
+  border: 0;
+  border-top: 1px solid var(--border);
+  border-radius: 0;
+  background: transparent;
+}
+
+.role-shell--trainer .role-nav-groups {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem 1.5rem;
+}
+
+.role-shell--trainer .role-nav-group,
+.role-shell--trainer .role-quick-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.role-shell--trainer .role-nav-group__label {
+  font-size: 0.66rem;
+  opacity: 0.82;
+}
+
+.role-shell--trainer .role-nav {
+  gap: 0.25rem;
+}
+
+.role-shell--trainer .pill {
+  padding: 0.35rem 0.55rem;
+  border-color: transparent;
+  background: transparent;
+  font-size: 0.86rem;
+}
+
+.role-shell--trainer .pill:hover {
+  border-color: transparent;
+  background: var(--surface-alt);
+}
+
+.role-shell--trainer .pill.is-active {
+  border-color: transparent;
+  background: rgba(31, 111, 255, 0.1);
+}
+
+.role-shell--trainer .role-quick-actions {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.role-shell--trainer .role-quick-action {
+  color: var(--muted);
+}
+
+.role-shell--trainer .role-quick-action:hover {
+  color: var(--primary-strong);
+}
+
 .trainer-dashboard {
   gap: 1rem;
   max-width: 1080px;
@@ -575,6 +703,7 @@ summary:focus-visible {
 }
 
 .trainer-dashboard__intro h1 {
+  margin-top: 0;
   font-size: clamp(1.5rem, 2.5vw, 1.9rem);
 }
 

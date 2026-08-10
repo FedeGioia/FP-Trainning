@@ -1,6 +1,10 @@
 import { signOut } from '@/auth'
 
-export function SignOutForm() {
+type SignOutFormProps = {
+  className?: string
+}
+
+export function SignOutForm({ className }: SignOutFormProps) {
   return (
     <form
       action={async () => {
@@ -8,7 +12,7 @@ export function SignOutForm() {
         await signOut({ redirectTo: '/login' })
       }}
       >
-      <button className="button button-secondary" type="submit">
+      <button className={`button button-secondary${className ? ` ${className}` : ''}`} type="submit">
         Cerrar sesión
       </button>
     </form>
