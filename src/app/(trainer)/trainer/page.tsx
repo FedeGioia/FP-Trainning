@@ -92,7 +92,7 @@ export default async function TrainerDashboardPage() {
         </div>
       </section>
 
-      <section className="trainer-dashboard__work" aria-label="Seguimiento operativo">
+      <section className="trainer-dashboard__work trainer-dashboard__work--primary" aria-label="Seguimiento operativo">
         <div className="trainer-dashboard__section-heading">
           <div>
             <span className="eyebrow">Seguimiento</span>

@@ -562,8 +562,8 @@ summary:focus-visible {
 }
 
 .role-shell--trainer .role-header-inner {
-  gap: 0.4rem;
-  padding: 0.6rem 0;
+  gap: 0.3rem;
+  padding: 0.5rem 0;
 }
 
 .role-shell--trainer .role-header-panel {
@@ -588,11 +588,15 @@ summary:focus-visible {
 }
 
 .role-shell--trainer .role-header-brand {
-  gap: 0.24rem;
+  display: flex;
+  align-items: baseline;
+  gap: 0.45rem;
 }
 
 .role-shell--trainer .role-header-copy {
-  gap: 0.08rem;
+  display: flex;
+  align-items: baseline;
+  gap: 0.45rem;
 }
 
 .role-shell--trainer .role-title {
@@ -606,6 +610,12 @@ summary:focus-visible {
   margin: 0;
   font-size: 0.82rem;
   line-height: 1.35;
+}
+
+.role-shell--trainer .role-description::before {
+  content: '·';
+  margin-right: 0.45rem;
+  color: var(--border);
 }
 
 .role-header-actions {
@@ -638,8 +648,11 @@ summary:focus-visible {
 }
 
 .role-shell--trainer .role-nav-card {
-  gap: 0.45rem;
-  padding: 0.45rem 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.35rem 0 0;
   border: 0;
   border-top: 1px solid var(--border);
   border-radius: 0;
@@ -650,6 +663,10 @@ summary:focus-visible {
   display: flex;
   flex-wrap: wrap;
   gap: 0.55rem 1.35rem;
+}
+
+.role-shell--trainer .role-nav--trainer {
+  min-width: 0;
 }
 
 .role-shell--trainer .role-nav-group,
@@ -686,12 +703,20 @@ summary:focus-visible {
 }
 
 .role-shell--trainer .role-quick-actions {
-  padding-top: 0;
-  border-top: 0;
+  flex-shrink: 0;
+  padding: 0;
+  border: 0;
+}
+
+.role-shell--trainer .role-quick-actions .role-nav-group__label {
+  display: none;
 }
 
 .role-shell--trainer .role-quick-action {
-  color: var(--muted);
+  border-color: rgba(31, 111, 255, 0.2);
+  background: rgba(31, 111, 255, 0.06);
+  color: var(--primary-strong);
+  font-weight: 700;
 }
 
 .role-shell--trainer .role-quick-action:hover {
@@ -773,11 +798,11 @@ summary:focus-visible {
   padding: 0.8rem 0.9rem;
   border: 1px solid var(--border);
   border-radius: 14px;
-  background: linear-gradient(145deg, #fff, #fafbfc);
-  box-shadow: 0 5px 14px rgba(15, 23, 42, 0.035);
+  background: var(--surface-alt);
 }
 
 .trainer-dashboard__action {
+  min-height: 86px;
   transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
 }
 
@@ -825,12 +850,25 @@ summary:focus-visible {
 
 .trainer-dashboard__metrics {
   grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface-alt);
+  overflow: hidden;
 }
 
 .trainer-dashboard__metric {
   min-height: 0;
   padding: 0.72rem 0.8rem;
+  border: 0;
+  border-radius: 0;
+  border-right: 1px solid var(--border);
+  background: transparent;
   box-shadow: none;
+}
+
+.trainer-dashboard__metric:last-child {
+  border-right: 0;
 }
 
 .trainer-dashboard__metric strong {
@@ -839,7 +877,6 @@ summary:focus-visible {
 }
 
 .trainer-dashboard__metric--attention {
-  border-color: rgba(249, 115, 22, 0.28);
   background: rgba(249, 115, 22, 0.06);
 }
 
@@ -849,8 +886,15 @@ summary:focus-visible {
   padding: 0.9rem;
   border: 1px solid var(--border);
   border-radius: 16px;
-  background: linear-gradient(145deg, #fff, #fcfcfd);
-  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.045);
+  background: var(--surface-alt);
+}
+
+.trainer-dashboard__work--primary {
+  border-color: rgba(31, 111, 255, 0.25);
+  background:
+    linear-gradient(135deg, rgba(31, 111, 255, 0.07), transparent 40%),
+    var(--surface);
+  box-shadow: 0 12px 26px rgba(15, 23, 42, 0.07);
 }
 
 .trainer-dashboard__section-heading h2 {
@@ -2274,6 +2318,21 @@ select[aria-invalid='true'] {
   .trainer-dashboard__metric {
     min-height: 82px;
     padding: 0.85rem;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .trainer-dashboard__metric:nth-child(2n) {
+    border-right: 0;
+  }
+
+  .trainer-dashboard__metric:nth-child(5) {
+    grid-column: span 2;
+    border-right: 0;
+  }
+
+  .trainer-dashboard__metric:last-child {
+    border-bottom: 0;
   }
 
   .trainer-dashboard__metric span {
@@ -2302,6 +2361,21 @@ select[aria-invalid='true'] {
   .role-nav-card {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .role-shell--trainer .role-header-brand,
+  .role-shell--trainer .role-header-copy,
+  .role-shell--trainer .role-nav-card {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .role-shell--trainer .role-nav-card {
+    gap: 0.3rem;
+  }
+
+  .role-shell--trainer .role-quick-actions {
+    flex-direction: row;
   }
 
   .role-header-chip {

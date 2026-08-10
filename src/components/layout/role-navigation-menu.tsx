@@ -14,6 +14,7 @@ type RoleNavigationProps = {
 
 export function RoleNavigation({ role, navItems = [], navGroups = [], quickActions = [] }: RoleNavigationProps) {
   const pathname = usePathname()
+  const trainerNavItems = navGroups.flatMap((group) => group.items)
 
   const renderLink = (item: RoleNavItem, className = 'pill') => {
     const active = isNavItemActive(pathname, item.href, item.exact)
@@ -27,7 +28,11 @@ export function RoleNavigation({ role, navItems = [], navGroups = [], quickActio
 
   return (
     <>
-      {navGroups.length > 0 ? (
+      {role === 'trainer' ? (
+        <nav className="role-nav role-nav--trainer" aria-label={`Navegación ${role}`}>
+          {trainerNavItems.map((item) => renderLink(item))}
+        </nav>
+      ) : navGroups.length > 0 ? (
         <nav className="role-nav-groups" aria-label={`Navegación ${role}`}>
           {navGroups.map((group) => (
             <section key={group.label} className="role-nav-group" aria-labelledby={`role-nav-group-${group.label}`}>

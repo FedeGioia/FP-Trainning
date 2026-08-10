@@ -19,7 +19,7 @@ export default async function TrainerLayout({ children }: Readonly<{ children: R
     <RoleShell
       role="trainer"
       title="Trainer"
-      description="Alumnos, rutinas y seguimiento."
+      description="Alumnos y rutinas"
       navGroups={[
         {
           label: 'Operación',
@@ -39,9 +39,6 @@ export default async function TrainerLayout({ children }: Readonly<{ children: R
       ]}
       quickActions={[
         { href: '/trainer/students/new', label: 'Nuevo alumno' },
-        { href: '/trainer/assignments/new', label: 'Asignar rutina' },
-        { href: '/trainer/templates/new', label: 'Nueva plantilla' },
-        { href: '/trainer/exercises/new', label: 'Nuevo ejercicio' },
       ]}
     >
       {children}
