@@ -14,6 +14,10 @@ import type {
 
 type CategoryRecord = { id: string; name: string; parentId: string | null }
 
+export function normalizeCategoryName(name: string) {
+  return name.trim().normalize('NFC').toLocaleLowerCase('es')
+}
+
 export function buildCategoryTree(categories: CategoryRecord[]): ExerciseCategoryNode[] {
   const nodes = new Map<string, ExerciseCategoryNode>()
   const roots: ExerciseCategoryNode[] = []
@@ -51,13 +55,21 @@ export async function listExercises(): Promise<ExerciseSummary[]> {
 }
 
 export async function createCategory(input: CreateCategoryInput): Promise<CreateCategoryResult> {
-  const name = input.name.trim()
+  const name = input.name.trim().normalize('NFC')
   if (!name) return { ok: false, message: 'El nombre de la categoría es obligatorio.' }
 
   try {
     if (input.parentId) {
       const parent = await db.exerciseCategory.findUnique({ where: { id: input.parentId } })
       if (!parent) return { ok: false, message: 'La categoría padre ya no existe.' }
+    }
+
+    const siblings = await db.exerciseCategory.findMany({
+      where: { parentId: input.parentId || null },
+      select: { name: true },
+    })
+    if (siblings.some((sibling) => normalizeCategoryName(sibling.name) === normalizeCategoryName(name))) {
+      return { ok: false, message: 'Ya existe una categoría con ese nombre en esta carpeta.' }
     }
 
     const category = await db.exerciseCategory.create({
@@ -129,14 +141,20 @@ export async function listExercisesWithCategoryPaths(): Promise<ExerciseSummary[
       listCategoryTree(),
     ])
     const paths = new Map(flattenCategoryTree(tree).map((category) => [category.id, category.path]))
+    const categoryOrder = new Map(flattenCategoryTree(tree).map((category, index) => [category.id, index]))
     return exercises.map((exercise) => ({
       id: exercise.id,
       name: exercise.name,
       description: exercise.description,
       primaryMetricType: exercise.primaryMetricType,
       hasVideo: exercise.media.length > 0,
+      categoryId: exercise.categoryId,
       categoryPath: exercise.categoryId ? paths.get(exercise.categoryId) ?? null : null,
-    }))
+    })).sort((a, b) => {
+      const categoryComparison = (categoryOrder.get(a.categoryId ?? '') ?? Number.MAX_SAFE_INTEGER)
+        - (categoryOrder.get(b.categoryId ?? '') ?? Number.MAX_SAFE_INTEGER)
+      return categoryComparison || a.name.localeCompare(b.name, 'es') || a.id.localeCompare(b.id)
+    })
   } catch {
     return []
   }

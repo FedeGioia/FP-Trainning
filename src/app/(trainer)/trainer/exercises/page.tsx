@@ -26,9 +26,13 @@ export default async function TrainerExercisesPage({ searchParams }: TrainerExer
   })
   const exercisesByCategory = new Map<string, typeof exercises>()
   for (const exercise of exercises) {
-    const path = exercise.categoryPath ?? 'Sin categoría'
-    exercisesByCategory.set(path, [...(exercisesByCategory.get(path) ?? []), exercise])
+    const categoryId = exercise.categoryId ?? 'uncategorized'
+    exercisesByCategory.set(categoryId, [...(exercisesByCategory.get(categoryId) ?? []), exercise])
   }
+  const categoryGroups = [
+    ...categories.map((category) => ({ id: category.id, path: category.path, exercises: exercisesByCategory.get(category.id) ?? [] })),
+    { id: 'uncategorized', path: 'Sin categoría', exercises: exercisesByCategory.get('uncategorized') ?? [] },
+  ].filter((category) => category.exercises.length > 0)
 
   return (
     <div className="stack">
@@ -116,18 +120,18 @@ export default async function TrainerExercisesPage({ searchParams }: TrainerExer
           </div>
         </div>
 
-        {Array.from(exercisesByCategory.entries()).map(([categoryPath, categoryExercises]) => (
-          <section key={categoryPath} className="stack">
-            <h3 className="section-title">{categoryPath}</h3>
+        {categoryGroups.map((category) => (
+          <section key={category.id} className="stack">
+            <h3 className="section-title">{category.path}</h3>
             <div className="grid cards">
-              {categoryExercises.map((exercise) => (
+              {category.exercises.map((exercise) => (
                 <div key={exercise.id} className="stack">
                   <ExerciseCard exercise={exercise} />
                   <form action={updateExerciseCategoryAction} className="exercise-category-assignment">
                     <input name="exerciseId" type="hidden" value={exercise.id} />
                     <label>
                       <span className="sr-only">Categoría para {exercise.name}</span>
-                      <select name="categoryId" defaultValue={categories.find((category) => category.path === exercise.categoryPath)?.id ?? ''}>
+                      <select name="categoryId" defaultValue={exercise.categoryId ?? ''}>
                         <option value="">Sin categoría</option>
                         {categories.map((category) => <option key={category.id} value={category.id}>{category.path}</option>)}
                       </select>

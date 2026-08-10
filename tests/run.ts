@@ -11,7 +11,7 @@ import { getWeekDaysFrom, formatLocalDateKey } from '@/lib/date'
 import { createAssignment, createManualAssignment } from '@/modules/assignments/service'
 import { buildManualValidationState, parseOptionalNumber } from '@/app/(trainer)/trainer/assignments/manual/actions'
 import { buildTemplateValidationState } from '@/app/(trainer)/trainer/assignments/new/actions'
-import { buildCategoryTree } from '@/modules/exercises'
+import { buildCategoryTree, normalizeCategoryName } from '@/modules/exercises'
 
 async function test(name: string, fn: () => void | Promise<void>) {
   try {
@@ -92,6 +92,21 @@ await test('buildCategoryTree creates nested paths in parent-to-child order', ()
 
   assert.equal(tree[0]?.path, 'Fuerza')
   assert.equal(tree[0]?.children[0]?.path, 'Fuerza / Tren superior')
+})
+
+await test('category helpers normalize duplicate names and sort siblings deterministically', () => {
+  assert.equal(normalizeCategoryName('  FUERZA  '), normalizeCategoryName('fuerza'))
+  assert.equal(normalizeCategoryName(' cafe\u0301 '), normalizeCategoryName('café'))
+
+  const tree = buildCategoryTree([
+    { id: 'z', name: 'Zancadas', parentId: null },
+    { id: 'a', name: 'Abdominales', parentId: null },
+    { id: 'b', name: 'Bíceps', parentId: 'a' },
+    { id: 'c', name: 'Core', parentId: 'a' },
+  ])
+
+  assert.deepEqual(tree.map((category) => category.name), ['Abdominales', 'Zancadas'])
+  assert.deepEqual(tree[0]?.children.map((category) => category.name), ['Bíceps', 'Core'])
 })
 
 await test('createAssignment returns stable structured issues for invalid template submissions', async () => {

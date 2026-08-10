@@ -6,6 +6,7 @@ export type ExerciseSummary = {
   description?: string | null
   primaryMetricType: ExerciseMetricType
   hasVideo: boolean
+  categoryId: string | null
   categoryPath: string | null
 }
 

@@ -1015,6 +1015,13 @@ summary:focus-visible {
   gap: 1rem;
 }
 
+.exercise-picker-modal__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
 .exercise-picker-modal__group {
   display: grid;
   gap: 0.45rem;

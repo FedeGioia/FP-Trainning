@@ -12,7 +12,7 @@ const SECTION_SLOTS = 3
 type ManualAssignmentFormProps = {
   students: Array<{ id: string; name: string; programCodes: string[] }>
   programs: Array<{ id: string; name: string; code: string }>
-  exercises: Array<{ id: string; name: string; primaryMetricType: string; categoryPath: string | null }>
+  exercises: Array<{ id: string; name: string; primaryMetricType: string; categoryId: string | null; categoryPath: string | null }>
   initialState?: ManualValidationState
 }
 

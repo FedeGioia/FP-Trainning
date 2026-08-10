@@ -23,6 +23,8 @@ export async function createCategoryAction(formData: FormData) {
   if (!result.ok) redirect(`/trainer/exercises?categoryError=${encodeURIComponent(result.message)}`)
   revalidatePath('/trainer/exercises')
   revalidatePath('/trainer/exercises/new')
+  revalidatePath('/trainer/templates/new')
+  revalidatePath('/trainer/assignments/manual')
   redirect('/trainer/exercises?categoryCreated=1')
 }
 
@@ -32,6 +34,8 @@ export async function deleteCategoryAction(formData: FormData) {
   if (!result.ok) redirect(`/trainer/exercises?categoryError=${encodeURIComponent(result.message)}`)
   revalidatePath('/trainer/exercises')
   revalidatePath('/trainer/exercises/new')
+  revalidatePath('/trainer/templates/new')
+  revalidatePath('/trainer/assignments/manual')
   redirect('/trainer/exercises?categoryDeleted=1')
 }
 
