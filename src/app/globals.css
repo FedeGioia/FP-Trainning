@@ -540,6 +540,245 @@ summary:focus-visible {
   width: min(100% - 2rem, 1400px);
 }
 
+.trainer-dashboard {
+  gap: 1.5rem;
+  max-width: 1180px;
+}
+
+.trainer-dashboard__intro,
+.trainer-dashboard__section-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.trainer-dashboard__intro {
+  padding: 0.25rem 0;
+}
+
+.trainer-dashboard__intro .eyebrow,
+.trainer-dashboard__section-heading .eyebrow {
+  padding: 0;
+  background: transparent;
+  color: var(--primary-strong);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.trainer-dashboard__intro h1,
+.trainer-dashboard__section-heading h2 {
+  margin: 0.3rem 0 0;
+  letter-spacing: -0.035em;
+}
+
+.trainer-dashboard__intro h1 {
+  font-size: clamp(1.7rem, 3vw, 2.2rem);
+}
+
+.trainer-dashboard__intro p,
+.trainer-dashboard__section-heading p {
+  margin: 0.25rem 0 0;
+  color: var(--muted);
+}
+
+.trainer-dashboard__overview {
+  display: grid;
+  gap: 1rem;
+}
+
+.trainer-dashboard__actions,
+.trainer-dashboard__metrics {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.trainer-dashboard__actions {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.trainer-dashboard__action,
+.trainer-dashboard__metric {
+  display: grid;
+  gap: 0.3rem;
+  min-height: 126px;
+  padding: 1.1rem 1.15rem;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--surface);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+}
+
+.trainer-dashboard__action {
+  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.trainer-dashboard__action:hover {
+  border-color: rgba(31, 111, 255, 0.35);
+  box-shadow: var(--shadow);
+  transform: translateY(-2px);
+}
+
+.trainer-dashboard__action span,
+.trainer-dashboard__metric span,
+.trainer-dashboard__action small {
+  color: var(--muted);
+}
+
+.trainer-dashboard__action span,
+.trainer-dashboard__metric span {
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+}
+
+.trainer-dashboard__action strong {
+  font-size: 1.05rem;
+}
+
+.trainer-dashboard__action small {
+  font-size: 0.84rem;
+}
+
+.trainer-dashboard__action--primary {
+  border-color: transparent;
+  background: linear-gradient(135deg, #1f6fff, #1459eb);
+  box-shadow: 0 14px 30px rgba(31, 111, 255, 0.22);
+  color: #fff;
+}
+
+.trainer-dashboard__action--primary span,
+.trainer-dashboard__action--primary small {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.trainer-dashboard__metrics {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.trainer-dashboard__metric {
+  min-height: 0;
+  padding: 0.95rem 1.1rem;
+  box-shadow: none;
+}
+
+.trainer-dashboard__metric strong {
+  font-size: 1.55rem;
+  line-height: 1;
+}
+
+.trainer-dashboard__metric--attention {
+  border-color: rgba(249, 115, 22, 0.28);
+  background: rgba(249, 115, 22, 0.06);
+}
+
+.trainer-dashboard__work {
+  display: grid;
+  gap: 0.85rem;
+  padding: 1.3rem;
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.trainer-dashboard__section-heading h2 {
+  font-size: 1.25rem;
+}
+
+.trainer-dashboard__queue,
+.trainer-dashboard__upcoming-list {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.trainer-dashboard__assignment,
+.trainer-dashboard__upcoming-item,
+.trainer-dashboard__empty {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface-alt);
+}
+
+.trainer-dashboard__assignment {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem 1rem;
+  transition: border-color 160ms ease, background 160ms ease;
+}
+
+.trainer-dashboard__assignment:hover,
+.trainer-dashboard__upcoming-item:hover {
+  border-color: rgba(31, 111, 255, 0.35);
+  background: rgba(31, 111, 255, 0.05);
+}
+
+.trainer-dashboard__assignment-main,
+.trainer-dashboard__assignment-meta,
+.trainer-dashboard__upcoming-item > div {
+  display: grid;
+  gap: 0.18rem;
+}
+
+.trainer-dashboard__assignment-main > span:last-child,
+.trainer-dashboard__upcoming-item span,
+.trainer-dashboard__assignment-meta {
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.trainer-dashboard__assignment-status {
+  color: #c2410c;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.trainer-dashboard__assignment-meta {
+  justify-items: end;
+  text-align: right;
+}
+
+.trainer-dashboard__assignment-meta span:last-child {
+  color: var(--primary-strong);
+  font-weight: 700;
+}
+
+.trainer-dashboard__section-heading--upcoming {
+  margin-top: 0.5rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid var(--border);
+}
+
+.trainer-dashboard__upcoming-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.8rem 0.95rem;
+  transition: border-color 160ms ease, background 160ms ease;
+}
+
+.trainer-dashboard__empty {
+  display: grid;
+  gap: 0.2rem;
+  padding: 1rem;
+  color: var(--muted);
+}
+
+.trainer-dashboard__empty strong {
+  color: var(--text);
+}
+
+.trainer-dashboard__empty--compact {
+  padding: 0.85rem 0.95rem;
+}
+
 .role-shell--student .role-header {
   border-bottom: none;
   background: transparent;
@@ -1835,6 +2074,53 @@ select[aria-invalid='true'] {
 }
 
 @media (max-width: 767px) {
+  .trainer-dashboard {
+    gap: 1.15rem;
+  }
+
+  .trainer-dashboard__intro,
+  .trainer-dashboard__section-heading,
+  .trainer-dashboard__assignment,
+  .trainer-dashboard__upcoming-item {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .trainer-dashboard__intro .button {
+    width: 100%;
+  }
+
+  .trainer-dashboard__actions,
+  .trainer-dashboard__metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .trainer-dashboard__action {
+    min-height: 112px;
+  }
+
+  .trainer-dashboard__metrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .trainer-dashboard__metric {
+    min-height: 104px;
+    padding: 0.85rem;
+  }
+
+  .trainer-dashboard__metric span {
+    font-size: 0.67rem;
+  }
+
+  .trainer-dashboard__work {
+    padding: 1rem;
+  }
+
+  .trainer-dashboard__assignment-meta {
+    justify-items: start;
+    text-align: left;
+  }
+
   .page-shell--public.page-shell--auth .login-layout {
     grid-template-columns: 1fr;
   }
