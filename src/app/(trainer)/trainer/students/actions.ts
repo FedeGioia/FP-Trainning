@@ -10,12 +10,19 @@ export async function updateStudentProfileAction(formData: FormData) {
   const studentId = String(formData.get('studentId') ?? '')
   const name = String(formData.get('name') ?? '')
   const email = String(formData.get('email') ?? '')
+  const programCodes = formData.getAll('programCodes').map(String)
 
   if (!session?.user?.id || (session.user.role !== 'trainer' && session.user.role !== 'admin')) {
     redirect('/login?error=auth')
   }
 
-  const result = await updateStudentProfile({ studentId, name, email })
+  const result = await updateStudentProfile({
+    studentId,
+    name,
+    email,
+    programCodes,
+    trainerId: session.user.id,
+  })
 
   if (!result.ok) {
     redirect(`/trainer/students?error=${encodeURIComponent(result.message)}`)

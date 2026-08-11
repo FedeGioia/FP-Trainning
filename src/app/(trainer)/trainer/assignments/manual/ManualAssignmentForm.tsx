@@ -3,13 +3,14 @@
 import { useActionState, useState } from 'react'
 
 import { ExercisePrescriptionGrid } from '@/components/shared/ExercisePrescriptionGrid'
+import { StudentModalPickerTrigger } from '@/components/shared/StudentModalPicker'
 import type { ManualValidationState } from '@/modules/assignments/types'
 import { createManualAssignmentAction } from './actions'
 
 const SECTION_SLOTS = 3
 
 type ManualAssignmentFormProps = {
-  students: Array<{ id: string; name: string; programCodes: string[] }>
+  students: Array<{ id: string; name: string; email: string; programCodes: string[] }>
   programs: Array<{ id: string; name: string; code: string }>
   exercises: Array<{ id: string; name: string; primaryMetricType: string; categoryId: string; categoryPath: string }>
   categories: Parameters<typeof ExercisePrescriptionGrid>[0]['categories']
@@ -61,14 +62,11 @@ export function ManualAssignmentForm({ students, programs, exercises, categories
       {values?.formError ? <p className="status status--error" role="alert">{values.formError}</p> : null}
       <section className="form-panel stack">
         <div className="form-grid">
-          <label className="field">
+          <div className="field">
             <span>Alumno</span><small>Solo aparecen alumnos ya cargados en la plataforma.</small>
-            <select name="studentId" value={studentId} onChange={(event) => { setStudentId(event.target.value); setProgramId('') }} aria-invalid={Boolean(errors.get('studentId'))}>
-              <option value="" disabled>Elegí un alumno</option>
-              {students.map((student) => <option key={student.id} value={student.id}>{student.name} — {student.programCodes.join(', ')}</option>)}
-            </select>
-            {errors.get('studentId') ? <small className="field-error">{errors.get('studentId')}</small> : null}
-          </label>
+            <StudentModalPickerTrigger students={students} fieldName="studentId" selectedId={studentId} onSelectedIdChange={(nextStudentId) => { if (nextStudentId !== studentId) setProgramId(''); setStudentId(nextStudentId) }} invalid={Boolean(errors.get('studentId'))} describedBy={errors.get('studentId') ? 'studentId-error' : undefined} />
+            {errors.get('studentId') ? <small id="studentId-error" className="field-error">{errors.get('studentId')}</small> : null}
+          </div>
           <label className="field">
             <span>Programa</span><small>La rutina se guarda asociada a uno de los programas del alumno.</small>
             <select name="programId" value={programId} onChange={(event) => setProgramId(event.target.value)} disabled={!selectedStudent} aria-invalid={Boolean(errors.get('programId'))}>

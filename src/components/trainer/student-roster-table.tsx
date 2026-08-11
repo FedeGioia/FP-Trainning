@@ -4,11 +4,21 @@ import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 
 import { resetStudentPasswordAction, updateStudentProfileAction } from '@/app/(trainer)/trainer/students/actions'
+import type { ProgramSummary } from '@/modules/programs'
 import type { StudentSummary } from '@/modules/users'
 import { ProgramBadge } from '@/components/ui/program-badge'
 
 type StudentRosterTableProps = {
   students: StudentSummary[]
+  programs: ProgramSummary[]
+}
+
+function CloseIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="m6 6 12 12M18 6 6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  )
 }
 
 function MetricsIcon() {
@@ -45,7 +55,7 @@ function ResetAccessIcon() {
   )
 }
 
-export function StudentRosterTable({ students }: StudentRosterTableProps) {
+export function StudentRosterTable({ students, programs }: StudentRosterTableProps) {
   const [selectedStudent, setSelectedStudent] = useState<StudentSummary | null>(null)
   const [resetStudent, setResetStudent] = useState<StudentSummary | null>(null)
   const modalTriggerRef = useRef<HTMLButtonElement | null>(null)
@@ -176,8 +186,8 @@ export function StudentRosterTable({ students }: StudentRosterTableProps) {
                 </h3>
               </div>
 
-              <button className="pill" type="button" onClick={closeStudentModal} aria-label="Cerrar modal">
-                Cerrar
+              <button className="student-modal__close" type="button" onClick={closeStudentModal} aria-label="Cerrar datos del alumno" title="Cerrar">
+                <CloseIcon />
               </button>
             </div>
 
@@ -194,16 +204,28 @@ export function StudentRosterTable({ students }: StudentRosterTableProps) {
                 <input name="email" type="email" defaultValue={selectedStudent.email} required />
               </label>
 
-              <section className="student-modal__programs" aria-labelledby="student-programs-title">
-                <span id="student-programs-title">Programas</span>
-                <div className="student-roster-table__badges">
-                  {selectedStudent.programCodes.length > 0 ? (
-                    selectedStudent.programCodes.map((programCode) => <ProgramBadge key={programCode} code={programCode} />)
-                  ) : (
-                    <span className="muted">Sin programas asignados.</span>
-                  )}
+              <fieldset className="student-modal__programs" aria-describedby="student-programs-help">
+                <legend>Programas</legend>
+                <div className="student-modal__program-grid">
+                  {programs.map((program) => (
+                    <label key={program.code} className="check-card student-modal__program-option">
+                      <input
+                        type="checkbox"
+                        name="programCodes"
+                        value={program.code}
+                        defaultChecked={selectedStudent.programCodes.includes(program.code)}
+                      />
+                      <span className="stack" style={{ gap: '0.2rem' }}>
+                        <strong>{program.name}</strong>
+                        {program.description ? <span className="muted">{program.description}</span> : null}
+                      </span>
+                    </label>
+                  ))}
                 </div>
-              </section>
+                <span id="student-programs-help" className="muted">
+                  Si elegís Training, Stretching o Running, se agrega FP-Home automáticamente según la regla actual del negocio.
+                </span>
+              </fieldset>
 
               <div className="role-nav student-modal__actions">
                 <button className="button button-primary" type="submit">
@@ -232,8 +254,8 @@ export function StudentRosterTable({ students }: StudentRosterTableProps) {
                 </p>
               </div>
 
-              <button className="pill" type="button" onClick={closeResetModal} aria-label="Cerrar modal">
-                Cerrar
+              <button className="student-modal__close" type="button" onClick={closeResetModal} aria-label="Cerrar reset de contraseña" title="Cerrar">
+                <CloseIcon />
               </button>
             </div>
 

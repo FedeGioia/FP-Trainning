@@ -29,6 +29,8 @@ export type UpdateStudentProfileInput = {
   studentId: string
   name: string
   email: string
+  programCodes?: string[]
+  trainerId?: string
 }
 
 export type UpdateStudentProfileResult =

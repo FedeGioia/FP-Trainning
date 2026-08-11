@@ -1,6 +1,7 @@
 import Link from 'next/link'
 
 import { PlaceholderPanel } from '@/components/ui/placeholder-panel'
+import { listProgramCatalog } from '@/modules/programs'
 import { listStudents } from '@/modules/users'
 import { StudentRosterTable } from '@/components/trainer/student-roster-table'
 
@@ -17,7 +18,7 @@ type TrainerStudentsPageProps = {
 export default async function TrainerStudentsPage({ searchParams }: TrainerStudentsPageProps) {
   const params = (await searchParams) ?? {}
   const query = params.q?.trim() ?? ''
-  const students = await listStudents(query)
+  const [students, programs] = await Promise.all([listStudents(query), listProgramCatalog()])
 
   return (
     <div className="trainer-students stack">
@@ -72,7 +73,7 @@ export default async function TrainerStudentsPage({ searchParams }: TrainerStude
             description={query ? 'Probá con otro nombre, email o programa para encontrar al alumno que buscás.' : 'Creá el primer alumno para empezar a asignar rutinas, programas y accesos desde esta pantalla.'}
           />
         ) : (
-          <StudentRosterTable students={students} />
+          <StudentRosterTable students={students} programs={programs} />
         )}
       </section>
     </div>

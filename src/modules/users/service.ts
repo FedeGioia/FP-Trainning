@@ -290,6 +290,7 @@ export async function changeStudentPassword(
 export async function updateStudentProfile(input: UpdateStudentProfileInput): Promise<UpdateStudentProfileResult> {
   const name = input.name.trim()
   const email = input.email.trim().toLowerCase()
+  const programCodes = input.programCodes ? normalizeProgramCodes(input.programCodes) : undefined
 
   if (!name) {
     return { ok: false, message: 'El nombre es obligatorio.' }
@@ -297,6 +298,14 @@ export async function updateStudentProfile(input: UpdateStudentProfileInput): Pr
 
   if (!email) {
     return { ok: false, message: 'El email es obligatorio.' }
+  }
+
+  if (programCodes && programCodes.length === 0) {
+    return { ok: false, message: 'Seleccioná al menos un programa.' }
+  }
+
+  if (programCodes && !input.trainerId) {
+    return { ok: false, message: 'No encontramos el trainer responsable de actualizar los programas.' }
   }
 
   try {
@@ -314,6 +323,75 @@ export async function updateStudentProfile(input: UpdateStudentProfileInput): Pr
 
     if (emailTaken && emailTaken.id !== student.id) {
       return { ok: false, message: 'Ya existe otra cuenta con ese email.' }
+    }
+
+    if (programCodes && input.trainerId) {
+      const trainer = await db.user.findUnique({
+        where: { id: input.trainerId },
+      })
+
+      if (!trainer || trainer.role !== 'TRAINER' || trainer.status !== 'ACTIVE') {
+        return { ok: false, message: 'No encontramos un trainer activo para actualizar los programas.' }
+      }
+
+      const programs = await db.program.findMany({
+        where: { code: { in: programCodes as never[] } },
+      })
+
+      if (programs.length !== programCodes.length) {
+        return { ok: false, message: 'Uno o más programas elegidos no existen en la base.' }
+      }
+
+      const programIds = programs.map((program) => program.id)
+
+      await db.$transaction(async (tx) => {
+        await tx.user.update({
+          where: { id: student.id },
+          data: { name, email },
+        })
+
+        await tx.studentProgramMembership.deleteMany({
+          where: {
+            studentId: student.id,
+            programId: { notIn: programIds },
+          },
+        })
+
+        await tx.studentProgramMembership.createMany({
+          data: programIds.map((programId) => ({ studentId: student.id, programId })),
+          skipDuplicates: true,
+        })
+
+        await tx.trainerStudentAssignment.updateMany({
+          where: {
+            trainerId: trainer.id,
+            studentId: student.id,
+            programId: { notIn: programIds },
+            active: true,
+          },
+          data: { active: false, activeTo: new Date() },
+        })
+
+        await Promise.all(
+          programIds.map((programId) => tx.trainerStudentAssignment.upsert({
+            where: {
+              trainerId_studentId_programId: {
+                trainerId: trainer.id,
+                studentId: student.id,
+                programId,
+              },
+            },
+            create: {
+              trainerId: trainer.id,
+              studentId: student.id,
+              programId,
+            },
+            update: { active: true, activeTo: null },
+          })),
+        )
+      })
+
+      return { ok: true }
     }
 
     await db.user.update({

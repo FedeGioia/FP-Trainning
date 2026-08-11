@@ -1588,9 +1588,71 @@ summary:focus-visible {
   gap: 0.45rem;
 }
 
-.student-modal__programs > span {
+.student-modal__programs {
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+
+.student-modal__programs legend {
+  padding: 0;
   font-size: 0.85rem;
   font-weight: 700;
+}
+
+.student-modal__programs > span {
+  font-size: 0.85rem;
+}
+
+.student-modal__program-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.student-modal__program-option {
+  min-width: 0;
+  padding: 0.7rem;
+  border-radius: 12px;
+}
+
+.student-modal__program-option strong {
+  font-size: 0.85rem;
+}
+
+.student-modal__program-option .muted {
+  font-size: 0.75rem;
+  line-height: 1.3;
+}
+
+.student-modal__close {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.student-modal__close:hover {
+  border-color: rgba(31, 111, 255, 0.35);
+  background: rgba(31, 111, 255, 0.08);
+  color: var(--primary-strong);
+}
+
+.student-modal__close:focus-visible {
+  outline: 3px solid rgba(31, 111, 255, 0.3);
+  outline-offset: 2px;
+}
+
+.student-modal__close svg {
+  width: 1.1rem;
+  height: 1.1rem;
 }
 
 .pill.is-active {
@@ -1702,6 +1764,97 @@ summary:focus-visible {
 
 .exercise-picker-trigger.is-invalid {
   border-color: var(--danger);
+}
+
+.student-picker-trigger {
+  display: grid;
+  width: 100%;
+  min-height: 48px;
+  gap: 0.18rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid rgba(205, 215, 229, 0.92);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.86);
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+
+.student-picker-trigger:hover {
+  border-color: rgba(31, 111, 255, 0.35);
+  background: #fff;
+  box-shadow: 0 8px 18px rgba(31, 51, 84, 0.06);
+}
+
+.student-picker-trigger small {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 0.78rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.student-picker-trigger.is-invalid {
+  border-color: var(--danger);
+}
+
+.student-picker-modal {
+  display: grid;
+  width: min(100%, 680px);
+  gap: 1rem;
+  max-height: min(90vh, 720px);
+  overflow-y: auto;
+}
+
+.student-picker-modal__eyebrow {
+  color: var(--primary-strong);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.student-picker-modal__list {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.student-picker-modal__option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid rgba(205, 215, 229, 0.82);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.82);
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+}
+
+.student-picker-modal__option:hover,
+.student-picker-modal__option.is-selected {
+  border-color: rgba(31, 111, 255, 0.35);
+  background: rgba(31, 111, 255, 0.07);
+}
+
+.student-picker-modal__option > span {
+  display: grid;
+  gap: 0.14rem;
+  min-width: 0;
+}
+
+.student-picker-modal__option small {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.student-picker-modal__option > small {
+  flex: 0 0 auto;
+  text-align: right;
 }
 
 .exercise-category-assignment {
