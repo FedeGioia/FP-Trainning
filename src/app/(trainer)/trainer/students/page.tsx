@@ -1,6 +1,5 @@
 import Link from 'next/link'
 
-import { SectionIntro } from '@/components/ui/section-intro'
 import { PlaceholderPanel } from '@/components/ui/placeholder-panel'
 import { listStudents } from '@/modules/users'
 import { StudentRosterTable } from '@/components/trainer/student-roster-table'
@@ -20,38 +19,40 @@ export default async function TrainerStudentsPage({ searchParams }: TrainerStude
   const students = await listStudents(query)
 
   return (
-    <div className="stack">
-      <SectionIntro
-        eyebrow="People"
-        title="Alumnos"
-        description="Buscá alumnos, asignales rutinas y administrá accesos desde una sola pantalla."
-        actions={
-          <>
-            <Link className="button button-primary" href="/trainer/students/new">
-              Nuevo alumno
-            </Link>
-          </>
-        }
-      />
+    <div className="trainer-students stack">
+      <section className="trainer-students__intro">
+        <div>
+          <span className="eyebrow">Personas</span>
+          <h1>Alumnos</h1>
+          <p>Buscá alumnos, asignales rutinas y administrá accesos desde una sola pantalla.</p>
+        </div>
+        <Link className="trainer-students__new-student" href="/trainer/students/new">
+          Nuevo alumno
+        </Link>
+      </section>
 
-      {params.created ? <span className="status status--ok">Alumno creado correctamente.</span> : null}
-      {params.reset ? <span className="status status--ok">Contraseña actualizada correctamente.</span> : null}
-      {params.error ? <span className="status status--error">{decodeURIComponent(params.error)}</span> : null}
+      {params.created || params.reset || params.error ? (
+        <div className="trainer-students__feedback" aria-live="polite">
+          {params.created ? <span className="trainer-students__notice trainer-students__notice--ok">Alumno creado correctamente.</span> : null}
+          {params.reset ? <span className="trainer-students__notice trainer-students__notice--ok">Contraseña actualizada correctamente.</span> : null}
+          {params.error ? <span className="trainer-students__notice trainer-students__notice--error">{decodeURIComponent(params.error)}</span> : null}
+        </div>
+      ) : null}
 
-      <section className="stack">
-        <section className="card stack student-roster-toolbar">
+      <section className="trainer-students__content stack">
+        <section className="student-roster-toolbar">
           <form className="student-roster-toolbar__form" action="/trainer/students" method="get">
             <label className="field">
               <span>Buscar alumnos</span>
               <input name="q" type="search" placeholder="Nombre, email o programa" defaultValue={query} />
             </label>
 
-            <div className="role-nav student-roster-toolbar__actions">
-              <button className="button button-primary" type="submit">
+            <div className="student-roster-toolbar__actions">
+              <button className="student-roster-toolbar__submit" type="submit">
                 Buscar
               </button>
               {query ? (
-                <Link className="button button-secondary" href="/trainer/students">
+                <Link className="student-roster-toolbar__clear" href="/trainer/students">
                   Limpiar
                 </Link>
               ) : null}

@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { resetStudentPasswordAction } from '@/app/(trainer)/trainer/students/actions'
 import type { StudentSummary } from '@/modules/users'
@@ -12,23 +12,8 @@ type StudentRosterTableProps = {
 }
 
 export function StudentRosterTable({ students }: StudentRosterTableProps) {
-  const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [resetStudent, setResetStudent] = useState<StudentSummary | null>(null)
   const resetTriggerRef = useRef<HTMLButtonElement | null>(null)
-
-  const visibleSelectedIds = useMemo(
-    () => selectedIds.filter((studentId) => students.some((student) => student.id === studentId)),
-    [selectedIds, students],
-  )
-  const allSelected = students.length > 0 && visibleSelectedIds.length === students.length
-
-  function toggleSelection(studentId: string) {
-    setSelectedIds((current) => (current.includes(studentId) ? current.filter((id) => id !== studentId) : [...current, studentId]))
-  }
-
-  function toggleSelectAll() {
-    setSelectedIds((current) => (current.length === students.length ? [] : students.map((student) => student.id)))
-  }
 
   function closeResetModal() {
     setResetStudent(null)
@@ -55,16 +40,11 @@ export function StudentRosterTable({ students }: StudentRosterTableProps) {
   }, [resetStudent])
 
   return (
-    <div className="stack">
+    <div className="student-roster">
       <div className="student-roster-table-wrap">
         <table className="student-roster-table">
           <thead>
             <tr>
-              <th className="student-roster-table__check-col">
-                <button type="button" className="student-roster-table__check-all" onClick={toggleSelectAll} aria-label="Seleccionar todos los alumnos">
-                  {allSelected ? '☑' : '☐'}
-                </button>
-              </th>
               <th>Alumno</th>
               <th>Email</th>
               <th>Programas</th>
@@ -73,16 +53,9 @@ export function StudentRosterTable({ students }: StudentRosterTableProps) {
           </thead>
           <tbody>
             {students.map((student) => {
-              const isSelected = selectedIds.includes(student.id)
-
               return (
-                <tr key={student.id} className={isSelected ? 'is-selected' : ''}>
-                  <td className="student-roster-table__check-col">
-                    <label className="student-roster-table__check">
-                      <input type="checkbox" checked={isSelected} onChange={() => toggleSelection(student.id)} aria-label={`Seleccionar ${student.name}`} />
-                    </label>
-                  </td>
-                  <td>
+                <tr key={student.id}>
+                  <td className="student-roster-table__student">
                     <strong>{student.name}</strong>
                   </td>
                   <td className="muted">{student.email}</td>
@@ -95,22 +68,22 @@ export function StudentRosterTable({ students }: StudentRosterTableProps) {
                   </td>
                   <td>
                     <div className="student-roster-table__actions">
-                      <Link className="pill" href={`/trainer/assignments/manual?studentId=${student.id}`}>
-                        Manual
+                      <Link className="student-roster-table__action student-roster-table__action--primary" href={`/trainer/assignments/manual?studentId=${student.id}`}>
+                        Asignar manualmente
                       </Link>
-                      <Link className="pill" href={`/trainer/assignments/new?studentId=${student.id}`}>
-                        Plantilla
+                      <Link className="student-roster-table__action" href={`/trainer/assignments/new?studentId=${student.id}`}>
+                        Usar plantilla
                       </Link>
 
                       <button
-                        className="pill"
+                        className="student-roster-table__action student-roster-table__action--reset"
                         type="button"
                         onClick={(event) => {
                           resetTriggerRef.current = event.currentTarget
                           setResetStudent(student)
                         }}
                       >
-                        Reset
+                        Resetear acceso
                       </button>
                     </div>
                   </td>
