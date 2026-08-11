@@ -45,28 +45,28 @@ export function StudentRosterTable({ students }: StudentRosterTableProps) {
         <table className="student-roster-table">
           <thead>
             <tr>
-              <th>Alumno</th>
-              <th>Email</th>
-              <th>Programas</th>
-              <th>Acciones</th>
+              <th className="student-roster-table__name-column">Alumno</th>
+              <th className="student-roster-table__email-column">Email</th>
+              <th className="student-roster-table__programs-column">Programas</th>
+              <th className="student-roster-table__actions-column">Acciones</th>
             </tr>
           </thead>
           <tbody>
             {students.map((student) => {
               return (
                 <tr key={student.id}>
-                  <td className="student-roster-table__student">
+                  <td className="student-roster-table__student student-roster-table__name-column">
                     <strong>{student.name}</strong>
                   </td>
-                  <td className="muted">{student.email}</td>
-                  <td>
+                  <td className="muted student-roster-table__email-column">{student.email}</td>
+                  <td className="student-roster-table__programs-column">
                     <div className="student-roster-table__badges">
                       {student.programCodes.map((programCode) => (
                         <ProgramBadge key={programCode} code={programCode} />
                       ))}
                     </div>
                   </td>
-                  <td>
+                  <td className="student-roster-table__actions-column">
                     <div className="student-roster-table__actions">
                       <Link className="student-roster-table__action student-roster-table__action--primary" href={`/trainer/assignments/manual?studentId=${student.id}`}>
                         Asignar manualmente

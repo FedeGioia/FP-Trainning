@@ -1268,7 +1268,7 @@ summary:focus-visible {
 
 .trainer-students {
   gap: 0.8rem;
-  max-width: 1080px;
+  max-width: 1320px;
   margin: 0 auto;
 }
 
@@ -1434,13 +1434,29 @@ summary:focus-visible {
 
 .student-roster-table {
   width: 100%;
-  min-width: 880px;
+  min-width: 1040px;
   border-collapse: collapse;
+}
+
+.student-roster-table__name-column {
+  width: 25%;
+}
+
+.student-roster-table__email-column {
+  width: 22%;
+}
+
+.student-roster-table__programs-column {
+  width: 33%;
+}
+
+.student-roster-table__actions-column {
+  width: 20%;
 }
 
 .student-roster-table th,
 .student-roster-table td {
-  padding: 0.78rem 0.8rem;
+  padding: 0.9rem 1rem;
   border-bottom: 1px solid rgba(205, 215, 229, 0.72);
   text-align: left;
   vertical-align: middle;
@@ -1464,11 +1480,24 @@ summary:focus-visible {
 }
 
 .student-roster-table__student strong {
-  font-size: 0.92rem;
-  letter-spacing: -0.01em;
+  display: block;
+  font-size: 1.02rem;
+  line-height: 1.35;
+  letter-spacing: -0.015em;
 }
 
-.student-roster-table__badges,
+.student-roster-table__badges {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
+  gap: 0.45rem;
+}
+
+.student-roster-table__badges .program-badge {
+  min-height: 2.15rem;
+  padding: 0.5rem 0.65rem;
+  text-align: center;
+}
+
 .student-roster-table__actions {
   display: flex;
   flex-wrap: wrap;
