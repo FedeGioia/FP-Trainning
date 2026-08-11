@@ -11,6 +11,40 @@ type StudentRosterTableProps = {
   students: StudentSummary[]
 }
 
+function MetricsIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M5 19V10M12 19V5M19 19v-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+function ManualAssignmentIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+function TemplateAssignmentIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <rect x="8" y="7" width="11" height="12" rx="2" stroke="currentColor" strokeWidth="2" />
+      <path d="M5 15V5a2 2 0 0 1 2-2h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+function ResetAccessIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M20 11a8 8 0 1 0 1 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path d="M20 5v6h-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
 export function StudentRosterTable({ students }: StudentRosterTableProps) {
   const [resetStudent, setResetStudent] = useState<StudentSummary | null>(null)
   const resetTriggerRef = useRef<HTMLButtonElement | null>(null)
@@ -68,22 +102,42 @@ export function StudentRosterTable({ students }: StudentRosterTableProps) {
                   </td>
                   <td className="student-roster-table__actions-column">
                     <div className="student-roster-table__actions">
-                      <Link className="student-roster-table__action student-roster-table__action--primary" href={`/trainer/assignments/manual?studentId=${student.id}`}>
-                        Asignar manualmente
+                      <Link
+                        className="student-roster-table__action"
+                        href={`/trainer/students/${student.id}/metrics`}
+                        aria-label={`Ver métricas de ${student.name}`}
+                        title="Ver métricas"
+                      >
+                        <MetricsIcon />
                       </Link>
-                      <Link className="student-roster-table__action" href={`/trainer/assignments/new?studentId=${student.id}`}>
-                        Usar plantilla
+                      <Link
+                        className="student-roster-table__action student-roster-table__action--primary"
+                        href={`/trainer/assignments/manual?studentId=${student.id}`}
+                        aria-label={`Asignar rutina manualmente a ${student.name}`}
+                        title="Asignar manualmente"
+                      >
+                        <ManualAssignmentIcon />
+                      </Link>
+                      <Link
+                        className="student-roster-table__action"
+                        href={`/trainer/assignments/new?studentId=${student.id}`}
+                        aria-label={`Asignar plantilla a ${student.name}`}
+                        title="Usar plantilla"
+                      >
+                        <TemplateAssignmentIcon />
                       </Link>
 
                       <button
                         className="student-roster-table__action student-roster-table__action--reset"
                         type="button"
+                        aria-label={`Resetear acceso de ${student.name}`}
+                        title="Resetear acceso"
                         onClick={(event) => {
                           resetTriggerRef.current = event.currentTarget
                           setResetStudent(student)
                         }}
                       >
-                        Resetear acceso
+                        <ResetAccessIcon />
                       </button>
                     </div>
                   </td>

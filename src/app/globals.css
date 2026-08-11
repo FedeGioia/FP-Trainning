@@ -1434,7 +1434,7 @@ summary:focus-visible {
 
 .student-roster-table {
   width: 100%;
-  min-width: 1040px;
+  min-width: 900px;
   border-collapse: collapse;
 }
 
@@ -1447,11 +1447,11 @@ summary:focus-visible {
 }
 
 .student-roster-table__programs-column {
-  width: 33%;
+  width: 35%;
 }
 
 .student-roster-table__actions-column {
-  width: 20%;
+  width: 18%;
 }
 
 .student-roster-table th,
@@ -1487,15 +1487,16 @@ summary:focus-visible {
 }
 
 .student-roster-table__badges {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
-  gap: 0.45rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
 }
 
 .student-roster-table__badges .program-badge {
-  min-height: 2.15rem;
-  padding: 0.5rem 0.65rem;
-  text-align: center;
+  min-height: 1.65rem;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.72rem;
+  line-height: 1.1;
 }
 
 .student-roster-table__actions {
@@ -1505,10 +1506,17 @@ summary:focus-visible {
 }
 
 .student-roster-table__action {
-  padding: 0.38rem 0.52rem;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
   background: transparent;
   color: var(--muted);
   cursor: pointer;
+}
+
+.student-roster-table__action svg {
+  width: 1rem;
+  height: 1rem;
 }
 
 .student-roster-table__action--primary {
