@@ -7,6 +7,7 @@ import { StudentRosterTable } from '@/components/trainer/student-roster-table'
 type TrainerStudentsPageProps = {
   searchParams?: Promise<{
     created?: string
+    updated?: string
     reset?: string
     error?: string
     q?: string
@@ -31,9 +32,10 @@ export default async function TrainerStudentsPage({ searchParams }: TrainerStude
         </Link>
       </section>
 
-      {params.created || params.reset || params.error ? (
+      {params.created || params.updated || params.reset || params.error ? (
         <div className="trainer-students__feedback" aria-live="polite">
           {params.created ? <span className="trainer-students__notice trainer-students__notice--ok">Alumno creado correctamente.</span> : null}
+          {params.updated ? <span className="trainer-students__notice trainer-students__notice--ok">Datos del alumno actualizados correctamente.</span> : null}
           {params.reset ? <span className="trainer-students__notice trainer-students__notice--ok">Contraseña actualizada correctamente.</span> : null}
           {params.error ? <span className="trainer-students__notice trainer-students__notice--error">{decodeURIComponent(params.error)}</span> : null}
         </div>

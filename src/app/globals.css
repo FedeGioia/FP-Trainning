@@ -1479,11 +1479,24 @@ summary:focus-visible {
   background: rgba(31, 111, 255, 0.035);
 }
 
-.student-roster-table__student strong {
+.student-roster-table__student-trigger {
   display: block;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
   font-size: 1.02rem;
+  font-weight: 700;
   line-height: 1.35;
   letter-spacing: -0.015em;
+  text-align: left;
+}
+
+.student-roster-table__student-trigger:hover {
+  color: var(--primary-strong);
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
 }
 
 .student-roster-table__badges {
@@ -1568,6 +1581,16 @@ summary:focus-visible {
 
 .student-modal__actions {
   align-items: center;
+}
+
+.student-modal__programs {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.student-modal__programs > span {
+  font-size: 0.85rem;
+  font-weight: 700;
 }
 
 .pill.is-active {

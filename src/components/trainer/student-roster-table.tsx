@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 
-import { resetStudentPasswordAction } from '@/app/(trainer)/trainer/students/actions'
+import { resetStudentPasswordAction, updateStudentProfileAction } from '@/app/(trainer)/trainer/students/actions'
 import type { StudentSummary } from '@/modules/users'
 import { ProgramBadge } from '@/components/ui/program-badge'
 
@@ -46,8 +46,15 @@ function ResetAccessIcon() {
 }
 
 export function StudentRosterTable({ students }: StudentRosterTableProps) {
+  const [selectedStudent, setSelectedStudent] = useState<StudentSummary | null>(null)
   const [resetStudent, setResetStudent] = useState<StudentSummary | null>(null)
-  const resetTriggerRef = useRef<HTMLButtonElement | null>(null)
+  const modalTriggerRef = useRef<HTMLButtonElement | null>(null)
+
+  const activeStudent = selectedStudent ?? resetStudent
+
+  function closeStudentModal() {
+    setSelectedStudent(null)
+  }
 
   function closeResetModal() {
     setResetStudent(null)
@@ -56,22 +63,23 @@ export function StudentRosterTable({ students }: StudentRosterTableProps) {
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') {
-        closeResetModal()
+        setSelectedStudent(null)
+        setResetStudent(null)
       }
     }
 
-    if (resetStudent) {
-      window.addEventListener('keydown', onKeyDown)
-      return () => window.removeEventListener('keydown', onKeyDown)
-    }
+      if (activeStudent) {
+        window.addEventListener('keydown', onKeyDown)
+        return () => window.removeEventListener('keydown', onKeyDown)
+      }
 
-    if (resetTriggerRef.current) {
-      resetTriggerRef.current.focus()
-      resetTriggerRef.current = null
+    if (modalTriggerRef.current) {
+      modalTriggerRef.current.focus()
+      modalTriggerRef.current = null
     }
 
     return undefined
-  }, [resetStudent])
+  }, [activeStudent])
 
   return (
     <div className="student-roster">
@@ -90,7 +98,16 @@ export function StudentRosterTable({ students }: StudentRosterTableProps) {
               return (
                 <tr key={student.id}>
                   <td className="student-roster-table__student student-roster-table__name-column">
-                    <strong>{student.name}</strong>
+                    <button
+                      className="student-roster-table__student-trigger"
+                      type="button"
+                      onClick={(event) => {
+                        modalTriggerRef.current = event.currentTarget
+                        setSelectedStudent(student)
+                      }}
+                    >
+                      {student.name}
+                    </button>
                   </td>
                   <td className="muted student-roster-table__email-column">{student.email}</td>
                   <td className="student-roster-table__programs-column">
@@ -133,7 +150,7 @@ export function StudentRosterTable({ students }: StudentRosterTableProps) {
                         aria-label={`Resetear acceso de ${student.name}`}
                         title="Resetear acceso"
                         onClick={(event) => {
-                          resetTriggerRef.current = event.currentTarget
+                          modalTriggerRef.current = event.currentTarget
                           setResetStudent(student)
                         }}
                       >
@@ -147,6 +164,59 @@ export function StudentRosterTable({ students }: StudentRosterTableProps) {
           </tbody>
         </table>
       </div>
+
+      {selectedStudent ? (
+        <div className="student-modal-backdrop" role="presentation" onClick={closeStudentModal}>
+          <div className="card stack student-modal" role="dialog" aria-modal="true" aria-labelledby="student-detail-title" onClick={(event) => event.stopPropagation()}>
+            <div className="student-modal__header">
+              <div className="stack" style={{ gap: '0.2rem' }}>
+                <span className="muted">Datos del alumno</span>
+                <h3 id="student-detail-title" className="student-modal__title">
+                  {selectedStudent.name}
+                </h3>
+              </div>
+
+              <button className="pill" type="button" onClick={closeStudentModal} aria-label="Cerrar modal">
+                Cerrar
+              </button>
+            </div>
+
+            <form className="stack" action={updateStudentProfileAction} style={{ gap: '0.85rem' }}>
+              <input type="hidden" name="studentId" value={selectedStudent.id} />
+
+              <label className="field">
+                <span>Nombre</span>
+                <input name="name" type="text" defaultValue={selectedStudent.name} required autoFocus />
+              </label>
+
+              <label className="field">
+                <span>Email</span>
+                <input name="email" type="email" defaultValue={selectedStudent.email} required />
+              </label>
+
+              <section className="student-modal__programs" aria-labelledby="student-programs-title">
+                <span id="student-programs-title">Programas</span>
+                <div className="student-roster-table__badges">
+                  {selectedStudent.programCodes.length > 0 ? (
+                    selectedStudent.programCodes.map((programCode) => <ProgramBadge key={programCode} code={programCode} />)
+                  ) : (
+                    <span className="muted">Sin programas asignados.</span>
+                  )}
+                </div>
+              </section>
+
+              <div className="role-nav student-modal__actions">
+                <button className="button button-primary" type="submit">
+                  Guardar cambios
+                </button>
+                <button className="button button-secondary" type="button" onClick={closeStudentModal}>
+                  Cancelar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      ) : null}
 
       {resetStudent ? (
         <div className="student-modal-backdrop" role="presentation" onClick={closeResetModal}>
