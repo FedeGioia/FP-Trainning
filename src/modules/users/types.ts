@@ -88,6 +88,7 @@ export type CreateStudentResult =
 export type ResetStudentPasswordInput = {
   studentId: string
   password: string
+  trainerId?: string
 }
 
 export type ResetStudentPasswordResult =

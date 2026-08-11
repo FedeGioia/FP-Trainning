@@ -24,6 +24,10 @@ import type {
 } from './types'
 
 export async function listStudents(searchQuery = ''): Promise<StudentSummary[]> {
+  return listStudentSummaries(searchQuery)
+}
+
+async function listStudentSummaries(searchQuery: string): Promise<StudentSummary[]> {
   try {
     const query = searchQuery.trim()
 
@@ -240,6 +244,10 @@ export async function resetStudentPassword(input: ResetStudentPasswordInput): Pr
       return { ok: false, message: 'No se encontró un alumno con ese ID.' }
     }
 
+    if (input.trainerId && !await hasActiveTrainerStudentAssignment(input.trainerId, student.id)) {
+      return { ok: false, message: 'No tenés permiso para administrar este alumno.' }
+    }
+
     await db.user.update({
       where: { id: input.studentId },
       data: {
@@ -330,6 +338,10 @@ export async function updateStudentProfile(input: UpdateStudentProfileInput): Pr
       return { ok: false, message: 'No se encontró el alumno.' }
     }
 
+    if (input.trainerId && !await hasActiveTrainerStudentAssignment(input.trainerId, student.id)) {
+      return { ok: false, message: 'No tenés permiso para administrar este alumno.' }
+    }
+
     const emailTaken = await db.user.findUnique({
       where: { email },
     })
@@ -339,14 +351,7 @@ export async function updateStudentProfile(input: UpdateStudentProfileInput): Pr
     }
 
     if (programCodes && input.trainerId) {
-      const trainer = await db.user.findUnique({
-        where: { id: input.trainerId },
-      })
-
-      if (!trainer || trainer.role !== 'TRAINER' || trainer.status !== 'ACTIVE') {
-        return { ok: false, message: 'No encontramos un trainer activo para actualizar los programas.' }
-      }
-
+      const trainerId = input.trainerId
       const programs = await db.program.findMany({
         where: { code: { in: programCodes as never[] } },
       })
@@ -377,7 +382,7 @@ export async function updateStudentProfile(input: UpdateStudentProfileInput): Pr
 
         await tx.trainerStudentAssignment.updateMany({
           where: {
-            trainerId: trainer.id,
+            trainerId,
             studentId: student.id,
             programId: { notIn: programIds },
             active: true,
@@ -389,13 +394,13 @@ export async function updateStudentProfile(input: UpdateStudentProfileInput): Pr
           programIds.map((programId) => tx.trainerStudentAssignment.upsert({
             where: {
               trainerId_studentId_programId: {
-                trainerId: trainer.id,
+                trainerId,
                 studentId: student.id,
                 programId,
               },
             },
             create: {
-              trainerId: trainer.id,
+              trainerId,
               studentId: student.id,
               programId,
             },
@@ -423,6 +428,25 @@ export async function updateStudentProfile(input: UpdateStudentProfileInput): Pr
       message: 'No se pudo actualizar el perfil.',
     }
   }
+}
+
+async function hasActiveTrainerStudentAssignment(trainerId: string, studentId: string) {
+  const assignment = await db.trainerStudentAssignment.findFirst({
+    where: {
+      trainerId,
+      studentId,
+      active: true,
+      trainer: {
+        is: {
+          role: 'TRAINER',
+          status: 'ACTIVE',
+        },
+      },
+    },
+    select: { id: true },
+  })
+
+  return assignment !== null
 }
 
 export async function changeStudentPasswordWithCurrent(

@@ -13,6 +13,7 @@ import { buildManualValidationState, parseOptionalNumber } from '@/app/(trainer)
 import { buildTemplateValidationState } from '@/app/(trainer)/trainer/assignments/new/validation'
 import { buildCategoryTree, normalizeCategoryName, requireCategoryId } from '@/modules/exercises'
 import { isNavItemActive } from '@/components/layout/role-navigation'
+import { getCurrentWeekRange } from '@/modules/trainer-students'
 
 async function test(name: string, fn: () => void | Promise<void>) {
   try {
@@ -83,6 +84,19 @@ await test('getWeekDaysFrom returns a Sunday-to-Saturday range', () => {
   assert.equal(week.length, 7)
   assert.equal(formatLocalDateKey(week[0]), '2026-07-05')
   assert.equal(formatLocalDateKey(week[6]), '2026-07-11')
+})
+
+await test('getCurrentWeekRange returns a Sunday-start, exclusive-next-Sunday window', () => {
+  const week = getCurrentWeekRange(new Date(2026, 6, 8, 12, 0, 0))
+
+  assert.deepEqual(
+    [week.start.getFullYear(), week.start.getMonth(), week.start.getDate(), week.start.getHours()],
+    [2026, 6, 5, 0],
+  )
+  assert.deepEqual(
+    [week.end.getFullYear(), week.end.getMonth(), week.end.getDate(), week.end.getHours()],
+    [2026, 6, 12, 0],
+  )
 })
 
 await test('isNavItemActive highlights exact routes and their nested pages only', () => {

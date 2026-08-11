@@ -12,8 +12,10 @@ export async function updateStudentProfileAction(formData: FormData) {
   const email = String(formData.get('email') ?? '')
   const programCodes = formData.getAll('programCodes').map(String)
   const expectedWorkoutsPerWeek = Number(formData.get('expectedWorkoutsPerWeek'))
+  const returnTo = String(formData.get('returnTo') ?? '')
+  const safeReturnTo = returnTo === `/trainer/students/${studentId}` ? returnTo : '/trainer/students'
 
-  if (!session?.user?.id || (session.user.role !== 'trainer' && session.user.role !== 'admin')) {
+  if (!session?.user?.id || session.user.role !== 'trainer') {
     redirect('/login?error=auth')
   }
 
@@ -27,26 +29,28 @@ export async function updateStudentProfileAction(formData: FormData) {
   })
 
   if (!result.ok) {
-    redirect(`/trainer/students?error=${encodeURIComponent(result.message)}`)
+    redirect(`${safeReturnTo}?error=${encodeURIComponent(result.message)}`)
   }
 
-  redirect('/trainer/students?updated=1')
+  redirect(`${safeReturnTo}?updated=1`)
 }
 
 export async function resetStudentPasswordAction(formData: FormData) {
   const session = await auth()
   const studentId = String(formData.get('studentId') ?? '')
   const password = String(formData.get('password') ?? '')
+  const returnTo = String(formData.get('returnTo') ?? '')
+  const safeReturnTo = returnTo === `/trainer/students/${studentId}` ? returnTo : '/trainer/students'
 
-  if (!session?.user?.id || (session.user.role !== 'trainer' && session.user.role !== 'admin')) {
+  if (!session?.user?.id || session.user.role !== 'trainer') {
     redirect('/login?error=auth')
   }
 
-  const result = await resetStudentPassword({ studentId, password })
+  const result = await resetStudentPassword({ studentId, password, trainerId: session.user.id })
 
   if (!result.ok) {
-    redirect(`/trainer/students?error=${encodeURIComponent(result.message)}`)
+    redirect(`${safeReturnTo}?error=${encodeURIComponent(result.message)}`)
   }
 
-  redirect('/trainer/students?reset=1')
+  redirect(`${safeReturnTo}?reset=1`)
 }
