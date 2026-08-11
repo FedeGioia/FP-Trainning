@@ -75,6 +75,7 @@ model User {
   image         String?
   passwordHash  String?
   mustChangePassword Boolean @default(false)
+  expectedWorkoutsPerWeek Int @default(0)
   role          Role
   status        UserStatus  @default(ACTIVE)
   createdAt     DateTime    @default(now())

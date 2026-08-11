@@ -1392,13 +1392,14 @@ summary:focus-visible {
 .student-roster-toolbar__actions {
   display: flex;
   align-items: center;
+  align-self: end;
   gap: 0.4rem;
 }
 
 .student-roster-toolbar__submit,
 .student-roster-toolbar__clear {
-  min-height: 38px;
-  padding: 0.55rem 0.72rem;
+  min-height: 50px;
+  padding: 0.65rem 0.9rem;
   cursor: pointer;
 }
 
@@ -1434,7 +1435,7 @@ summary:focus-visible {
 
 .student-roster-table {
   width: 100%;
-  min-width: 900px;
+  min-width: 1040px;
   border-collapse: collapse;
 }
 
@@ -1447,7 +1448,11 @@ summary:focus-visible {
 }
 
 .student-roster-table__programs-column {
-  width: 35%;
+  width: 28%;
+}
+
+.student-roster-table__workouts-column {
+  width: 17%;
 }
 
 .student-roster-table__actions-column {
@@ -1510,6 +1515,21 @@ summary:focus-visible {
   padding: 0.25rem 0.5rem;
   font-size: 0.72rem;
   line-height: 1.1;
+}
+
+.student-roster-table__workouts {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.student-roster-table__workouts strong {
+  font-size: 1.02rem;
+  line-height: 1.1;
+}
+
+.student-roster-table__workouts .muted {
+  font-size: 0.76rem;
+  line-height: 1.3;
 }
 
 .student-roster-table__actions {

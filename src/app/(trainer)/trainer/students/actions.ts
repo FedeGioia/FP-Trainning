@@ -11,6 +11,7 @@ export async function updateStudentProfileAction(formData: FormData) {
   const name = String(formData.get('name') ?? '')
   const email = String(formData.get('email') ?? '')
   const programCodes = formData.getAll('programCodes').map(String)
+  const expectedWorkoutsPerWeek = Number(formData.get('expectedWorkoutsPerWeek'))
 
   if (!session?.user?.id || (session.user.role !== 'trainer' && session.user.role !== 'admin')) {
     redirect('/login?error=auth')
@@ -22,6 +23,7 @@ export async function updateStudentProfileAction(formData: FormData) {
     email,
     programCodes,
     trainerId: session.user.id,
+    expectedWorkoutsPerWeek,
   })
 
   if (!result.ok) {

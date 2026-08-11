@@ -100,6 +100,7 @@ export function StudentRosterTable({ students, programs }: StudentRosterTablePro
               <th className="student-roster-table__name-column">Alumno</th>
               <th className="student-roster-table__email-column">Email</th>
               <th className="student-roster-table__programs-column">Programas</th>
+              <th className="student-roster-table__workouts-column">Rutinas</th>
               <th className="student-roster-table__actions-column">Acciones</th>
             </tr>
           </thead>
@@ -125,6 +126,14 @@ export function StudentRosterTable({ students, programs }: StudentRosterTablePro
                       {student.programCodes.map((programCode) => (
                         <ProgramBadge key={programCode} code={programCode} />
                       ))}
+                    </div>
+                  </td>
+                  <td className="student-roster-table__workouts-column">
+                    <div className="student-roster-table__workouts">
+                      <strong>{student.assignedWorkoutCount}</strong>
+                      <span className="muted">
+                        cargadas · {student.expectedWorkoutsPerWeek} esperadas/semana
+                      </span>
                     </div>
                   </td>
                   <td className="student-roster-table__actions-column">
@@ -202,6 +211,19 @@ export function StudentRosterTable({ students, programs }: StudentRosterTablePro
               <label className="field">
                 <span>Email</span>
                 <input name="email" type="email" defaultValue={selectedStudent.email} required />
+              </label>
+
+              <label className="field">
+                <span>Rutinas esperadas por semana</span>
+                <input
+                  name="expectedWorkoutsPerWeek"
+                  type="number"
+                  min={0}
+                  step={1}
+                  defaultValue={selectedStudent.expectedWorkoutsPerWeek}
+                  required
+                />
+                <small>Objetivo global del alumno. Usá 0 si todavía no definiste uno.</small>
               </label>
 
               <fieldset className="student-modal__programs" aria-describedby="student-programs-help">

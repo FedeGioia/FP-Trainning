@@ -16,6 +16,8 @@ export type AdminUserSummary = UserSummary & {
 
 export type StudentSummary = UserSummary & {
   programCodes: string[]
+  assignedWorkoutCount: number
+  expectedWorkoutsPerWeek: number
 }
 
 export type StudentProfileSummary = {
@@ -31,6 +33,7 @@ export type UpdateStudentProfileInput = {
   email: string
   programCodes?: string[]
   trainerId?: string
+  expectedWorkoutsPerWeek?: number
 }
 
 export type UpdateStudentProfileResult =

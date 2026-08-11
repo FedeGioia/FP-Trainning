@@ -39,12 +39,12 @@ const programSeeds = [
 ] as const
 
 const userSeeds = [
-  { email: 'admin@fptraining.local', name: 'Admin Demo', role: Role.ADMIN, password: 'admin1234' },
-  { email: 'trainer@fptraining.local', name: 'Trainer Demo', role: Role.TRAINER, password: 'trainer1234' },
-  { email: 'student@fptraining.local', name: 'Student Demo', role: Role.STUDENT, password: 'student1234' },
-  { email: 'student2@fptraining.local', name: 'Student Two', role: Role.STUDENT, password: 'student1234' },
-  { email: 'student3@fptraining.local', name: 'Student Three', role: Role.STUDENT, password: 'student1234' },
-  { email: 'student4@fptraining.local', name: 'Student Four', role: Role.STUDENT, password: 'student1234' },
+  { email: 'admin@fptraining.local', name: 'Admin Demo', role: Role.ADMIN, password: 'admin1234', expectedWorkoutsPerWeek: 0 },
+  { email: 'trainer@fptraining.local', name: 'Trainer Demo', role: Role.TRAINER, password: 'trainer1234', expectedWorkoutsPerWeek: 0 },
+  { email: 'student@fptraining.local', name: 'Student Demo', role: Role.STUDENT, password: 'student1234', expectedWorkoutsPerWeek: 3 },
+  { email: 'student2@fptraining.local', name: 'Student Two', role: Role.STUDENT, password: 'student1234', expectedWorkoutsPerWeek: 2 },
+  { email: 'student3@fptraining.local', name: 'Student Three', role: Role.STUDENT, password: 'student1234', expectedWorkoutsPerWeek: 2 },
+  { email: 'student4@fptraining.local', name: 'Student Four', role: Role.STUDENT, password: 'student1234', expectedWorkoutsPerWeek: 4 },
 ] as const
 
 const exerciseSeeds = [
@@ -519,6 +519,7 @@ async function main() {
         passwordHash,
         status: UserStatus.ACTIVE,
         mustChangePassword: false,
+        expectedWorkoutsPerWeek: user.expectedWorkoutsPerWeek,
       },
     })
     createdUsers.set(user.email, created)

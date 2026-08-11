@@ -53,6 +53,9 @@ export async function listStudents(searchQuery = ''): Promise<StudentSummary[]> 
         studentProgramMemberships: {
           include: { program: true },
         },
+        _count: {
+          select: { studentAssignedRoutines: true },
+        },
       },
     })
 
@@ -62,6 +65,8 @@ export async function listStudents(searchQuery = ''): Promise<StudentSummary[]> 
       email: student.email,
       role: 'student',
       programCodes: student.studentProgramMemberships.map((membership) => membership.program.code),
+      assignedWorkoutCount: student._count.studentAssignedRoutines,
+      expectedWorkoutsPerWeek: student.expectedWorkoutsPerWeek,
     }))
   } catch {
     return []
@@ -291,6 +296,7 @@ export async function updateStudentProfile(input: UpdateStudentProfileInput): Pr
   const name = input.name.trim()
   const email = input.email.trim().toLowerCase()
   const programCodes = input.programCodes ? normalizeProgramCodes(input.programCodes) : undefined
+  const expectedWorkoutsPerWeek = input.expectedWorkoutsPerWeek
 
   if (!name) {
     return { ok: false, message: 'El nombre es obligatorio.' }
@@ -306,6 +312,13 @@ export async function updateStudentProfile(input: UpdateStudentProfileInput): Pr
 
   if (programCodes && !input.trainerId) {
     return { ok: false, message: 'No encontramos el trainer responsable de actualizar los programas.' }
+  }
+
+  if (
+    expectedWorkoutsPerWeek !== undefined
+    && (!Number.isInteger(expectedWorkoutsPerWeek) || expectedWorkoutsPerWeek < 0)
+  ) {
+    return { ok: false, message: 'Las rutinas esperadas por semana deben ser un número entero igual o mayor a cero.' }
   }
 
   try {
@@ -347,7 +360,7 @@ export async function updateStudentProfile(input: UpdateStudentProfileInput): Pr
       await db.$transaction(async (tx) => {
         await tx.user.update({
           where: { id: student.id },
-          data: { name, email },
+          data: { name, email, expectedWorkoutsPerWeek },
         })
 
         await tx.studentProgramMembership.deleteMany({
@@ -399,6 +412,7 @@ export async function updateStudentProfile(input: UpdateStudentProfileInput): Pr
       data: {
         name,
         email,
+        expectedWorkoutsPerWeek,
       },
     })
 
