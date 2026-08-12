@@ -12,6 +12,13 @@ async function requireTrainer() {
   return session.user.id
 }
 
+function exercisesUrl(feedback: string, returnCategory: FormDataEntryValue | null) {
+  const params = new URLSearchParams(feedback)
+  const categoryId = String(returnCategory ?? '').trim()
+  if (categoryId) params.set('category', categoryId)
+  return `/trainer/exercises?${params}`
+}
+
 export async function createCategoryAction(formData: FormData) {
   const createdById = await requireTrainer()
   const result = await createCategory({
@@ -20,23 +27,23 @@ export async function createCategoryAction(formData: FormData) {
     createdById,
   })
 
-  if (!result.ok) redirect(`/trainer/exercises?categoryError=${encodeURIComponent(result.message)}`)
+  if (!result.ok) redirect(exercisesUrl(`categoryError=${encodeURIComponent(result.message)}`, formData.get('returnCategory')))
   revalidatePath('/trainer/exercises')
   revalidatePath('/trainer/exercises/new')
   revalidatePath('/trainer/templates/new')
   revalidatePath('/trainer/assignments/manual')
-  redirect('/trainer/exercises?categoryCreated=1')
+  redirect(exercisesUrl('categoryCreated=1', formData.get('returnCategory')))
 }
 
 export async function deleteCategoryAction(formData: FormData) {
   await requireTrainer()
   const result = await deleteCategory(String(formData.get('categoryId') ?? ''))
-  if (!result.ok) redirect(`/trainer/exercises?categoryError=${encodeURIComponent(result.message)}`)
+  if (!result.ok) redirect(exercisesUrl(`categoryError=${encodeURIComponent(result.message)}`, formData.get('returnCategory')))
   revalidatePath('/trainer/exercises')
   revalidatePath('/trainer/exercises/new')
   revalidatePath('/trainer/templates/new')
   revalidatePath('/trainer/assignments/manual')
-  redirect('/trainer/exercises?categoryDeleted=1')
+  redirect(exercisesUrl('categoryDeleted=1', formData.get('returnCategory')))
 }
 
 export async function updateExerciseCategoryAction(formData: FormData) {
@@ -45,9 +52,9 @@ export async function updateExerciseCategoryAction(formData: FormData) {
     String(formData.get('exerciseId') ?? ''),
     String(formData.get('categoryId') ?? ''),
   )
-  if (!result.ok) redirect(`/trainer/exercises?categoryError=${encodeURIComponent(result.message)}`)
+  if (!result.ok) redirect(exercisesUrl(`categoryError=${encodeURIComponent(result.message)}`, formData.get('returnCategory')))
   revalidatePath('/trainer/exercises')
   revalidatePath('/trainer/templates/new')
   revalidatePath('/trainer/assignments/manual')
-  redirect('/trainer/exercises?exerciseCategoryUpdated=1')
+  redirect(exercisesUrl('exerciseCategoryUpdated=1', formData.get('returnCategory')))
 }

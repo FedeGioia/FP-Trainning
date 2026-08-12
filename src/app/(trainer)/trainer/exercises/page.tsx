@@ -12,6 +12,7 @@ type TrainerExercisesPageProps = {
     categoryDeleted?: string
     categoryError?: string
     exerciseCategoryUpdated?: string
+    category?: string
   }>
 }
 
@@ -29,6 +30,9 @@ export default async function TrainerExercisesPage({ searchParams }: TrainerExer
   const categoryGroups = categories
     .map((category) => ({ id: category.id, path: category.path, exercises: exercisesByCategory.get(category.id) ?? [] }))
     .filter((category) => category.exercises.length > 0)
+  const defaultCategory = categoryGroups[0] ?? categories[0]
+  const selectedCategory = categories.find((category) => category.id === params.category) ?? defaultCategory
+  const selectedExercises = selectedCategory ? exercisesByCategory.get(selectedCategory.id) ?? [] : []
 
   return (
     <div className="exercise-library">
@@ -40,8 +44,9 @@ export default async function TrainerExercisesPage({ searchParams }: TrainerExer
           </div>
           <details className="exercise-library__new-category">
             <summary>Nueva categoría</summary>
-            <form action={createCategoryAction} className="exercise-library__category-form">
-              <label><span>Nombre</span><input name="name" type="text" required placeholder="Ej: Fuerza" /></label>
+              <form action={createCategoryAction} className="exercise-library__category-form">
+                {selectedCategory ? <input name="returnCategory" type="hidden" value={selectedCategory.id} /> : null}
+                <label><span>Nombre</span><input name="name" type="text" required placeholder="Ej: Fuerza" /></label>
               <label><span>Dentro de</span><select name="parentId" defaultValue=""><option value="">Carpeta raíz</option>{categories.map((category) => <option key={category.id} value={category.id}>{category.path}</option>)}</select></label>
               <button type="submit">Crear categoría</button>
             </form>
@@ -53,19 +58,22 @@ export default async function TrainerExercisesPage({ searchParams }: TrainerExer
             const level = category.path.split(' / ').length - 1
             const protectedCategory = category.name === BACKFILL_CATEGORY_NAME && category.parentId === null
             return (
-              <article key={category.id} className="exercise-library__category" style={{ '--category-level': level } as CSSProperties}>
-                <div className="exercise-library__category-name"><span aria-hidden="true">▰</span><strong>{category.name}</strong></div>
-                <small>{category.path}</small>
+              <article key={category.id} className={`exercise-library__category${category.id === selectedCategory?.id ? ' exercise-library__category--selected' : ''}`} style={{ '--category-level': level } as CSSProperties}>
+                <Link className="exercise-library__category-link" href={`/trainer/exercises?category=${encodeURIComponent(category.id)}`} aria-current={category.id === selectedCategory?.id ? 'page' : undefined}>
+                  <div className="exercise-library__category-name"><span aria-hidden="true">▰</span><strong>{category.name}</strong></div>
+                  <small>{category.path}</small>
+                </Link>
                 <div className="exercise-library__category-actions">
                   <details>
                     <summary>+ Subcategoría</summary>
                     <form action={createCategoryAction} className="exercise-library__child-form">
                       <input name="parentId" type="hidden" value={category.id} />
+                      {selectedCategory ? <input name="returnCategory" type="hidden" value={selectedCategory.id} /> : null}
                       <input name="name" type="text" required placeholder={`Dentro de ${category.name}`} aria-label={`Nueva subcategoría dentro de ${category.path}`} />
                       <button type="submit">Agregar</button>
                     </form>
                   </details>
-                  {protectedCategory ? <span className="exercise-library__locked">Respaldo</span> : <form action={deleteCategoryAction}><input name="categoryId" type="hidden" value={category.id} /><button className="exercise-library__delete" type="submit">Eliminar</button></form>}
+                  {protectedCategory ? <span className="exercise-library__locked">Respaldo</span> : <form action={deleteCategoryAction}><input name="categoryId" type="hidden" value={category.id} />{selectedCategory ? <input name="returnCategory" type="hidden" value={selectedCategory.id} /> : null}<button className="exercise-library__delete" type="submit">Eliminar</button></form>}
                 </div>
               </article>
             )
@@ -101,11 +109,11 @@ export default async function TrainerExercisesPage({ searchParams }: TrainerExer
         </div>
 
         <div className="exercise-library__content">
-          {categoryGroups.length === 0 ? <p className="exercise-library__empty">Todavía no hay ejercicios visibles. Creá tu primer ejercicio para empezar a armar la biblioteca.</p> : categoryGroups.map((category) => (
-            <section key={category.id} className="exercise-library__group">
-              <h3>{category.path}</h3>
+          {!selectedCategory ? <p className="exercise-library__empty">Todavía no hay categorías. Creá una categoría o agregá tu primer ejercicio para empezar a armar la biblioteca.</p> : <section className="exercise-library__group">
+              <h3>{selectedCategory.path}</h3>
+              {selectedExercises.length === 0 ? <p className="exercise-library__empty">Esta categoría todavía no tiene ejercicios.</p> :
               <div className="exercise-library__grid">
-                {category.exercises.map((exercise) => <article key={exercise.id} className="exercise-library__card">
+                {selectedExercises.map((exercise) => <article key={exercise.id} className="exercise-library__card">
                   <div className="exercise-library__card-body">
                     <div className="exercise-library__card-meta"><span>{exercise.primaryMetricType}</span>{exercise.hasVideo ? <span title="Con video">▶</span> : null}</div>
                     <h4>{exercise.name}</h4>
@@ -114,13 +122,14 @@ export default async function TrainerExercisesPage({ searchParams }: TrainerExer
                   </div>
                   <form action={updateExerciseCategoryAction} className="exercise-library__assignment">
                     <input name="exerciseId" type="hidden" value={exercise.id} />
+                    <input name="returnCategory" type="hidden" value={selectedCategory.id} />
                     <label><span className="sr-only">Categoría para {exercise.name}</span><select name="categoryId" required defaultValue={exercise.categoryId}>{categories.map((item) => <option key={item.id} value={item.id}>{item.path}</option>)}</select></label>
                     <button type="submit">Guardar</button>
                   </form>
                 </article>)}
               </div>
-            </section>
-          ))}
+              }
+            </section>}
         </div>
       </section>
     </div>
