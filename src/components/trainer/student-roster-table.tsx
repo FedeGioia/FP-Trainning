@@ -77,19 +77,19 @@ export function StudentRosterTable({ students }: StudentRosterTableProps) {
                   </td>
                   <td className="student-roster-table__workouts-column">
                     <strong
-                      className="student-roster-table__assigned-workouts"
-                      aria-label={student.weekly.goalTarget === null
-                        ? `${student.weekly.completedCount} rutinas completadas esta semana; sin objetivo semanal definido`
-                        : `${student.weekly.completedCount} de ${student.weekly.goalTarget} entrenamientos semanales completados`}
-                      title={student.weekly.goalTarget === null
-                        ? `${student.weekly.completedCount} completadas esta semana · ${student.weekly.scheduledCount} rutinas cargadas esta semana · sin objetivo semanal definido`
-                        : `${student.weekly.completedCount}/${student.weekly.goalTarget} completadas esta semana · carga semanal: ${student.weekly.scheduledCount}/${student.weekly.goalTarget} rutinas asignadas`}
+                       className="student-roster-table__assigned-workouts"
+                       aria-label={student.weekly.goalTarget === null
+                        ? `${student.weekly.scheduledCount} rutinas cargadas esta semana; sin objetivo semanal definido`
+                        : `${student.weekly.scheduledCount} de ${student.weekly.goalTarget} entrenamientos cargados esta semana`}
+                       title={student.weekly.goalTarget === null
+                        ? `${student.weekly.scheduledCount} rutinas cargadas esta semana · sin objetivo semanal definido`
+                        : `${student.weekly.scheduledCount}/${student.weekly.goalTarget} rutinas cargadas esta semana`}
                     >
                       <span
                         className={`student-roster-table__weekly-goal-dot student-roster-table__weekly-goal-dot--${weeklyGoalDotState}`}
                         aria-hidden="true"
                       />
-                      {student.weekly.completedCount}/{student.weekly.goalTarget ?? '—'}
+                      {student.weekly.scheduledCount}/{student.weekly.goalTarget ?? '—'}
                     </strong>
                   </td>
                   <td className="student-roster-table__actions-column">

@@ -2073,31 +2073,31 @@ summary:focus-visible {
 }
 
 @media (max-width: 767px) {
-  .role-shell--trainer:has(.trainer-students) .role-header {
+  .role-shell--trainer .role-header {
     position: static;
     width: auto;
   }
 
-  .role-shell--trainer:has(.trainer-students) .role-header-inner {
+  .role-shell--trainer .role-header-inner {
     height: auto;
     padding: 1rem;
   }
 
-  .role-shell--trainer:has(.trainer-students) .role-header-panel {
+  .role-shell--trainer .role-header-panel {
     padding-bottom: 0.8rem;
   }
 
-  .role-shell--trainer:has(.trainer-students) .role-nav--trainer {
+  .role-shell--trainer .role-nav--trainer {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .role-shell--trainer:has(.trainer-students) .pill {
+  .role-shell--trainer .pill {
     min-height: 40px;
     padding: 0.55rem;
     font-size: 0.82rem;
   }
 
-  .role-shell--trainer:has(.trainer-students) .role-main {
+  .role-shell--trainer .role-main {
     margin-left: 0;
     padding: 1rem;
   }
@@ -3116,13 +3116,13 @@ select[aria-invalid='true'] {
 }
 
 /* Trainer student roster — canonical desktop workspace direction. */
-.role-shell--trainer:has(.trainer-students) {
+.role-shell--trainer {
   --trainer-sidebar: #10192b;
   --trainer-sidebar-muted: #cbd3e4;
   background: #f2f1ed;
 }
 
-.role-shell--trainer:has(.trainer-students) .role-header {
+.role-shell--trainer .role-header {
   position: fixed;
   z-index: 10;
   inset: 0 auto 0 0;
@@ -3132,13 +3132,13 @@ select[aria-invalid='true'] {
   box-shadow: 4px 0 16px rgba(15, 23, 42, 0.12);
 }
 
-.role-shell--trainer:has(.trainer-students) .role-header .container {
+.role-shell--trainer .role-header .container {
   width: 100%;
   height: 100%;
   margin: 0;
 }
 
-.role-shell--trainer:has(.trainer-students) .role-header-inner {
+.role-shell--trainer .role-header-inner {
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -3146,24 +3146,24 @@ select[aria-invalid='true'] {
   padding: 1.9rem 1.15rem 1.15rem;
 }
 
-.role-shell--trainer:has(.trainer-students) .role-header-panel,
-.role-shell--trainer:has(.trainer-students) .role-header-brand,
-.role-shell--trainer:has(.trainer-students) .role-header-copy {
+.role-shell--trainer .role-header-panel,
+.role-shell--trainer .role-header-brand,
+.role-shell--trainer .role-header-copy {
   display: block;
 }
 
-.role-shell--trainer:has(.trainer-students) .role-header-panel {
+.role-shell--trainer .role-header-panel {
   padding: 0 0 1.35rem;
   border-bottom: 1px solid rgba(203, 211, 228, 0.18);
 }
 
-.role-shell--trainer:has(.trainer-students) .role-header-panel .eyebrow,
-.role-shell--trainer:has(.trainer-students) .role-description,
-.role-shell--trainer:has(.trainer-students) .role-header-actions {
+.role-shell--trainer .role-header-panel .eyebrow,
+.role-shell--trainer .role-description,
+.role-shell--trainer .role-header-actions {
   display: none;
 }
 
-.role-shell--trainer:has(.trainer-students) .role-title::before {
+.role-shell--trainer .role-title::before {
   content: 'F';
   display: inline-grid;
   place-items: center;
@@ -3178,7 +3178,7 @@ select[aria-invalid='true'] {
   font-style: italic;
 }
 
-.role-shell--trainer:has(.trainer-students) .role-title {
+.role-shell--trainer .role-title {
   display: flex;
   align-items: center;
   color: #f8fafc;
@@ -3187,18 +3187,18 @@ select[aria-invalid='true'] {
   letter-spacing: -0.04em;
 }
 
-.role-shell--trainer:has(.trainer-students) .role-nav-card {
+.role-shell--trainer .role-nav-card {
   display: block;
   padding: 0;
   border: 0;
 }
 
-.role-shell--trainer:has(.trainer-students) .role-nav--trainer {
+.role-shell--trainer .role-nav--trainer {
   display: grid;
   gap: 0.4rem;
 }
 
-.role-shell--trainer:has(.trainer-students) .pill {
+.role-shell--trainer .pill {
   justify-content: flex-start;
   gap: 0.75rem;
   min-height: 46px;
@@ -3209,25 +3209,25 @@ select[aria-invalid='true'] {
   font-weight: 500;
 }
 
-.role-shell--trainer:has(.trainer-students) .pill:hover,
-.role-shell--trainer:has(.trainer-students) .pill.is-active {
+.role-shell--trainer .pill:hover,
+.role-shell--trainer .pill.is-active {
   color: #fff;
   background: rgba(137, 156, 195, 0.24);
 }
 
-.role-shell--trainer:has(.trainer-students) .role-nav__icon {
+.role-shell--trainer .role-nav__icon {
   width: 1.4rem;
   height: 1.4rem;
   flex: 0 0 auto;
 }
 
-.role-shell--trainer:has(.trainer-students) .role-main {
+.role-shell--trainer .role-main {
   min-height: 100vh;
   margin-left: 252px;
   padding: 4.75rem 2rem;
 }
 
-.role-shell--trainer:has(.trainer-students) .role-main .container {
+.role-shell--trainer .role-main .container {
   width: min(100%, 990px);
 }
 
