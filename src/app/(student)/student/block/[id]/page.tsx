@@ -1,7 +1,6 @@
 import Link from 'next/link'
 
 import { auth } from '@/auth'
-import { ProgramBadge, getProgramToneClass } from '@/components/ui/program-badge'
 import { getAssignmentDetailById } from '@/modules/assignments'
 
 function getExerciseStatusClass(status: 'PENDING' | 'COMPLETED') {
@@ -10,6 +9,10 @@ function getExerciseStatusClass(status: 'PENDING' | 'COMPLETED') {
 
 function getExerciseStatusLabel(status: 'PENDING' | 'COMPLETED') {
   return status === 'COMPLETED' ? 'Completado' : 'Pendiente'
+}
+
+function getExerciseStatusIcon(status: 'PENDING' | 'COMPLETED') {
+  return status === 'COMPLETED' ? '✓' : '◷'
 }
 
 type StudentBlockPageProps = {
@@ -42,105 +45,59 @@ export default async function StudentBlockPage({ params, searchParams }: Student
   const scheduled = new Date(assignment.scheduledAt).toLocaleString('es-AR')
 
   return (
-    <div className="student-shell stack">
-      <section className={`student-detail-header stack program-surface ${getProgramToneClass(assignment.programCode)}`}>
-        <Link className="pill" href="/student/today">
-          Volver a hoy
-        </Link>
+    <div className="student-workout-page">
+      <header className="student-mobile-topbar">
+        <Link href="/student/today" className="student-icon-button" aria-label="Volver a hoy">←</Link>
+        <h1>{assignment.title}</h1>
+        <span className="student-icon-button student-icon-button--static" aria-hidden="true">▣</span>
+      </header>
 
-        <div className="stack" style={{ gap: '0.35rem' }}>
-          <span className="eyebrow">Bloque</span>
-          <h1 className="student-title">{assignment.title}</h1>
-          <p className="student-subtitle">Vista mobile para entender rápido la sesión, entrar en ritmo y después cargar resultados.</p>
-        </div>
+      <main className="student-workout-page__content">
+        {qs.error ? <p className="student-feedback student-feedback--error">{decodeURIComponent(qs.error)}</p> : null}
+        {qs.saved ? <p className="student-feedback student-feedback--success">Resultados guardados correctamente.</p> : null}
 
-        <div className="student-block-meta">
-          <ProgramBadge code={assignment.programCode} />
-          <span className="student-time">{scheduled}</span>
-        </div>
-      </section>
-
-      {qs.error ? <span className="status status--error">{decodeURIComponent(qs.error)}</span> : null}
-      {qs.saved ? <span className="status status--ok">Resultados guardados correctamente.</span> : null}
-
-      <section className={`student-progress-card program-surface ${getProgramToneClass(assignment.programCode)}`}>
-        <div>
-          <span className="muted">Progreso del bloque</span>
-          <strong>
-            {assignment.completedExerciseCount} de {assignment.totalExerciseCount} ejercicios cargados
-          </strong>
-        </div>
-        <span className="status status--ok">{assignment.status}</span>
-      </section>
-
-      <section className={`student-progress-card program-surface ${getProgramToneClass(assignment.programCode)}`}>
-        <div>
-          <span className="muted">Template base</span>
-          <strong>{assignment.templateName ?? 'Bloque manual'}</strong>
-        </div>
-        <span className="status status--muted">Ejercicio por ejercicio</span>
-      </section>
-
-      {assignment.notes ? (
-        <section className={`student-progress-card program-surface ${getProgramToneClass(assignment.programCode)}`}>
-          <div>
-            <span className="muted">Notas del trainer</span>
-            <strong>{assignment.notes}</strong>
+        <section className="student-workout-progress" aria-label="Progreso del bloque">
+          <div className="student-workout-progress__track">
+            <span style={{ width: `${assignment.totalExerciseCount ? (assignment.completedExerciseCount / assignment.totalExerciseCount) * 100 : 0}%` }} />
           </div>
-        </section>
-      ) : null}
-
-      {assignment.studentNotes ? (
-        <section className={`student-progress-card program-surface ${getProgramToneClass(assignment.programCode)}`}>
-          <div>
-            <span className="muted">Tus notas cargadas</span>
-            <strong>{assignment.studentNotes}</strong>
-          </div>
-        </section>
-      ) : null}
-
-      <section className="student-section stack">
-        {assignment.sections.map((section, index) => (
-          <article key={section.title} className="student-section-card stack">
-            <div className="student-section-card__header">
-              <span className="student-section-index">0{index + 1}</span>
-              <div>
-                <strong>{section.title}</strong>
-                <p className="muted">{section.exercises.length} ejercicios / indicaciones</p>
-              </div>
+          <div className="student-workout-progress__header">
+            <div>
+              <h2>Progreso del bloque</h2>
+              <p>{assignment.completedExerciseCount} de {assignment.totalExerciseCount} ejercicios cargados</p>
             </div>
+            <span>{assignment.totalExerciseCount ? Math.round((assignment.completedExerciseCount / assignment.totalExerciseCount) * 100) : 0}%</span>
+          </div>
+          <p className="student-workout-progress__hint">ⓘ {assignment.totalExerciseCount} ejercicios / indicaciones en total</p>
+        </section>
 
-              <ul className="list">
-               {section.exercises.map((item) => (
-                 <li key={item.id} className="student-exercise-row">
-                   <span className="student-exercise-dot" />
-                  <div className="stack" style={{ gap: '0.35rem', width: '100%' }}>
-                    <div className="role-nav" style={{ justifyContent: 'space-between', alignItems: 'center', gap: '0.75rem' }}>
-                      <div className="stack" style={{ gap: '0.2rem' }}>
-                        <span>{item.name}</span>
-                        <span className="muted">{item.metricType}</span>
-                        {item.currentValue ? <span className="muted">Último valor: {item.currentValue}</span> : null}
-                      </div>
-                      <span className={getExerciseStatusClass(item.status)}>{getExerciseStatusLabel(item.status)}</span>
+        {assignment.notes ? <aside className="student-workout-note"><strong>Notas del entrenador</strong><p>{assignment.notes}</p></aside> : null}
+
+        <section className="student-workout-exercises" aria-label="Ejercicios del bloque">
+          {assignment.sections.map((section) => (
+            <div key={section.id} className="student-workout-section">
+              {assignment.sections.length > 1 ? <h2>{section.title}</h2> : null}
+              {section.exercises.map((item) => (
+                <article key={item.id} className={`student-workout-exercise student-workout-exercise--${item.status.toLowerCase()}`}>
+                  <div className="student-workout-exercise__body">
+                    <div className="student-workout-exercise__meta">
+                      <span className="student-metric-badge">{item.metricType}</span>
+                      <span className={`student-exercise-state ${getExerciseStatusClass(item.status)}`}><b>{getExerciseStatusIcon(item.status)}</b> {getExerciseStatusLabel(item.status)}</span>
                     </div>
-
-                    <Link className="button button-secondary" href={`/student/block/${assignment.id}/exercise/${item.id}`}>
-                      {item.status === 'COMPLETED' ? 'Editar carga' : 'Cargar ejercicio'}
+                    <h3>{item.name}</h3>
+                    {item.currentValue ? <p className="student-workout-exercise__value">Último valor: {item.currentValue}</p> : null}
+                    <Link className={`student-exercise-link${item.status === 'COMPLETED' ? ' student-exercise-link--outline' : ''}`} href={`/student/block/${assignment.id}/exercise/${item.id}`}>
+                      {item.status === 'COMPLETED' ? 'Ver detalles' : 'Cargar ejercicio'}
                     </Link>
                   </div>
-                 </li>
-               ))}
-             </ul>
-           </article>
-         ))}
-       </section>
+                </article>
+              ))}
+            </div>
+          ))}
+        </section>
 
-      <section className="student-progress-card">
-        <div>
-          <span className="muted">Cómo cargar</span>
-          <strong>Entrá a cada ejercicio, guardá el resultado y volvés a este bloque.</strong>
-        </div>
-      </section>
+        {assignment.studentNotes ? <aside className="student-workout-note"><strong>Tus notas cargadas</strong><p>{assignment.studentNotes}</p></aside> : null}
+        <p className="student-workout-context">{assignment.templateName ?? 'Bloque manual'} · {scheduled}</p>
+      </main>
     </div>
   )
 }

@@ -26,8 +26,8 @@ function HomeIcon({ className }: IconProps) {
 function TodayIcon({ className }: IconProps) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M12 7v5l3 2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-      <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="1.8" />
+      <rect x="5" y="5.5" width="14" height="14" rx="2" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M8 3.8v3.3M16 3.8v3.3M5 10h14M8.5 13h2M13.5 13h2M8.5 16h2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
     </svg>
   )
 }
@@ -46,7 +46,7 @@ function isActivePath(pathname: string, href: string) {
     return pathname === '/student'
   }
 
-  return pathname.startsWith(href)
+  return href === '/student/today' ? pathname.startsWith('/student/today') || pathname.startsWith('/student/block/') : pathname.startsWith(href)
 }
 
 export function StudentBottomNav() {

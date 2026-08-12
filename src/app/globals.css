@@ -2643,6 +2643,217 @@ summary:focus-visible {
   color: #fff;
 }
 
+/* Student workout flow — mobile composition based on the approved loading reference. */
+.role-shell--student:has(.student-workout-page),
+.role-shell--student:has(.student-exercise-page) {
+  --background: #f8f9ff;
+  --surface: #fff;
+  --surface-alt: #eff4ff;
+  --border: #c3c6d7;
+  --text: #0b1c30;
+  --muted: #565e74;
+  --primary: #004ac6;
+  --primary-strong: #003ea8;
+  background: #f8f9ff;
+}
+
+.role-shell--student:has(.student-workout-page) .role-header,
+.role-shell--student:has(.student-exercise-page) .role-header {
+  display: none;
+}
+
+.role-shell--student:has(.student-workout-page) .role-main,
+.role-shell--student:has(.student-exercise-page) .role-main {
+  padding: 0 0 calc(6.2rem + env(safe-area-inset-bottom));
+}
+
+.student-workout-page,
+.student-exercise-page {
+  min-height: 100vh;
+  color: #0b1c30;
+}
+
+.student-mobile-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: grid;
+  grid-template-columns: 2.5rem minmax(0, 1fr) 2.5rem;
+  align-items: center;
+  min-height: 4rem;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid rgba(195, 198, 215, 0.5);
+  background: rgba(248, 249, 255, 0.94);
+  backdrop-filter: blur(14px);
+}
+
+.student-mobile-topbar h1 {
+  margin: 0;
+  overflow: hidden;
+  color: #004ac6;
+  font-size: clamp(1.05rem, 4.8vw, 1.5rem);
+  font-weight: 800;
+  line-height: 1.2;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.student-icon-button {
+  display: inline-grid;
+  width: 2.5rem;
+  height: 2.5rem;
+  place-items: center;
+  border-radius: 999px;
+  color: #004ac6;
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.student-icon-button:hover { background: #eff4ff; }
+.student-icon-button--static { color: #004ac6; cursor: default; }
+
+.student-workout-page__content,
+.student-exercise-page__content {
+  display: grid;
+  gap: 1.5rem;
+  width: min(100%, 42rem);
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.student-feedback {
+  margin: 0;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid;
+  border-radius: 0.75rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+.student-feedback--error { border-color: #f5b7b1; color: #93000a; background: #ffdad6; }
+.student-feedback--success { border-color: #9ed6b6; color: #075c36; background: #dff7e8; }
+
+.student-workout-progress {
+  position: relative;
+  overflow: hidden;
+  padding: 1.5rem;
+  border: 1px solid #c3c6d7;
+  border-radius: 0.75rem;
+  background: #fff;
+  box-shadow: 0 3px 8px rgba(11, 28, 48, 0.08);
+}
+
+.student-workout-progress__track { position: absolute; top: 0; right: 0; left: 0; height: 0.5rem; background: #dce9ff; }
+.student-workout-progress__track span { display: block; height: 100%; background: #004ac6; box-shadow: 0 0 8px rgba(0, 74, 198, 0.45); }
+.student-workout-progress__header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: 0.5rem; }
+.student-workout-progress h2,
+.student-workout-progress p { margin: 0; }
+.student-workout-progress h2 { font-size: 1.1rem; }
+.student-workout-progress__header p,
+.student-workout-progress__hint { color: #565e74; font-size: 0.9rem; }
+.student-workout-progress__header > span { padding: 0.4rem 0.7rem; border-radius: 999px; background: #e5eeff; color: #004ac6; font-size: 0.75rem; font-weight: 800; }
+.student-workout-progress__hint { margin-top: 1rem !important; }
+
+.student-workout-exercises,
+.student-workout-section { display: grid; gap: 1rem; }
+.student-workout-section > h2 { margin: 0; color: #004ac6; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.06em; }
+.student-workout-exercise { position: relative; overflow: hidden; border: 1px solid #c3c6d7; border-radius: 0.75rem; background: #fff; box-shadow: 0 3px 8px rgba(11, 28, 48, 0.08); }
+.student-workout-exercise::before { position: absolute; inset: 0 auto 0 0; width: 0.25rem; content: ''; background: #004ac6; }
+.student-workout-exercise--completed::before { background: #10b981; }
+.student-workout-exercise__body { display: grid; gap: 0.85rem; padding: 1.25rem 1.25rem 1.25rem 1.5rem; }
+.student-workout-exercise__meta { display: flex; align-items: center; flex-wrap: wrap; gap: 0.65rem; }
+.student-metric-badge { padding: 0.25rem 0.5rem; border-radius: 999px; background: #e5eeff; color: #004ac6; font-size: 0.68rem; font-weight: 800; letter-spacing: 0.05em; }
+.student-exercise-state { color: #565e74; font-size: 0.76rem; font-weight: 700; }
+.student-exercise-state.status--ok { color: #078557; background: transparent; border: 0; padding: 0; }
+.student-exercise-state.status--muted { background: transparent; border: 0; padding: 0; }
+.student-workout-exercise h3 { margin: 0; font-size: 1.05rem; }
+.student-workout-exercise__value { margin: -0.4rem 0 0; color: #565e74; font-size: 0.82rem; }
+.student-exercise-link,
+.student-exercise-button { display: inline-flex; min-height: 2.8rem; align-items: center; justify-content: center; padding: 0.7rem 1rem; border: 1px solid #004ac6; border-radius: 0.5rem; background: #004ac6; color: #fff; font-size: 0.82rem; font-weight: 800; text-align: center; }
+.student-exercise-link--outline,
+.student-exercise-button--secondary { border-color: #c3c6d7; background: transparent; color: #0b1c30; }
+.student-exercise-link:hover,
+.student-exercise-button--primary:hover { background: #003ea8; }
+.student-exercise-link--outline:hover,
+.student-exercise-button--secondary:hover { background: #eff4ff; }
+.student-workout-note { padding: 0.9rem 1rem; border-left: 0.25rem solid #004ac6; border-radius: 0.5rem; background: #eff4ff; color: #434655; font-size: 0.9rem; }
+.student-workout-note p { margin: 0.3rem 0 0; }
+.student-workout-context { margin: 0; color: #565e74; font-size: 0.75rem; text-align: center; }
+
+.student-exercise-context { display: grid; gap: 0.65rem; padding: 1rem; border: 1px solid rgba(195, 198, 215, 0.45); border-radius: 0.75rem; background: #eff4ff; }
+.student-exercise-context > span { width: fit-content; padding: 0.25rem 0.5rem; border-radius: 0.25rem; background: rgba(0, 74, 198, 0.1); color: #004ac6; font-size: 0.68rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
+.student-exercise-context h2 { margin: 0; color: #004ac6; font-size: 1.45rem; font-style: italic; line-height: 1.15; text-transform: uppercase; }
+.student-exercise-context p { margin: 0; color: #565e74; font-size: 0.88rem; font-style: italic; line-height: 1.5; }
+.student-exercise-context > div { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; margin-top: 0.25rem; }
+.student-exercise-context b { padding: 0.35rem 0.7rem; border-radius: 999px; background: rgba(0, 74, 198, 0.1); color: #004ac6; font-size: 0.7rem; }
+.student-exercise-context small { color: #565e74; font-size: 0.72rem; }
+.student-exercise-goal { padding: 0 0.5rem; color: #004ac6; }
+.student-exercise-goal h2 { margin: 0 0 0.85rem; font-size: 1.05rem; }
+.student-exercise-goal p { margin: 0.28rem 0; font-size: 0.9rem; }
+.student-exercise-goal__details { margin-top: 0.85rem; color: #565e74; }
+.student-exercise-form { display: grid; gap: 1.35rem; padding: 1.5rem; border: 1px solid rgba(195, 198, 215, 0.65); border-left: 0.25rem solid #004ac6; border-radius: 0.75rem; background: #fff; box-shadow: 0 3px 10px rgba(11, 28, 48, 0.08); }
+.student-exercise-form__kicker { color: #434655; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.04em; }
+.student-exercise-form__fields { display: grid; gap: 1rem; }
+.student-exercise-form label { display: grid; gap: 0.45rem; color: #0b1c30; font-size: 0.9rem; font-weight: 700; }
+.student-exercise-form input { width: 100%; min-height: 3rem; padding: 0.7rem 0.85rem; border: 1px solid #c3c6d7; border-radius: 0.5rem; background: #f8f9ff; color: #0b1c30; }
+.student-exercise-form input:focus { border-color: #004ac6; outline: 3px solid rgba(0, 74, 198, 0.14); }
+.student-exercise-form__actions { display: grid; gap: 0.75rem; padding-top: 0.25rem; }
+.student-exercise-button { width: 100%; cursor: pointer; }
+
+.role-shell--student:has(.student-workout-page) .student-bottom-nav,
+.role-shell--student:has(.student-exercise-page) .student-bottom-nav {
+  bottom: 0;
+  width: 100%;
+  max-width: none;
+  padding: 0.55rem 1.5rem calc(0.55rem + env(safe-area-inset-bottom));
+  border: 0;
+  border-top: 1px solid rgba(195, 198, 215, 0.35);
+  border-radius: 1rem 1rem 0 0;
+  box-shadow: 0 -4px 20px rgba(11, 28, 48, 0.05);
+}
+
+.role-shell--student:has(.student-workout-page) .student-bottom-nav__item,
+.role-shell--student:has(.student-exercise-page) .student-bottom-nav__item {
+  min-height: 48px;
+  color: #434655;
+}
+
+.role-shell--student:has(.student-workout-page) .student-bottom-nav__item.is-active,
+.role-shell--student:has(.student-exercise-page) .student-bottom-nav__item.is-active {
+  background: transparent;
+  color: #004ac6;
+}
+
+.role-shell--student:has(.student-workout-page) .student-bottom-nav__icon,
+.role-shell--student:has(.student-exercise-page) .student-bottom-nav__icon {
+  width: 24px;
+  height: 24px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+}
+
+.role-shell--student:has(.student-workout-page) .student-bottom-nav__item.is-active .student-bottom-nav__icon,
+.role-shell--student:has(.student-exercise-page) .student-bottom-nav__item.is-active .student-bottom-nav__icon {
+  background: rgba(0, 74, 198, 0.1);
+  color: #004ac6;
+}
+
+@media (min-width: 700px) {
+  .student-workout-page__content,
+  .student-exercise-page__content { padding: 1.5rem 2rem 3rem; }
+
+  .student-mobile-topbar { padding-right: 2rem; padding-left: 2rem; }
+
+  .student-exercise-form__actions { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 380px) {
+  .student-workout-progress,
+  .student-exercise-form { padding: 1rem; }
+
+}
+
 .section-title {
   margin-bottom: 0.25rem;
 }

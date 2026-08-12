@@ -1,7 +1,6 @@
 import Link from 'next/link'
 
 import { auth } from '@/auth'
-import { ProgramBadge, getProgramToneClass } from '@/components/ui/program-badge'
 import { getAssignmentDetailById } from '@/modules/assignments'
 
 import { saveStudentExerciseAction } from './actions'
@@ -94,67 +93,50 @@ export default async function StudentExercisePage({ params, searchParams }: Stud
   }
 
   return (
-    <div className="student-shell stack">
-      <section className={`student-detail-header stack program-surface ${getProgramToneClass(assignment.programCode)}`}>
-        <Link className="pill" href={`/student/block/${assignment.id}`}>
-          Volver al bloque
-        </Link>
+    <div className="student-exercise-page">
+      <header className="student-mobile-topbar">
+        <Link href={`/student/block/${assignment.id}`} className="student-icon-button" aria-label="Volver al bloque">←</Link>
+        <h1>FitTrack</h1>
+        <span className="student-icon-button student-icon-button--static" aria-hidden="true" />
+      </header>
 
-        <div className="stack" style={{ gap: '0.35rem' }}>
-          <span className="eyebrow">Ejercicio</span>
-          <h1 className="student-title">{exercise.name}</h1>
-          <p className="student-subtitle">Cargá este ejercicio solo, guardalo y volvés al bloque con el estado actualizado.</p>
-        </div>
+      <main className="student-exercise-page__content">
+        {qs.error ? <p className="student-feedback student-feedback--error">{decodeURIComponent(qs.error)}</p> : null}
 
-        <div className="student-block-meta">
-          <ProgramBadge code={assignment.programCode} />
-          <span className={exercise.status === 'COMPLETED' ? 'status status--ok' : 'status status--muted'}>
-            {exercise.status === 'COMPLETED' ? 'Completado' : 'Pendiente'}
-          </span>
-        </div>
-      </section>
+        <section className="student-exercise-context">
+          <span>Ejercicio</span>
+          <h2>{exercise.name}</h2>
+          {exercise.notes ? <p>{exercise.notes}</p> : null}
+          <div>
+            <b>{assignment.programCode}</b>
+            <small>{exercise.status === 'COMPLETED' ? 'Completado' : 'Pendiente'}</small>
+          </div>
+        </section>
 
-      {qs.error ? <span className="status status--error">{decodeURIComponent(qs.error)}</span> : null}
-
-      <section className={`student-progress-card program-surface ${getProgramToneClass(assignment.programCode)} form-panel form-panel--soft`}>
-        <div>
-          <span className="muted">Tipo de métrica</span>
-          <strong>{exercise.metricType}</strong>
-        </div>
-      </section>
-
-      <section className={`student-progress-card program-surface ${getProgramToneClass(assignment.programCode)} form-panel form-panel--soft`}>
-        <div className="stack" style={{ gap: '0.45rem' }}>
-          <span className="muted">Lo pedido por el trainer</span>
-          <strong>{getExpectedLabel(exercise.metricType)}</strong>
+        <section className="student-exercise-goal">
+          <h2>🎯 Objetivo del entrenador</h2>
           {isStrengthMetric(exercise.metricType) && exercise.expectedStrength ? (
-            <div className="stack" style={{ gap: '0.2rem' }}>
-              <span>Series esperadas: {exercise.expectedStrength.series ?? '-'}</span>
-              <span>Repeticiones esperadas: {exercise.expectedStrength.repetitions ?? '-'}</span>
-              <span>Peso esperado: {exercise.expectedStrength.weight ?? '-'} kg</span>
+            <div className="student-exercise-goal__strength">
+              <p>Series: <b>{exercise.expectedStrength.series ?? '-'}</b></p>
+              <p>Repeticiones: <b>{exercise.expectedStrength.repetitions ?? '-'}</b></p>
+              <p>Peso: <b>{exercise.expectedStrength.weight ?? '-'} kg</b></p>
             </div>
           ) : (
-            <span>{exercise.expectedValue ?? 'Sin prescripción visible'}</span>
+            <p>{getExpectedLabel(exercise.metricType)}: <b>{exercise.expectedValue ?? 'Sin prescripción visible'}</b></p>
           )}
-          {exercise.restLabel ? <span className="muted">Descanso: {exercise.restLabel}</span> : null}
-          {exercise.methodLabel ? <span className="muted">Método: {exercise.methodLabel}</span> : null}
-          {exercise.notes ? <span className="muted">Notas: {exercise.notes}</span> : null}
-        </div>
-      </section>
+          <div className="student-exercise-goal__details">
+            {exercise.restLabel ? <p>Descanso: {exercise.restLabel}</p> : null}
+            {exercise.methodLabel ? <p>Método: {exercise.methodLabel}</p> : null}
+          </div>
+        </section>
 
-      <form action={saveStudentExerciseAction.bind(null, { assignmentId: assignment.id, exerciseId: exercise.id })} className="student-result-form stack">
+        <form action={saveStudentExerciseAction.bind(null, { assignmentId: assignment.id, exerciseId: exercise.id })} className="student-exercise-form">
+          <span className="student-exercise-form__kicker">📝 Tu registro de hoy</span>
         {isStrengthMetric(exercise.metricType) ? (
           <>
-            <div className="stack form-panel form-panel--soft" style={{ gap: '0.35rem' }}>
-              <span className="muted">Lo realizado por vos</span>
-              <strong>Cargá series, repeticiones y peso por separado.</strong>
-              <span className="field-hint">Si cambiaste algo respecto a lo pedido, dejalo reflejado en estos tres campos.</span>
-            </div>
-
-            <div className="form-grid">
-              <label className="field">
-                <span>Series realizadas</span>
-                <small>Cuántas series completaste realmente.</small>
+            <div className="student-exercise-form__fields">
+              <label>
+                <span>Series completadas</span>
                 <input
                   name="strengthSeries"
                   type="number"
@@ -165,9 +147,8 @@ export default async function StudentExercisePage({ params, searchParams }: Stud
                 />
               </label>
 
-              <label className="field">
-                <span>Repeticiones realizadas</span>
-                <small>Las repeticiones reales por serie.</small>
+              <label>
+                <span>Reps por serie</span>
                 <input
                   name="strengthRepetitions"
                   type="number"
@@ -179,9 +160,8 @@ export default async function StudentExercisePage({ params, searchParams }: Stud
               </label>
             </div>
 
-            <label className="field">
-              <span>Peso realizado en kg</span>
-              <small>Usá el peso que efectivamente moviste.</small>
+            <label className="student-exercise-form__field">
+              <span>Peso utilizado (kg)</span>
               <input
                 name="strengthWeight"
                 type="number"
@@ -193,9 +173,8 @@ export default async function StudentExercisePage({ params, searchParams }: Stud
             </label>
           </>
         ) : (
-          <label className="field">
+          <label className="student-exercise-form__field">
             <span>{getMetricFieldLabel(exercise.metricType)}</span>
-            <small>Registrá el valor real que completaste en este ejercicio.</small>
             <input
               name="value"
               type="text"
@@ -205,15 +184,16 @@ export default async function StudentExercisePage({ params, searchParams }: Stud
           </label>
         )}
 
-        <section className="student-action-bar">
-          <Link className="button button-secondary" href={`/student/block/${assignment.id}`}>
+        <section className="student-exercise-form__actions">
+          <Link className="student-exercise-button student-exercise-button--secondary" href={`/student/block/${assignment.id}`}>
             Cancelar
           </Link>
-          <button className="button button-primary" type="submit">
+          <button className="student-exercise-button student-exercise-button--primary" type="submit">
             Guardar ejercicio
           </button>
         </section>
       </form>
+      </main>
     </div>
   )
 }
