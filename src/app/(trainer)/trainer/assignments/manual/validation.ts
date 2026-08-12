@@ -35,6 +35,24 @@ export function parseOptionalNumber(value: FormDataEntryValue | null): ParsedOpt
   return { raw, parsed: Number.isFinite(parsed) ? parsed : null }
 }
 
+export function getInvalidNumericIssues(sections: ParsedManualSection[]): ValidationIssue[] {
+  return sections.flatMap((section, sectionIndex) =>
+    section.exercises.flatMap((exercise, exerciseIndex) => {
+      const numericFields: Array<[string, ParsedOptionalNumber]> = [
+        ['strengthSeries', exercise.strengthSeries],
+        ['strengthRepetitions', exercise.strengthRepetitions],
+        ['strengthWeight', exercise.strengthWeight],
+      ]
+
+      return numericFields.flatMap(([field, value]) =>
+        value.raw.trim() && value.parsed === null
+          ? [{ path: `sections.${sectionIndex}.exercises.${exerciseIndex}.${field}`, message: 'Ingresá un número válido.', kind: 'invalid' as const }]
+          : [],
+      )
+    }),
+  )
+}
+
 export function buildManualValidationState(
   values: ManualFormValues,
   sections: ParsedManualSection[],

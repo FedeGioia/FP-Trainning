@@ -4,8 +4,8 @@ import { redirect } from 'next/navigation'
 
 import { auth } from '@/auth'
 import { createManualAssignment } from '@/modules/assignments'
-import type { ManualValidationState, ValidationIssue } from '@/modules/assignments/types'
-import { buildManualValidationState, parseOptionalNumber, type ParsedManualSection } from './validation'
+import type { ManualValidationState } from '@/modules/assignments/types'
+import { buildManualValidationState, getInvalidNumericIssues, parseOptionalNumber } from './validation'
 
 const SECTION_SLOTS = 3
 
@@ -109,22 +109,4 @@ export async function createManualAssignmentAction(
   }
 
   redirect('/trainer/assignments?created=1')
-}
-
-export function getInvalidNumericIssues(sections: ParsedManualSection[]): ValidationIssue[] {
-  return sections.flatMap((section, sectionIndex) =>
-    section.exercises.flatMap((exercise, exerciseIndex) => {
-      const numericFields: Array<[string, { raw: string; parsed: number | null }]> = [
-        ['strengthSeries', exercise.strengthSeries],
-        ['strengthRepetitions', exercise.strengthRepetitions],
-        ['strengthWeight', exercise.strengthWeight],
-      ]
-
-      return numericFields.flatMap(([field, value]) =>
-        value.raw.trim() && value.parsed === null
-          ? [{ path: `sections.${sectionIndex}.exercises.${exerciseIndex}.${field}`, message: 'Ingresá un número válido.', kind: 'invalid' as const }]
-          : [],
-      )
-    }),
-  )
 }
