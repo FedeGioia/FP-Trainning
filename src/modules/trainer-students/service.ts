@@ -1,3 +1,5 @@
+import { ProgramCode } from '@prisma/client'
+
 import { db } from '@/lib/db'
 
 import type { TrainerStudentDetail, TrainerStudentRosterRow, WeeklyAdherence } from './types'
@@ -16,6 +18,10 @@ export function getCurrentWeekRange(now = new Date()): WeekRange {
   end.setDate(end.getDate() + 7)
 
   return { start, end }
+}
+
+function isProgramCode(value: string): value is ProgramCode {
+  return Object.values(ProgramCode).includes(value as ProgramCode)
 }
 
 function mapWeeklyAdherence(
@@ -71,6 +77,15 @@ export async function listTrainerStudentRoster(
     const selectedProgram = programCode.trim()
     const week = getCurrentWeekRange(now)
 
+    let selectedProgramCode: ProgramCode | undefined
+    if (selectedProgram) {
+      if (!isProgramCode(selectedProgram)) {
+        return []
+      }
+
+      selectedProgramCode = selectedProgram
+    }
+
     const students = await db.user.findMany({
       where: {
         role: 'STUDENT',
@@ -78,7 +93,7 @@ export async function listTrainerStudentRoster(
           some: {
             trainerId,
             active: true,
-            ...(selectedProgram ? { program: { code: selectedProgram } } : {}),
+            ...(selectedProgramCode ? { program: { code: selectedProgramCode } } : {}),
           },
         },
         ...(query
