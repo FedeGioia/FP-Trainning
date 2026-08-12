@@ -29,17 +29,6 @@ export default async function TrainerStudentsPage({ searchParams }: TrainerStude
 
   return (
     <div className="trainer-students stack">
-      <section className="trainer-students__intro">
-        <div>
-          <span className="eyebrow">Personas</span>
-          <h1>Alumnos</h1>
-          <p>Buscá alumnos, asignales rutinas y administrá accesos desde una sola pantalla.</p>
-        </div>
-        <Link className="trainer-students__new-student" href="/trainer/students/new">
-          Nuevo alumno
-        </Link>
-      </section>
-
       {params.created || params.updated || params.reset || params.error ? (
         <div className="trainer-students__feedback" aria-live="polite">
           {params.created ? <span className="trainer-students__notice trainer-students__notice--ok">Alumno creado correctamente.</span> : null}
@@ -50,6 +39,14 @@ export default async function TrainerStudentsPage({ searchParams }: TrainerStude
       ) : null}
 
       <section className="trainer-students__content stack">
+        <section className="trainer-students__intro">
+          <div>
+            <span className="eyebrow">Personas</span>
+            <h1>Alumnos</h1>
+            <p>Buscá alumnos, asignales rutinas y administrá accesos desde una sola pantalla.</p>
+          </div>
+        </section>
+
         <section className="student-roster-toolbar">
           <form className="student-roster-toolbar__form" action="/trainer/students" method="get">
             <label className="field student-roster-toolbar__field">
@@ -66,6 +63,9 @@ export default async function TrainerStudentsPage({ searchParams }: TrainerStude
                   Limpiar
                 </Link>
               ) : null}
+              <Link className="trainer-students__new-student" href="/trainer/students/new">
+                Nuevo alumno
+              </Link>
             </div>
           </form>
 

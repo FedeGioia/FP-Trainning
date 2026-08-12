@@ -9,7 +9,8 @@ type StudentRosterTableProps = {
 
 function getWeeklyGoalDotState(weekly: TrainerStudentRosterRow['weekly']) {
   if (weekly.goalTarget === null) return 'untracked'
-  if (weekly.completedCount >= weekly.goalTarget) return 'met'
+  if (weekly.scheduledCount === 0) return 'empty'
+  if (weekly.scheduledCount >= weekly.goalTarget) return 'met'
   return 'in-progress'
 }
 
@@ -80,7 +81,7 @@ export function StudentRosterTable({ students }: StudentRosterTableProps) {
                       aria-label={`${student.weekly.completedCount} de ${student.weekly.scheduledCount} rutinas programadas completadas esta semana`}
                       title={student.weekly.goalTarget === null
                         ? `${student.weekly.completedCount}/${student.weekly.scheduledCount} completadas esta semana · sin objetivo semanal definido`
-                        : `${student.weekly.completedCount}/${student.weekly.scheduledCount} completadas esta semana · objetivo: ${student.weekly.completedCount}/${student.weekly.goalTarget}`}
+                        : `${student.weekly.completedCount}/${student.weekly.scheduledCount} completadas esta semana · carga semanal: ${student.weekly.scheduledCount}/${student.weekly.goalTarget} rutinas asignadas`}
                     >
                       <span
                         className={`student-roster-table__weekly-goal-dot student-roster-table__weekly-goal-dot--${weeklyGoalDotState}`}

@@ -13,6 +13,7 @@ import { buildManualValidationState, parseOptionalNumber } from '@/app/(trainer)
 import { buildTemplateValidationState } from '@/app/(trainer)/trainer/assignments/new/validation'
 import { buildCategoryTree, normalizeCategoryName, requireCategoryId } from '@/modules/exercises'
 import { isNavItemActive } from '@/components/layout/role-navigation'
+import { StudentRosterTable } from '@/components/trainer/student-roster-table'
 import { getCurrentWeekRange } from '@/modules/trainer-students'
 
 async function test(name: string, fn: () => void | Promise<void>) {
@@ -104,6 +105,38 @@ await test('isNavItemActive highlights exact routes and their nested pages only'
   assert.equal(isNavItemActive('/trainer/assignments', '/trainer', true), false)
   assert.equal(isNavItemActive('/trainer', '/trainer', true), true)
   assert.equal(isNavItemActive('/trainer', '/'), false)
+})
+
+await test('StudentRosterTable weekly dot reflects trainer workout loading against the weekly goal', () => {
+  const createStudent = (weekly: { scheduledCount: number; completedCount: number; goalTarget: number | null }) => ({
+    id: `student-${weekly.goalTarget ?? 'none'}-${weekly.scheduledCount}`,
+    name: 'Alumno',
+    email: 'alumno@example.com',
+    programCodes: [],
+    expectedWorkoutsPerWeek: weekly.goalTarget ?? 0,
+    assignmentHistoryCount: 0,
+    weekly: {
+      weekStart: '2026-07-05T00:00:00.000Z',
+      ...weekly,
+      pendingCount: weekly.scheduledCount - weekly.completedCount,
+      goalCompletionRate: weekly.goalTarget === null ? null : weekly.completedCount / weekly.goalTarget,
+    },
+  })
+
+  const html = renderToStaticMarkup(createElement(StudentRosterTable, {
+    students: [
+      createStudent({ scheduledCount: 0, completedCount: 0, goalTarget: null }),
+      createStudent({ scheduledCount: 0, completedCount: 0, goalTarget: 3 }),
+      createStudent({ scheduledCount: 2, completedCount: 2, goalTarget: 3 }),
+      createStudent({ scheduledCount: 3, completedCount: 0, goalTarget: 3 }),
+    ],
+  }))
+
+  assert.match(html, /weekly-goal-dot--untracked/)
+  assert.match(html, /weekly-goal-dot--empty/)
+  assert.match(html, /weekly-goal-dot--in-progress/)
+  assert.match(html, /weekly-goal-dot--met/)
+  assert.match(html, /carga semanal: 3\/3 rutinas asignadas/)
 })
 
 await test('buildCategoryTree creates nested paths in parent-to-child order', () => {
