@@ -6,6 +6,14 @@ import { PlaceholderPanel } from '@/components/ui/placeholder-panel'
 import { listTrainerStudentRoster } from '@/modules/trainer-students'
 import { StudentRosterTable } from '@/components/trainer/student-roster-table'
 
+const programFilters = [
+  { value: '', label: 'Filtrar por programa' },
+  { value: 'FP_TRAINING', label: 'Training' },
+  { value: 'FP_HOME', label: 'Home' },
+  { value: 'FP_STRETCHING', label: 'Stretching' },
+  { value: 'FP_RUNNING', label: 'Running' },
+]
+
 type TrainerStudentsPageProps = {
   searchParams?: Promise<{
     created?: string
@@ -13,6 +21,7 @@ type TrainerStudentsPageProps = {
     reset?: string
     error?: string
     q?: string
+    program?: string
   }>
 }
 
@@ -25,7 +34,8 @@ export default async function TrainerStudentsPage({ searchParams }: TrainerStude
 
   const params = (await searchParams) ?? {}
   const query = params.q?.trim() ?? ''
-  const students = await listTrainerStudentRoster(session.user.id, query)
+  const program = params.program?.trim() ?? ''
+  const students = await listTrainerStudentRoster(session.user.id, query, program)
 
   return (
     <div className="trainer-students stack">
@@ -40,37 +50,39 @@ export default async function TrainerStudentsPage({ searchParams }: TrainerStude
 
       <section className="trainer-students__content stack">
         <section className="trainer-students__intro">
-          <div>
-            <span className="eyebrow">Personas</span>
-            <h1>Alumnos</h1>
-            <p>Buscá alumnos, asignales rutinas y administrá accesos desde una sola pantalla.</p>
-          </div>
+          <h1>Gestión de alumnos</h1>
         </section>
 
         <section className="student-roster-toolbar">
           <form className="student-roster-toolbar__form" action="/trainer/students" method="get">
             <label className="field student-roster-toolbar__field">
-              <span>Buscar alumnos</span>
-              <input name="q" type="search" placeholder="Nombre, email o programa" defaultValue={query} />
+              <span className="sr-only">Buscar alumnos</span>
+              <span className="student-roster-toolbar__search-icon" aria-hidden="true" />
+              <input name="q" type="search" placeholder="Buscar" defaultValue={query} />
+            </label>
+
+            <label className="student-roster-toolbar__filter">
+              <span className="sr-only">Filtrar por programa</span>
+              <select name="program" defaultValue={program}>
+                {programFilters.map((filter) => <option key={filter.value} value={filter.value}>{filter.label}</option>)}
+              </select>
             </label>
 
             <div className="student-roster-toolbar__actions">
-              <button className="student-roster-toolbar__submit" type="submit">
-                Buscar
-              </button>
+              <button className="sr-only" type="submit">Aplicar filtros</button>
               {query ? (
                 <Link className="student-roster-toolbar__clear" href="/trainer/students">
                   Limpiar
                 </Link>
               ) : null}
               <Link className="trainer-students__new-student" href="/trainer/students/new">
-                Nuevo alumno
+                <span aria-hidden="true">+</span> Agregar alumno
               </Link>
             </div>
           </form>
 
           <span className="muted student-roster-toolbar__helper">
-            {query ? `Mostrando ${students.length} resultado${students.length === 1 ? '' : 's'} para “${query}”.` : 'Buscá por nombre, email o programa para administrar más rápido.'}
+            {query || program ? `Mostrando ${students.length} resultado${students.length === 1 ? '' : 's'}.` : 'Buscá o filtrá a tus alumnos para administrar sus rutinas.'}
           </span>
         </section>
 

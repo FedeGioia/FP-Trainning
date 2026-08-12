@@ -63,17 +63,23 @@ function mapRosterRow(
 export async function listTrainerStudentRoster(
   trainerId: string,
   searchQuery = '',
+  programCode = '',
   now = new Date(),
 ): Promise<TrainerStudentRosterRow[]> {
   try {
     const query = searchQuery.trim()
+    const selectedProgram = programCode.trim()
     const week = getCurrentWeekRange(now)
 
     const students = await db.user.findMany({
       where: {
         role: 'STUDENT',
         studentAssignments: {
-          some: { trainerId, active: true },
+          some: {
+            trainerId,
+            active: true,
+            ...(selectedProgram ? { program: { code: selectedProgram } } : {}),
+          },
         },
         ...(query
           ? {

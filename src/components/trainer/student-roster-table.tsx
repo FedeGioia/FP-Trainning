@@ -14,27 +14,27 @@ function getWeeklyGoalDotState(weekly: TrainerStudentRosterRow['weekly']) {
   return 'in-progress'
 }
 
+function EditIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="m14.5 5.5 4 4M4 20l4.4-1 10.3-10.3a2.8 2.8 0 0 0-4-4L4.4 14.9 4 20Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+function MessageIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" strokeWidth="2" />
+      <path d="m4 7 8 6 8-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
 function MetricsIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <path d="M5 19V10M12 19V5M19 19v-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  )
-}
-
-function ManualAssignmentIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  )
-}
-
-function TemplateAssignmentIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <rect x="8" y="7" width="11" height="12" rx="2" stroke="currentColor" strokeWidth="2" />
-      <path d="M5 15V5a2 2 0 0 1 2-2h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
     </svg>
   )
 }
@@ -47,9 +47,8 @@ export function StudentRosterTable({ students }: StudentRosterTableProps) {
           <thead>
             <tr>
               <th className="student-roster-table__name-column">Alumno</th>
-              <th className="student-roster-table__email-column">Email</th>
               <th className="student-roster-table__programs-column">Programas</th>
-              <th className="student-roster-table__workouts-column">Semana actual</th>
+              <th className="student-roster-table__workouts-column">Entrenamientos</th>
               <th className="student-roster-table__actions-column">Acciones</th>
             </tr>
           </thead>
@@ -64,10 +63,10 @@ export function StudentRosterTable({ students }: StudentRosterTableProps) {
                       className="student-roster-table__student-trigger"
                       href={`/trainer/students/${student.id}`}
                     >
+                      <span className="student-roster-table__avatar" aria-hidden="true">{student.name.slice(0, 1)}</span>
                       {student.name}
                     </Link>
                   </td>
-                  <td className="muted student-roster-table__email-column">{student.email}</td>
                   <td className="student-roster-table__programs-column">
                     <div className="student-roster-table__badges">
                       {student.programCodes.map((programCode) => (
@@ -95,26 +94,26 @@ export function StudentRosterTable({ students }: StudentRosterTableProps) {
                       <Link
                         className="student-roster-table__action"
                         href={`/trainer/students/${student.id}`}
-                        aria-label={`Ver detalle y seguimiento de ${student.name}`}
-                        title="Ver detalle"
+                        aria-label={`Editar alumno ${student.name}`}
+                        title="Editar alumno"
                       >
-                        <MetricsIcon />
-                      </Link>
-                      <Link
-                        className="student-roster-table__action student-roster-table__action--primary"
-                        href={`/trainer/assignments/manual?studentId=${student.id}`}
-                        aria-label={`Asignar rutina manualmente a ${student.name}`}
-                        title="Asignar manualmente"
-                      >
-                        <ManualAssignmentIcon />
+                        <EditIcon />
                       </Link>
                       <Link
                         className="student-roster-table__action"
                         href={`/trainer/assignments/new?studentId=${student.id}`}
-                        aria-label={`Asignar plantilla a ${student.name}`}
-                        title="Usar plantilla"
+                        aria-label={`Asignar una plantilla a ${student.name}`}
+                        title="Asignar rutina"
                       >
-                        <TemplateAssignmentIcon />
+                        <MessageIcon />
+                      </Link>
+                      <Link
+                        className="student-roster-table__action"
+                        href={`/trainer/students/${student.id}/metrics`}
+                        aria-label={`Ver métricas de ${student.name}`}
+                        title="Ver métricas"
+                      >
+                        <MetricsIcon />
                       </Link>
 
                     </div>

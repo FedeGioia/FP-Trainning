@@ -2072,6 +2072,54 @@ summary:focus-visible {
   border: 0;
 }
 
+@media (max-width: 767px) {
+  .role-shell--trainer:has(.trainer-students) .role-header {
+    position: static;
+    width: auto;
+  }
+
+  .role-shell--trainer:has(.trainer-students) .role-header-inner {
+    height: auto;
+    padding: 1rem;
+  }
+
+  .role-shell--trainer:has(.trainer-students) .role-header-panel {
+    padding-bottom: 0.8rem;
+  }
+
+  .role-shell--trainer:has(.trainer-students) .role-nav--trainer {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .role-shell--trainer:has(.trainer-students) .pill {
+    min-height: 40px;
+    padding: 0.55rem;
+    font-size: 0.82rem;
+  }
+
+  .role-shell--trainer:has(.trainer-students) .role-main {
+    margin-left: 0;
+    padding: 1rem;
+  }
+
+  .role-shell--trainer:has(.trainer-students) .trainer-students__content {
+    padding: 1rem 1rem 0;
+  }
+
+  .role-shell--trainer:has(.trainer-students) .student-roster-toolbar__form {
+    grid-template-columns: 1fr;
+  }
+
+  .role-shell--trainer:has(.trainer-students) .student-roster-toolbar__actions,
+  .role-shell--trainer:has(.trainer-students) .trainer-students__new-student {
+    width: 100%;
+  }
+
+  .role-shell--trainer:has(.trainer-students) .trainer-students__new-student {
+    flex: 1;
+  }
+}
+
 .category-tree {
   display: grid;
   gap: 0.55rem;
@@ -3065,6 +3113,335 @@ select[aria-invalid='true'] {
 
 .check-card input {
   margin-top: 0.2rem;
+}
+
+/* Trainer student roster — canonical desktop workspace direction. */
+.role-shell--trainer:has(.trainer-students) {
+  --trainer-sidebar: #10192b;
+  --trainer-sidebar-muted: #cbd3e4;
+  background: #f2f1ed;
+}
+
+.role-shell--trainer:has(.trainer-students) .role-header {
+  position: fixed;
+  z-index: 10;
+  inset: 0 auto 0 0;
+  width: 252px;
+  border: 0;
+  background: linear-gradient(165deg, #121b2e, #101829 70%, #162039);
+  box-shadow: 4px 0 16px rgba(15, 23, 42, 0.12);
+}
+
+.role-shell--trainer:has(.trainer-students) .role-header .container {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+.role-shell--trainer:has(.trainer-students) .role-header-inner {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.7rem;
+  padding: 1.9rem 1.15rem 1.15rem;
+}
+
+.role-shell--trainer:has(.trainer-students) .role-header-panel,
+.role-shell--trainer:has(.trainer-students) .role-header-brand,
+.role-shell--trainer:has(.trainer-students) .role-header-copy {
+  display: block;
+}
+
+.role-shell--trainer:has(.trainer-students) .role-header-panel {
+  padding: 0 0 1.35rem;
+  border-bottom: 1px solid rgba(203, 211, 228, 0.18);
+}
+
+.role-shell--trainer:has(.trainer-students) .role-header-panel .eyebrow,
+.role-shell--trainer:has(.trainer-students) .role-description,
+.role-shell--trainer:has(.trainer-students) .role-header-actions {
+  display: none;
+}
+
+.role-shell--trainer:has(.trainer-students) .role-title::before {
+  content: 'F';
+  display: inline-grid;
+  place-items: center;
+  width: 2.35rem;
+  height: 2.35rem;
+  margin-right: 0.6rem;
+  border-radius: 0.55rem;
+  background: #f8fafc;
+  color: #14213a;
+  font-size: 1.45rem;
+  font-weight: 900;
+  font-style: italic;
+}
+
+.role-shell--trainer:has(.trainer-students) .role-title {
+  display: flex;
+  align-items: center;
+  color: #f8fafc;
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.role-shell--trainer:has(.trainer-students) .role-nav-card {
+  display: block;
+  padding: 0;
+  border: 0;
+}
+
+.role-shell--trainer:has(.trainer-students) .role-nav--trainer {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.role-shell--trainer:has(.trainer-students) .pill {
+  justify-content: flex-start;
+  gap: 0.75rem;
+  min-height: 46px;
+  padding: 0.7rem 0.8rem;
+  border-radius: 0.55rem;
+  color: var(--trainer-sidebar-muted);
+  font-size: 0.98rem;
+  font-weight: 500;
+}
+
+.role-shell--trainer:has(.trainer-students) .pill:hover,
+.role-shell--trainer:has(.trainer-students) .pill.is-active {
+  color: #fff;
+  background: rgba(137, 156, 195, 0.24);
+}
+
+.role-shell--trainer:has(.trainer-students) .role-nav__icon {
+  width: 1.4rem;
+  height: 1.4rem;
+  flex: 0 0 auto;
+}
+
+.role-shell--trainer:has(.trainer-students) .role-main {
+  min-height: 100vh;
+  margin-left: 252px;
+  padding: 4.75rem 2rem;
+}
+
+.role-shell--trainer:has(.trainer-students) .role-main .container {
+  width: min(100%, 990px);
+}
+
+.role-shell--trainer:has(.trainer-students) .trainer-students {
+  max-width: none;
+}
+
+.role-shell--trainer:has(.trainer-students) .trainer-students__content {
+  gap: 1.25rem;
+  padding: 1.4rem 1.45rem 0;
+  border-color: #d9d9d6;
+  border-radius: 1rem;
+  background: #fff;
+  box-shadow: 0 16px 28px rgba(15, 23, 42, 0.1);
+}
+
+.role-shell--trainer:has(.trainer-students) .trainer-students__intro {
+  padding: 0;
+}
+
+.role-shell--trainer:has(.trainer-students) .trainer-students__intro h1 {
+  font-size: clamp(2rem, 3.4vw, 2.45rem);
+  font-weight: 800;
+  letter-spacing: -0.05em;
+}
+
+.role-shell--trainer:has(.trainer-students) .student-roster-toolbar {
+  padding: 0;
+  border: 0;
+}
+
+.role-shell--trainer:has(.trainer-students) .student-roster-toolbar__form {
+  grid-template-columns: minmax(220px, 1fr) 230px auto;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.role-shell--trainer:has(.trainer-students) .student-roster-toolbar__field {
+  position: relative;
+}
+
+.role-shell--trainer:has(.trainer-students) .student-roster-toolbar__field input,
+.role-shell--trainer:has(.trainer-students) .student-roster-toolbar__filter select {
+  width: 100%;
+  min-height: 46px;
+  border: 1px solid #b9bec5;
+  border-radius: 0.7rem;
+  background: #fff;
+  color: #252525;
+  font-size: 0.95rem;
+}
+
+.role-shell--trainer:has(.trainer-students) .student-roster-toolbar__field input {
+  padding: 0.7rem 0.8rem 0.7rem 2.8rem;
+}
+
+.student-roster-toolbar__search-icon {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 0.9rem;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid #68717b;
+  border-radius: 50%;
+  transform: translateY(-60%);
+}
+
+.student-roster-toolbar__search-icon::after {
+  content: '';
+  position: absolute;
+  right: -0.35rem;
+  bottom: -0.25rem;
+  width: 0.42rem;
+  border-top: 2px solid #68717b;
+  transform: rotate(45deg);
+}
+
+.role-shell--trainer:has(.trainer-students) .student-roster-toolbar__filter select {
+  appearance: auto;
+  padding: 0.7rem 0.8rem;
+}
+
+.role-shell--trainer:has(.trainer-students) .student-roster-toolbar__actions {
+  gap: 0.5rem;
+}
+
+.role-shell--trainer:has(.trainer-students) .trainer-students__new-student {
+  min-height: 46px;
+  padding: 0.7rem 1rem;
+  border-radius: 0.65rem;
+  background: linear-gradient(135deg, #3375de, #1d55bd);
+  box-shadow: 0 5px 10px rgba(29, 85, 189, 0.34);
+  white-space: nowrap;
+}
+
+.role-shell--trainer:has(.trainer-students) .trainer-students__new-student span {
+  margin-right: 0.25rem;
+  font-size: 1.35rem;
+  font-weight: 400;
+  line-height: 0;
+}
+
+.role-shell--trainer:has(.trainer-students) .student-roster-toolbar__helper {
+  display: none;
+}
+
+.role-shell--trainer:has(.trainer-students) .student-roster {
+  margin: 0 -1.45rem;
+  border-top: 1px solid #d5d5d5;
+  border-radius: 0;
+}
+
+.role-shell--trainer:has(.trainer-students) .student-roster-table {
+  min-width: 720px;
+}
+
+.role-shell--trainer:has(.trainer-students) .student-roster-table__name-column { width: 27%; }
+.role-shell--trainer:has(.trainer-students) .student-roster-table__programs-column { width: 36%; }
+.role-shell--trainer:has(.trainer-students) .student-roster-table__workouts-column { width: 18%; }
+.role-shell--trainer:has(.trainer-students) .student-roster-table__actions-column { width: 19%; }
+
+.role-shell--trainer:has(.trainer-students) .student-roster-table th,
+.role-shell--trainer:has(.trainer-students) .student-roster-table td {
+  padding: 0.78rem 1rem;
+  color: #111;
+  font-size: 0.9rem;
+}
+
+.role-shell--trainer:has(.trainer-students) .student-roster-table thead th {
+  color: #111;
+  font-size: 0.85rem;
+  font-weight: 750;
+  letter-spacing: -0.015em;
+  text-transform: none;
+  background: #fcfcfc;
+}
+
+.role-shell--trainer:has(.trainer-students) .student-roster-table__student-trigger {
+  gap: 0.7rem;
+  margin: 0;
+  padding: 0;
+  color: #111;
+  font-size: 0.95rem;
+}
+
+.student-roster-table__avatar {
+  display: inline-grid;
+  place-items: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  overflow: hidden;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #dce2eb, #929cae);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+.role-shell--trainer:has(.trainer-students) .student-roster-table__badges { gap: 0.45rem; }
+
+.role-shell--trainer:has(.trainer-students) .student-roster-table__badges .program-badge {
+  min-height: 1.75rem;
+  padding: 0.3rem 0.68rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  box-shadow: inset 0 1px rgba(255,255,255,0.35), 0 2px 4px rgba(0,0,0,0.12);
+}
+
+.role-shell--trainer:has(.trainer-students) .student-roster-table__assigned-workouts {
+  min-width: 3.6rem;
+  justify-content: center;
+  border: 0;
+  border-radius: 999px;
+  background: #c64048;
+  box-shadow: inset 0 1px rgba(255,255,255,0.36), 0 2px 4px rgba(0,0,0,0.16);
+  color: #fff;
+}
+
+.role-shell--trainer:has(.trainer-students) .student-roster-table__weekly-goal-dot { display: none; }
+.role-shell--trainer:has(.trainer-students) .student-roster-table__assigned-workouts:has(.student-roster-table__weekly-goal-dot--met) { background: #4f9b60; }
+.role-shell--trainer:has(.trainer-students) .student-roster-table__assigned-workouts:has(.student-roster-table__weekly-goal-dot--in-progress) { background: #d98535; }
+.role-shell--trainer:has(.trainer-students) .student-roster-table__assigned-workouts:has(.student-roster-table__weekly-goal-dot--untracked) { background: #778396; }
+
+.role-shell--trainer:has(.trainer-students) .student-roster-table__actions {
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.role-shell--trainer:has(.trainer-students) .student-roster-table__action {
+  width: 1.9rem;
+  height: 1.9rem;
+  border: 0;
+  border-radius: 0.35rem;
+  background: transparent;
+  color: #0e3048;
+}
+
+.role-shell--trainer:has(.trainer-students) .student-roster-table__action svg {
+  width: 1.4rem;
+  height: 1.4rem;
+  stroke-width: 2.25;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 @media (max-width: 767px) {
