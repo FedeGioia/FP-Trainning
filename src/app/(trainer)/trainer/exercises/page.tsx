@@ -19,7 +19,6 @@ type TrainerExercisesPageProps = {
 export default async function TrainerExercisesPage({ searchParams }: TrainerExercisesPageProps) {
   const params = (await searchParams) ?? {}
   const [exercises, categoryTree] = await Promise.all([listExercises(), listCategoryTree()])
-  const withVideo = exercises.filter((exercise) => exercise.hasVideo).length
   const categories = categoryTree.flatMap(function flatten(category): typeof categoryTree {
     return [category, ...category.children.flatMap(flatten)]
   })
@@ -33,6 +32,8 @@ export default async function TrainerExercisesPage({ searchParams }: TrainerExer
   const defaultCategory = categoryGroups[0] ?? categories[0]
   const selectedCategory = categories.find((category) => category.id === params.category) ?? defaultCategory
   const selectedExercises = selectedCategory ? exercisesByCategory.get(selectedCategory.id) ?? [] : []
+  const selectedWithVideo = selectedExercises.filter((exercise) => exercise.hasVideo).length
+  const selectedMetricTypes = new Set(selectedExercises.map((exercise) => exercise.primaryMetricType)).size
 
   return (
     <div className="exercise-library">
@@ -103,9 +104,9 @@ export default async function TrainerExercisesPage({ searchParams }: TrainerExer
         </div> : null}
 
         <div className="exercise-library__stats" aria-label="Resumen de la biblioteca">
-          <div><span className="exercise-library__stat-icon">▤</span><p>Total de ejercicios<strong>{exercises.length}</strong></p></div>
-          <div><span className="exercise-library__stat-icon exercise-library__stat-icon--muted">▶</span><p>Con video<strong>{withVideo}</strong></p></div>
-          <div><span className="exercise-library__stat-icon exercise-library__stat-icon--muted">◫</span><p>Tipos activos<strong>4</strong></p></div>
+          <div><span className="exercise-library__stat-icon">▤</span><p>Total de ejercicios<strong>{selectedExercises.length}</strong></p></div>
+          <div><span className="exercise-library__stat-icon exercise-library__stat-icon--muted">▶</span><p>Con video<strong>{selectedWithVideo}</strong></p></div>
+          <div><span className="exercise-library__stat-icon exercise-library__stat-icon--muted">◫</span><p>Tipos activos<strong>{selectedMetricTypes}</strong></p></div>
         </div>
 
         <div className="exercise-library__content">
@@ -115,7 +116,7 @@ export default async function TrainerExercisesPage({ searchParams }: TrainerExer
               <div className="exercise-library__grid">
                 {selectedExercises.map((exercise) => <article key={exercise.id} className="exercise-library__card">
                   <div className="exercise-library__card-body">
-                    <div className="exercise-library__card-meta"><span>{exercise.primaryMetricType}</span>{exercise.hasVideo ? <span title="Con video">▶</span> : null}</div>
+                    <div className="exercise-library__card-meta"><span>{exercise.primaryMetricType}</span>{exercise.hasVideo ? <span className="exercise-library__video-indicator" title="Con video">▶</span> : null}</div>
                     <h4>{exercise.name}</h4>
                     <p>{exercise.description ?? 'Sin descripción todavía.'}</p>
                     <span className="exercise-library__tag">{exercise.categoryPath}</span>
