@@ -1,14 +1,31 @@
 import Link from 'next/link'
 
-import { AssignmentCard } from '@/components/ui/assignment-card'
-import { SectionIntro } from '@/components/ui/section-intro'
-import { StatCard } from '@/components/ui/stat-card'
 import { listAssignments } from '@/modules/assignments'
+import type { AssignmentStatus } from '@/modules/assignments'
+import { ProgramBadge } from '@/components/ui/program-badge'
 
 type TrainerAssignmentsPageProps = {
   searchParams?: Promise<{
     created?: string
   }>
+}
+
+const assignmentStatusLabels: Record<AssignmentStatus, string> = {
+  PLANNED: 'Pendiente',
+  IN_PROGRESS: 'En curso',
+  COMPLETED: 'Completado',
+  PARTIAL: 'Parcial',
+  CANCELLED: 'Cancelada',
+}
+
+function formatScheduledAt(scheduledAt: string) {
+  return new Intl.DateTimeFormat('es-AR', {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(new Date(scheduledAt))
 }
 
 export default async function TrainerAssignmentsPage({ searchParams }: TrainerAssignmentsPageProps) {
@@ -17,43 +34,77 @@ export default async function TrainerAssignmentsPage({ searchParams }: TrainerAs
   const planned = assignments.filter((assignment) => assignment.status === 'PLANNED').length
 
   return (
-    <div className="stack">
-      <SectionIntro
-        eyebrow="Agenda"
-        title="Asignaciones"
-        description="Rutinas programadas por fecha y hora para cada alumno."
-        actions={
-          <>
-            <Link className="button button-primary" href="/trainer/assignments/new">
-              Desde plantilla
-            </Link>
-            <Link className="button button-secondary" href="/trainer/assignments/manual">
-              Rutina manual
-            </Link>
-          </>
-        }
-      />
-
-      {params.created ? <span className="status status--ok">Asignación creada correctamente.</span> : null}
-
-      <div className="grid cards">
-        <StatCard label="Asignaciones activas" value={assignments.length} detail="Bloques visibles en agenda" />
-        <StatCard label="Por iniciar" value={planned} detail="Todavía no arrancadas por el alumno" />
-        <StatCard label="Programadas" value={assignments.length} detail="Sesiones organizadas por fecha y hora" />
-      </div>
-
-      <section className="stack">
-        <div className="section-header">
-          <div>
-            <h2 className="section-title">Agenda visible</h2>
-            <p className="muted">Revisá qué tiene cada alumno, cuándo le toca y cómo viene avanzando.</p>
-          </div>
+    <div className="trainer-assignments">
+      <section className="trainer-assignments__hero">
+        <div className="trainer-assignments__hero-copy">
+          <span className="trainer-assignments__eyebrow">Agenda</span>
+          <h1>Asignaciones de rutinas</h1>
+          <p>Gestioná y programá los entrenamientos de tus alumnos.</p>
         </div>
+        <div className="trainer-assignments__actions">
+          <Link className="trainer-assignments__action trainer-assignments__action--secondary" href="/trainer/assignments/manual">
+            Rutina manual
+          </Link>
+          <Link className="trainer-assignments__action trainer-assignments__action--primary" href="/trainer/assignments/new">
+            Desde plantilla
+          </Link>
+        </div>
+      </section>
 
-        <div className="grid cards">
-          {assignments.map((assignment) => (
-            <AssignmentCard key={assignment.id} assignment={assignment} />
-          ))}
+      {params.created ? <p className="trainer-assignments__notice">Asignación creada correctamente.</p> : null}
+
+      <section className="trainer-assignments__metrics" aria-label="Resumen de asignaciones">
+        <article className="trainer-assignments__metric">
+          <span>Asignaciones activas</span>
+          <strong>{assignments.length}</strong>
+          <p>Bloques visibles en agenda</p>
+        </article>
+        <article className="trainer-assignments__metric">
+          <span>Por iniciar</span>
+          <strong>{planned}</strong>
+          <p>Todavía no arrancadas por el alumno</p>
+        </article>
+        <article className="trainer-assignments__metric">
+          <span>Programadas</span>
+          <strong>{assignments.length}</strong>
+          <p>Sesiones organizadas por fecha y hora</p>
+        </article>
+      </section>
+
+      <section className="trainer-assignments__agenda">
+        <header className="trainer-assignments__agenda-header">
+          <h2>Agenda visible</h2>
+          <p>Revisá qué tiene cada alumno, cuándo le toca y cómo viene avanzando.</p>
+        </header>
+
+        <label className="trainer-assignments__search">
+          <span aria-hidden="true">⌕</span>
+          <input aria-label="Buscar por alumno o rutina" placeholder="Buscar por alumno o rutina..." type="search" />
+        </label>
+
+        <div className="trainer-assignments__list">
+          {assignments.length > 0 ? (
+            assignments.map((assignment) => (
+              <Link className="trainer-assignments__row" href={`/trainer/assignments/${assignment.id}`} key={assignment.id}>
+                <ProgramBadge className="trainer-assignments__program" code={assignment.programCode} />
+                <div className="trainer-assignments__row-copy">
+                  <strong>{assignment.title}</strong>
+                  <span>{assignment.studentName}</span>
+                </div>
+                <div className="trainer-assignments__row-meta">
+                  <time dateTime={assignment.scheduledAt}>◷ {formatScheduledAt(assignment.scheduledAt)}</time>
+                  <span className={`trainer-assignments__status trainer-assignments__status--${assignment.status.toLowerCase()}`}>
+                    {assignmentStatusLabels[assignment.status]}
+                  </span>
+                </div>
+              </Link>
+            ))
+          ) : (
+            <div className="trainer-assignments__empty">
+              <strong>Todavía no hay asignaciones visibles.</strong>
+              <span>Creá una rutina desde una plantilla o cargala manualmente.</span>
+            </div>
+          )}
         </div>
       </section>
     </div>

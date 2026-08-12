@@ -1,8 +1,6 @@
 import Link from 'next/link'
+import type { CSSProperties } from 'react'
 
-import { ExerciseCard } from '@/components/ui/exercise-card'
-import { SectionIntro } from '@/components/ui/section-intro'
-import { StatCard } from '@/components/ui/stat-card'
 import { BACKFILL_CATEGORY_NAME, listCategoryTree, listExercises } from '@/modules/exercises'
 
 import { createCategoryAction, deleteCategoryAction, updateExerciseCategoryAction } from './actions'
@@ -33,114 +31,97 @@ export default async function TrainerExercisesPage({ searchParams }: TrainerExer
     .filter((category) => category.exercises.length > 0)
 
   return (
-    <div className="stack">
-      <SectionIntro
-        eyebrow="Biblioteca"
-        title="Ejercicios"
-        description="Centralizá los ejercicios que usás en cada programa para reutilizarlos al crear plantillas y bloques."
-        actions={
-          <>
-            <Link className="button button-primary" href="/trainer/exercises/new">
-              Nuevo ejercicio
-            </Link>
-          </>
-        }
-      />
-
-      {params.created ? <span className="status status--ok">Ejercicio creado correctamente.</span> : null}
-      {params.categoryCreated ? <span className="status status--ok">Categoría creada correctamente.</span> : null}
-      {params.categoryDeleted ? <span className="status status--ok">Categoría eliminada; sus ejercicios se reasignaron a Sin categoría.</span> : null}
-      {params.exerciseCategoryUpdated ? <span className="status status--ok">Categoría del ejercicio actualizada.</span> : null}
-      {params.categoryError ? <span className="status status--error">{decodeURIComponent(params.categoryError)}</span> : null}
-
-      <div className="grid cards">
-        <StatCard label="Ejercicios visibles" value={exercises.length} detail="Catálogo actual disponible" />
-        <StatCard label="Con video" value={withVideo} detail="Útiles para guía del alumno" />
-        <StatCard label="Tipos activos" value="4" detail="Strength, duration, distance y custom" />
-      </div>
-
-      <section className="card stack">
-        <div className="section-header">
+    <div className="exercise-library">
+      <aside className="exercise-library__categories" aria-label="Gestión de categorías">
+        <div className="exercise-library__categories-header">
           <div>
-            <h2 className="section-title">Carpetas de categorías</h2>
-            <p className="muted">Creá carpetas raíz o elegí una existente como padre para anidarlas. Sin categoría es la carpeta obligatoria de respaldo.</p>
+            <p className="exercise-library__eyebrow">Organización</p>
+            <h1>Categorías</h1>
           </div>
+          <details className="exercise-library__new-category">
+            <summary>Nueva categoría</summary>
+            <form action={createCategoryAction} className="exercise-library__category-form">
+              <label><span>Nombre</span><input name="name" type="text" required placeholder="Ej: Fuerza" /></label>
+              <label><span>Dentro de</span><select name="parentId" defaultValue=""><option value="">Carpeta raíz</option>{categories.map((category) => <option key={category.id} value={category.id}>{category.path}</option>)}</select></label>
+              <button type="submit">Crear categoría</button>
+            </form>
+          </details>
         </div>
-        <form action={createCategoryAction} className="form-grid">
-          <label className="field">
-            <span>Nueva categoría</span>
-            <input name="name" type="text" required placeholder="Ej: Fuerza" />
-          </label>
-          <label className="field">
-            <span>Dentro de</span>
-            <select name="parentId" defaultValue="">
-              <option value="">Carpeta raíz</option>
-              {categories.map((category) => <option key={category.id} value={category.id}>{category.path}</option>)}
-            </select>
-          </label>
-          <button className="button button-primary" type="submit">Crear categoría</button>
-        </form>
-        {categories.length === 0 ? (
-          <p className="status status--muted">Todavía no hay categorías. Creá una antes de cargar ejercicios.</p>
-        ) : (
-          <ul className="category-tree">
-            {categories.map((category) => (
-              <li key={category.id} className="category-tree__item" style={{ marginLeft: `${category.path.split(' / ').length - 1}rem` }}>
-                <div className="category-tree__content">
-                  <span>{category.path}</span>
+
+        <div className="exercise-library__category-list">
+          {categories.length === 0 ? <p className="exercise-library__empty">Todavía no hay categorías. Podés crear una o seguir usando la biblioteca.</p> : categories.map((category) => {
+            const level = category.path.split(' / ').length - 1
+            const protectedCategory = category.name === BACKFILL_CATEGORY_NAME && category.parentId === null
+            return (
+              <article key={category.id} className="exercise-library__category" style={{ '--category-level': level } as CSSProperties}>
+                <div className="exercise-library__category-name"><span aria-hidden="true">▰</span><strong>{category.name}</strong></div>
+                <small>{category.path}</small>
+                <div className="exercise-library__category-actions">
                   <details>
-                    <summary>Agregar subcategoría</summary>
-                    <form action={createCategoryAction} className="category-tree__child-form">
+                    <summary>+ Subcategoría</summary>
+                    <form action={createCategoryAction} className="exercise-library__child-form">
                       <input name="parentId" type="hidden" value={category.id} />
                       <input name="name" type="text" required placeholder={`Dentro de ${category.name}`} aria-label={`Nueva subcategoría dentro de ${category.path}`} />
-                      <button className="button button-primary" type="submit">Agregar</button>
+                      <button type="submit">Agregar</button>
                     </form>
                   </details>
+                  {protectedCategory ? <span className="exercise-library__locked">Respaldo</span> : <form action={deleteCategoryAction}><input name="categoryId" type="hidden" value={category.id} /><button className="exercise-library__delete" type="submit">Eliminar</button></form>}
                 </div>
-                {category.name === BACKFILL_CATEGORY_NAME && category.parentId === null ? (
-                  <span className="status status--muted">Categoría de respaldo obligatoria</span>
-                ) : (
-                  <form action={deleteCategoryAction}>
-                    <input name="categoryId" type="hidden" value={category.id} />
-                    <button className="button button-secondary category-tree__delete" type="submit">Eliminar</button>
-                  </form>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+              </article>
+            )
+          })}
+        </div>
+      </aside>
 
-      <section className="stack">
-        <div className="section-header">
+      <section className="exercise-library__catalog">
+        <header className="exercise-library__header">
           <div>
-            <h2 className="section-title">Catálogo visible</h2>
-            <p className="muted">Revisá tu biblioteca actual y sumá nuevos ejercicios cuando lo necesites.</p>
+            <p className="exercise-library__eyebrow">Biblioteca</p>
+            <h2>Ejercicios</h2>
+            <p>Gestioná y organizá tu catálogo de ejercicios.</p>
           </div>
+          <div className="exercise-library__header-actions">
+            <label className="exercise-library__search"><span aria-hidden="true">⌕</span><span className="sr-only">Buscar ejercicios</span><input type="search" placeholder="Buscar ejercicios..." /></label>
+            <Link className="exercise-library__new-exercise" href="/trainer/exercises/new"><span aria-hidden="true">+</span> Nuevo ejercicio</Link>
+          </div>
+        </header>
+
+        {(params.created || params.categoryCreated || params.categoryDeleted || params.exerciseCategoryUpdated || params.categoryError) ? <div className="exercise-library__feedback" aria-live="polite">
+          {params.created ? <span className="exercise-library__notice exercise-library__notice--ok">Ejercicio creado correctamente.</span> : null}
+          {params.categoryCreated ? <span className="exercise-library__notice exercise-library__notice--ok">Categoría creada correctamente.</span> : null}
+          {params.categoryDeleted ? <span className="exercise-library__notice exercise-library__notice--ok">Categoría eliminada; sus ejercicios se reasignaron a Sin categoría.</span> : null}
+          {params.exerciseCategoryUpdated ? <span className="exercise-library__notice exercise-library__notice--ok">Categoría del ejercicio actualizada.</span> : null}
+          {params.categoryError ? <span className="exercise-library__notice exercise-library__notice--error">{decodeURIComponent(params.categoryError)}</span> : null}
+        </div> : null}
+
+        <div className="exercise-library__stats" aria-label="Resumen de la biblioteca">
+          <div><span className="exercise-library__stat-icon">▤</span><p>Total de ejercicios<strong>{exercises.length}</strong></p></div>
+          <div><span className="exercise-library__stat-icon exercise-library__stat-icon--muted">▶</span><p>Con video<strong>{withVideo}</strong></p></div>
+          <div><span className="exercise-library__stat-icon exercise-library__stat-icon--muted">◫</span><p>Tipos activos<strong>4</strong></p></div>
         </div>
 
-        {categoryGroups.map((category) => (
-          <section key={category.id} className="stack">
-            <h3 className="section-title">{category.path}</h3>
-            <div className="grid cards">
-              {category.exercises.map((exercise) => (
-                <div key={exercise.id} className="stack">
-                  <ExerciseCard exercise={exercise} />
-                  <form action={updateExerciseCategoryAction} className="exercise-category-assignment">
+        <div className="exercise-library__content">
+          {categoryGroups.length === 0 ? <p className="exercise-library__empty">Todavía no hay ejercicios visibles. Creá tu primer ejercicio para empezar a armar la biblioteca.</p> : categoryGroups.map((category) => (
+            <section key={category.id} className="exercise-library__group">
+              <h3>{category.path}</h3>
+              <div className="exercise-library__grid">
+                {category.exercises.map((exercise) => <article key={exercise.id} className="exercise-library__card">
+                  <div className="exercise-library__card-body">
+                    <div className="exercise-library__card-meta"><span>{exercise.primaryMetricType}</span>{exercise.hasVideo ? <span title="Con video">▶</span> : null}</div>
+                    <h4>{exercise.name}</h4>
+                    <p>{exercise.description ?? 'Sin descripción todavía.'}</p>
+                    <span className="exercise-library__tag">{exercise.categoryPath}</span>
+                  </div>
+                  <form action={updateExerciseCategoryAction} className="exercise-library__assignment">
                     <input name="exerciseId" type="hidden" value={exercise.id} />
-                    <label>
-                      <span className="sr-only">Categoría para {exercise.name}</span>
-                      <select name="categoryId" required defaultValue={exercise.categoryId}>
-                        {categories.map((category) => <option key={category.id} value={category.id}>{category.path}</option>)}
-                      </select>
-                    </label>
-                    <button className="button button-secondary" type="submit">Guardar categoría</button>
+                    <label><span className="sr-only">Categoría para {exercise.name}</span><select name="categoryId" required defaultValue={exercise.categoryId}>{categories.map((item) => <option key={item.id} value={item.id}>{item.path}</option>)}</select></label>
+                    <button type="submit">Guardar</button>
                   </form>
-                </div>
-              ))}
-            </div>
-          </section>
-        ))}
+                </article>)}
+              </div>
+            </section>
+          ))}
+        </div>
       </section>
     </div>
   )
