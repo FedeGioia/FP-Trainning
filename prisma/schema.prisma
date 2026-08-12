@@ -409,9 +409,25 @@ model WorkoutResultEntry {
 
   submission     WorkoutSubmission      @relation(fields: [submissionId], references: [id], onDelete: Cascade)
   assignedExercise AssignedRoutineExercise @relation(fields: [assignedRoutineExerciseId], references: [id], onDelete: Cascade)
+  strengthSetResults WorkoutStrengthSetResult[]
 
   @@index([submissionId])
   @@index([assignedRoutineExerciseId])
+}
+
+model WorkoutStrengthSetResult {
+  id                  String             @id @default(cuid())
+  workoutResultEntryId String
+  setOrder            Int
+  repetitions         Int
+  weight              Float
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+
+  workoutResultEntry WorkoutResultEntry @relation(fields: [workoutResultEntryId], references: [id], onDelete: Cascade)
+
+  @@unique([workoutResultEntryId, setOrder])
+  @@index([workoutResultEntryId])
 }
 
 model TrainerFeedback {

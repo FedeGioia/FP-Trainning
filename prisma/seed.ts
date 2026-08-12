@@ -308,6 +308,7 @@ type RoutineResultSeed = {
   exerciseOrder: number
   resultType: MetricType
   resultPayload: Prisma.InputJsonObject
+  strengthSets?: Array<{ repetitions: number; weight: number }>
   notes?: string | null
 }
 
@@ -351,6 +352,10 @@ const routineSeeds: Array<{
           exerciseOrder: 1,
           resultType: MetricType.STRENGTH,
           resultPayload: { series: 2, repetitions: 10, weight: 50 },
+          strengthSets: [
+            { repetitions: 10, weight: 50 },
+            { repetitions: 8, weight: 55 },
+          ],
           notes: 'Primer bloque completado.',
         },
       ],
@@ -714,6 +719,13 @@ async function main() {
             resultType: result.resultType,
             resultPayload: result.resultPayload,
             notes: result.notes ?? null,
+            strengthSetResults: result.strengthSets ? {
+              create: result.strengthSets.map((set, index) => ({
+                setOrder: index + 1,
+                repetitions: set.repetitions,
+                weight: set.weight,
+              })),
+            } : undefined,
           })),
         },
         feedbacks: {

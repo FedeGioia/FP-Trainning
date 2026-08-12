@@ -13,9 +13,18 @@ type ActionProps = {
 export async function saveStudentExerciseAction({ assignmentId, exerciseId }: ActionProps, formData: FormData) {
   const session = await auth()
   const value = String(formData.get('value') ?? '')
-  const strengthSeries = String(formData.get('strengthSeries') ?? '')
-  const strengthRepetitions = String(formData.get('strengthRepetitions') ?? '')
-  const strengthWeight = String(formData.get('strengthWeight') ?? '')
+  const strengthSets = new Map<number, { repetitions: string; weight: string }>()
+
+  for (const [name, entry] of formData.entries()) {
+    const match = /^strengthSets\.(\d+)\.(repetitions|weight)$/.exec(name)
+    if (!match) continue
+
+    const index = Number(match[1])
+    const field = match[2] as 'repetitions' | 'weight'
+    const set = strengthSets.get(index) ?? { repetitions: '', weight: '' }
+    set[field] = String(entry)
+    strengthSets.set(index, set)
+  }
 
   if (!session?.user?.id || session.user.role !== 'student') {
     redirect('/login?error=auth')
@@ -25,9 +34,7 @@ export async function saveStudentExerciseAction({ assignmentId, exerciseId }: Ac
     assignmentId,
     assignedExerciseId: exerciseId,
     value,
-    strengthSeries,
-    strengthRepetitions,
-    strengthWeight,
+    strengthSets: [...strengthSets.entries()].sort(([left], [right]) => left - right).map(([, set]) => set),
     studentId: session.user.id,
   })
 

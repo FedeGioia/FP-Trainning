@@ -325,6 +325,38 @@ async function main() {
       assert.equal(result.ok, false)
     })
 
+    await test('saveAssignmentExerciseResult atomically replaces ordered strength set results', async () => {
+      const result = await saveAssignmentExerciseResult({
+        assignmentId: fixture.assignmentId,
+        assignedExerciseId: fixture.assignmentExerciseId,
+        value: '',
+        studentId: fixture.studentOwnerId,
+        strengthSets: [
+          { repetitions: '8', weight: '60' },
+          { repetitions: '6', weight: '65.5' },
+        ],
+      })
+
+      assert.equal(result.ok, true)
+
+      const entry = await db.workoutResultEntry.findFirstOrThrow({
+        where: { assignedRoutineExerciseId: fixture.assignmentExerciseId },
+        include: { strengthSetResults: { orderBy: { setOrder: 'asc' } } },
+      })
+      assert.deepEqual(entry.strengthSetResults.map((set) => [set.setOrder, set.repetitions, set.weight]), [
+        [1, 8, 60],
+        [2, 6, 65.5],
+      ])
+
+      const assignment = await getAssignmentDetailById(fixture.assignmentId, { studentId: fixture.studentOwnerId })
+      const exercise = assignment?.sections[0]?.exercises[0]
+      assert.deepEqual(exercise?.currentStrengthSets, [
+        { repetitions: 8, weight: 60 },
+        { repetitions: 6, weight: 65.5 },
+      ])
+      assert.equal(exercise?.status, 'COMPLETED')
+    })
+
     await test('submitAssignmentResults saves a completed student submission', async () => {
       const result = await submitAssignmentResults({
         assignmentId: fixture.assignmentId,

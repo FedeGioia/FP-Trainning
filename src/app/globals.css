@@ -2784,6 +2784,9 @@ summary:focus-visible {
 .student-exercise-context > span { width: fit-content; padding: 0.25rem 0.5rem; border-radius: 0.25rem; background: rgba(0, 74, 198, 0.1); color: #004ac6; font-size: 0.68rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
 .student-exercise-context h2 { margin: 0; color: #004ac6; font-size: 1.45rem; font-style: italic; line-height: 1.15; text-transform: uppercase; }
 .student-exercise-context p { margin: 0; color: #565e74; font-size: 0.88rem; font-style: italic; line-height: 1.5; }
+.student-exercise-context__video-button { display: inline-flex; align-items: center; gap: 0.45rem; width: fit-content; min-height: 2.5rem; padding: 0.55rem 0.9rem; border: 1px solid #c3c6d7; border-radius: 0.5rem; background: #fff; color: #004ac6; box-shadow: 0 1px 2px rgba(11, 28, 48, 0.08); font-size: 0.78rem; font-weight: 800; transition: background 160ms ease, border-color 160ms ease, transform 160ms ease; }
+.student-exercise-context__video-button:hover { border-color: #004ac6; background: #f8f9ff; transform: translateY(-1px); }
+.student-exercise-context__video-button span { display: inline-grid; width: 1.15rem; height: 1.15rem; place-items: center; border-radius: 999px; background: #004ac6; color: #fff; font-size: 0.6rem; line-height: 1; }
 .student-exercise-context > div { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; margin-top: 0.25rem; }
 .student-exercise-context b { padding: 0.35rem 0.7rem; border-radius: 999px; background: rgba(0, 74, 198, 0.1); color: #004ac6; font-size: 0.7rem; }
 .student-exercise-context small { color: #565e74; font-size: 0.72rem; }
@@ -2797,6 +2800,16 @@ summary:focus-visible {
 .student-exercise-form label { display: grid; gap: 0.45rem; color: #0b1c30; font-size: 0.9rem; font-weight: 700; }
 .student-exercise-form input { width: 100%; min-height: 3rem; padding: 0.7rem 0.85rem; border: 1px solid #c3c6d7; border-radius: 0.5rem; background: #f8f9ff; color: #0b1c30; }
 .student-exercise-form input:focus { border-color: #004ac6; outline: 3px solid rgba(0, 74, 198, 0.14); }
+.student-exercise-form__input-with-action { display: flex; gap: 0.5rem; }
+.student-exercise-form__input-with-action input { min-width: 0; }
+.student-exercise-form__add-button { display: inline-flex; flex: 0 0 3rem; align-items: center; justify-content: center; min-height: 3rem; padding: 0; border: 1px solid #c3c6d7; border-radius: 0.5rem; background: #dce9ff; color: #004ac6; cursor: pointer; font-size: 1.5rem; font-weight: 700; line-height: 1; transition: background 160ms ease, border-color 160ms ease, transform 160ms ease; }
+.student-exercise-form__add-button:hover { border-color: #004ac6; background: #d3e4fe; }
+.student-exercise-form__add-button:active { transform: scale(0.96); }
+.student-strength-sets { display: grid; gap: 0.75rem; }
+.student-strength-set { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; margin: 0; padding: 0.75rem; border: 1px solid #d9ddea; border-radius: 0.75rem; }
+.student-strength-set legend { padding: 0 0.3rem; color: #004ac6; font-size: 0.78rem; font-weight: 800; }
+.student-strength-set label { display: grid; gap: 0.35rem; color: #565e74; font-size: 0.75rem; font-weight: 700; }
+.student-strength-sets__add { min-height: 2.8rem; border: 1px dashed #7ba4e8; border-radius: 0.6rem; background: #f8faff; color: #004ac6; cursor: pointer; font-weight: 800; }
 .student-exercise-form__actions { display: grid; gap: 0.75rem; padding-top: 0.25rem; }
 .student-exercise-button { width: 100%; cursor: pointer; }
 

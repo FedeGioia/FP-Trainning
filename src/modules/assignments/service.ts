@@ -83,6 +83,18 @@ function formatStrengthPayload(strength: { series: number | null; repetitions: n
   return `${base}${weightPart}`.trim()
 }
 
+function getLegacyStrengthSets(strength: { series: number | null; repetitions: number | null; weight: number | null } | null) {
+  if (!strength || strength.series === null || strength.repetitions === null || strength.weight === null || strength.series < 1) {
+    return []
+  }
+
+  return Array.from({ length: strength.series }, () => ({ repetitions: strength.repetitions!, weight: strength.weight! }))
+}
+
+function formatStrengthSets(sets: Array<{ repetitions: number; weight: number }>) {
+  return sets.map((set) => `${set.repetitions} reps @ ${set.weight}kg`).join(' · ')
+}
+
 type NormalizedManualSection = {
   title: string
   exercises: Array<{
@@ -182,13 +194,29 @@ export async function getAssignmentDetailById(
           include: {
             exercises: {
               orderBy: { exerciseOrder: 'asc' },
-              include: { exercise: true },
+              include: {
+                exercise: {
+                  include: {
+                    media: {
+                      where: { kind: 'VIDEO' },
+                      orderBy: { createdAt: 'asc' },
+                      take: 1,
+                    },
+                  },
+                },
+              },
             },
           },
         },
         submission: {
           include: {
-            resultEntries: true,
+            resultEntries: {
+              include: {
+                strengthSetResults: {
+                  orderBy: { setOrder: 'asc' },
+                },
+              },
+            },
           },
         },
       },
@@ -238,16 +266,23 @@ export async function getAssignmentDetailById(
           const resultEntry = resultEntriesByExerciseId.get(exercise.id)
           const expectedStrength = getStrengthPayload(exercise.prescriptionSnapshot)
           const currentStrength = resultEntry ? getStrengthPayload(resultEntry.resultPayload) : null
+          const savedStrengthSets = resultEntry?.strengthSetResults.map((set) => ({
+            repetitions: set.repetitions,
+            weight: set.weight,
+          })) ?? []
+          const currentStrengthSets = savedStrengthSets.length > 0 ? savedStrengthSets : getLegacyStrengthSets(currentStrength)
 
           return {
             id: exercise.id,
             name: exercise.exercise.name,
+            videoUrl: exercise.exercise.media[0]?.url ?? null,
             metricType: exercise.metricType,
             status: resultEntry ? 'COMPLETED' : 'PENDING',
-            currentValue: currentStrength ? formatStrengthPayload(currentStrength) : resultEntry ? mapResultPayloadValue(resultEntry.resultPayload) : null,
+            currentValue: currentStrengthSets.length > 0 ? formatStrengthSets(currentStrengthSets) : currentStrength ? formatStrengthPayload(currentStrength) : resultEntry ? mapResultPayloadValue(resultEntry.resultPayload) : null,
             expectedValue: expectedStrength ? formatStrengthPayload(expectedStrength) : mapResultPayloadValue(exercise.prescriptionSnapshot),
             expectedStrength,
             currentStrength,
+            currentStrengthSets,
             restLabel: exercise.restLabel,
             methodLabel: exercise.methodLabel,
             notes: exercise.notes,
@@ -264,9 +299,10 @@ export async function saveAssignmentExerciseResult(
   input: SaveAssignmentExerciseResultInput,
 ): Promise<SaveAssignmentExerciseResultResult> {
   const value = input.value.trim()
-  const strengthSeries = parseOptionalNumber(input.strengthSeries)
-  const strengthRepetitions = parseOptionalNumber(input.strengthRepetitions)
-  const strengthWeight = parseOptionalNumber(input.strengthWeight)
+  const strengthSets = (input.strengthSets ?? []).map((set) => ({
+    repetitions: parseOptionalNumber(set.repetitions),
+    weight: parseOptionalNumber(set.weight),
+  }))
 
   if (!input.assignmentId || !input.assignedExerciseId) {
     return { ok: false, message: 'No encontramos el bloque o ejercicio a actualizar.' }
@@ -305,12 +341,16 @@ export async function saveAssignmentExerciseResult(
     const isStrength = targetExercise.metricType === 'STRENGTH'
 
     if (isStrength) {
-      if (Number.isNaN(strengthSeries) || Number.isNaN(strengthRepetitions) || Number.isNaN(strengthWeight)) {
-        return { ok: false, message: 'Series, repeticiones y peso tienen que ser números válidos.' }
+      if (strengthSets.length === 0) {
+        return { ok: false, message: 'Tenés que cargar al menos una serie para guardar este ejercicio.' }
       }
 
-      if (strengthSeries === null || strengthRepetitions === null || strengthWeight === null) {
-        return { ok: false, message: 'Tenés que completar series, repeticiones y peso para guardar este ejercicio.' }
+      if (strengthSets.some((set) => Number.isNaN(set.repetitions) || Number.isNaN(set.weight))) {
+        return { ok: false, message: 'Las repeticiones y el peso de cada serie tienen que ser números válidos.' }
+      }
+
+      if (strengthSets.some((set) => set.repetitions === null || set.weight === null)) {
+        return { ok: false, message: 'Tenés que completar repeticiones y peso para cada serie.' }
       }
     } else if (!value) {
       return { ok: false, message: 'Tenés que cargar un resultado antes de guardar.' }
@@ -324,17 +364,25 @@ export async function saveAssignmentExerciseResult(
         },
       })
 
+      const strengthPayload = {
+        series: strengthSets.length,
+        repetitions: strengthSets[0]?.repetitions ?? null,
+        weight: strengthSets[0]?.weight ?? null,
+      }
+
       if (existingEntry) {
         await tx.workoutResultEntry.update({
           where: { id: existingEntry.id },
           data: {
-            resultPayload: isStrength
-              ? {
-                  series: strengthSeries,
-                  repetitions: strengthRepetitions,
-                  weight: strengthWeight,
-                }
-              : { value },
+            resultPayload: isStrength ? strengthPayload : { value },
+            strengthSetResults: isStrength ? {
+              deleteMany: {},
+              create: strengthSets.map((set, index) => ({
+                setOrder: index + 1,
+                repetitions: set.repetitions!,
+                weight: set.weight!,
+              })),
+            } : undefined,
           },
         })
       } else {
@@ -343,13 +391,14 @@ export async function saveAssignmentExerciseResult(
             submissionId: assignment.submission!.id,
             assignedRoutineExerciseId: targetExercise.id,
             resultType: targetExercise.metricType,
-            resultPayload: isStrength
-              ? {
-                  series: strengthSeries,
-                  repetitions: strengthRepetitions,
-                  weight: strengthWeight,
-                }
-              : { value },
+            resultPayload: isStrength ? strengthPayload : { value },
+            strengthSetResults: isStrength ? {
+              create: strengthSets.map((set, index) => ({
+                setOrder: index + 1,
+                repetitions: set.repetitions!,
+                weight: set.weight!,
+              })),
+            } : undefined,
           },
         })
       }

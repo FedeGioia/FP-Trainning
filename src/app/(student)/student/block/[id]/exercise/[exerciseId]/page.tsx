@@ -4,7 +4,7 @@ import { auth } from '@/auth'
 import { getAssignmentDetailById } from '@/modules/assignments'
 
 import { saveStudentExerciseAction } from './actions'
-import { getStrengthResultPrefill } from './strength-prefill'
+import { StrengthResultForm } from './StrengthResultForm'
 
 function getMetricFieldLabel(metricType: string) {
   switch (metricType) {
@@ -107,6 +107,17 @@ export default async function StudentExercisePage({ params, searchParams }: Stud
           <span>Ejercicio</span>
           <h2>{exercise.name}</h2>
           {exercise.notes ? <p>{exercise.notes}</p> : null}
+          {exercise.videoUrl ? (
+            <a
+              className="student-exercise-context__video-button"
+              href={exercise.videoUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <span aria-hidden="true">▶</span>
+              Ver ejecución
+            </a>
+          ) : null}
           <div>
             <b>{assignment.programCode}</b>
             <small>{exercise.status === 'COMPLETED' ? 'Completado' : 'Pendiente'}</small>
@@ -130,69 +141,26 @@ export default async function StudentExercisePage({ params, searchParams }: Stud
           </div>
         </section>
 
-        <form action={saveStudentExerciseAction.bind(null, { assignmentId: assignment.id, exerciseId: exercise.id })} className="student-exercise-form">
-          <span className="student-exercise-form__kicker">📝 Tu registro de hoy</span>
         {isStrengthMetric(exercise.metricType) ? (
-          <>
-            <div className="student-exercise-form__fields">
-              <label>
-                <span>Series completadas</span>
-                <input
-                  name="strengthSeries"
-                  type="number"
-                  min="0"
-                  step="1"
-                  defaultValue={getStrengthResultPrefill(exercise.currentStrength, exercise.expectedStrength, 'series')}
-                  placeholder="Ej: 3"
-                />
-              </label>
-
-              <label>
-                <span>Reps por serie</span>
-                <input
-                  name="strengthRepetitions"
-                  type="number"
-                  min="0"
-                  step="1"
-                  defaultValue={getStrengthResultPrefill(exercise.currentStrength, exercise.expectedStrength, 'repetitions')}
-                  placeholder="Ej: 8"
-                />
-              </label>
-            </div>
-
-            <label className="student-exercise-form__field">
-              <span>Peso utilizado (kg)</span>
-              <input
-                name="strengthWeight"
-                type="number"
-                min="0"
-                step="0.5"
-                defaultValue={getStrengthResultPrefill(exercise.currentStrength, exercise.expectedStrength, 'weight')}
-                placeholder="Ej: 60"
-              />
-            </label>
-          </>
+          <StrengthResultForm
+            action={saveStudentExerciseAction.bind(null, { assignmentId: assignment.id, exerciseId: exercise.id })}
+            assignmentId={assignment.id}
+            currentSets={exercise.currentStrengthSets ?? []}
+            expectedStrength={exercise.expectedStrength}
+          />
         ) : (
-          <label className="student-exercise-form__field">
-            <span>{getMetricFieldLabel(exercise.metricType)}</span>
-            <input
-              name="value"
-              type="text"
-              defaultValue={exercise.currentValue ?? ''}
-              placeholder={getMetricPlaceholder(exercise.metricType)}
-            />
-          </label>
+          <form action={saveStudentExerciseAction.bind(null, { assignmentId: assignment.id, exerciseId: exercise.id })} className="student-exercise-form">
+            <span className="student-exercise-form__kicker">📝 Tu registro de hoy</span>
+            <label className="student-exercise-form__field">
+              <span>{getMetricFieldLabel(exercise.metricType)}</span>
+              <input name="value" type="text" defaultValue={exercise.currentValue ?? ''} placeholder={getMetricPlaceholder(exercise.metricType)} />
+            </label>
+            <section className="student-exercise-form__actions">
+              <Link className="student-exercise-button student-exercise-button--secondary" href={`/student/block/${assignment.id}`}>Cancelar</Link>
+              <button className="student-exercise-button student-exercise-button--primary" type="submit">Guardar ejercicio</button>
+            </section>
+          </form>
         )}
-
-        <section className="student-exercise-form__actions">
-          <Link className="student-exercise-button student-exercise-button--secondary" href={`/student/block/${assignment.id}`}>
-            Cancelar
-          </Link>
-          <button className="student-exercise-button student-exercise-button--primary" type="submit">
-            Guardar ejercicio
-          </button>
-        </section>
-      </form>
       </main>
     </div>
   )

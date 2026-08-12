@@ -23,6 +23,7 @@ export type AssignmentSectionDetail = {
 export type AssignmentExerciseDetail = {
   id: string
   name: string
+  videoUrl?: string | null
   metricType: string
   status: 'PENDING' | 'COMPLETED'
   currentValue?: string | null
@@ -37,6 +38,10 @@ export type AssignmentExerciseDetail = {
     repetitions: number | null
     weight: number | null
   } | null
+  currentStrengthSets?: Array<{
+    repetitions: number
+    weight: number
+  }>
   restLabel?: string | null
   methodLabel?: string | null
   notes?: string | null
@@ -54,9 +59,10 @@ export type SaveAssignmentExerciseResultInput = {
   assignmentId: string
   assignedExerciseId: string
   value: string
-  strengthSeries?: string
-  strengthRepetitions?: string
-  strengthWeight?: string
+  strengthSets?: Array<{
+    repetitions: string
+    weight: string
+  }>
   studentId?: string
 }
 
