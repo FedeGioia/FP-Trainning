@@ -69,7 +69,7 @@ export default async function TrainerStudentsPage({ searchParams }: TrainerStude
             </div>
           </form>
 
-          <span className="muted">
+          <span className="muted student-roster-toolbar__helper">
             {query ? `Mostrando ${students.length} resultado${students.length === 1 ? '' : 's'} para “${query}”.` : 'Buscá por nombre, email o programa para administrar más rápido.'}
           </span>
         </section>
