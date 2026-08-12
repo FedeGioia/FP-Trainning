@@ -108,7 +108,7 @@ await test('isNavItemActive highlights exact routes and their nested pages only'
   assert.equal(isNavItemActive('/trainer', '/'), false)
 })
 
-await test('StudentRosterTable weekly dot reflects trainer workout loading against the weekly goal', () => {
+await test('StudentRosterTable shows completed workouts against the weekly goal while preserving weekly-load status', () => {
   const createStudent = (weekly: { scheduledCount: number; completedCount: number; goalTarget: number | null }) => ({
     id: `student-${weekly.goalTarget ?? 'none'}-${weekly.scheduledCount}`,
     name: 'Alumno',
@@ -137,6 +137,8 @@ await test('StudentRosterTable weekly dot reflects trainer workout loading again
   assert.match(html, /weekly-goal-dot--empty/)
   assert.match(html, /weekly-goal-dot--in-progress/)
   assert.match(html, /weekly-goal-dot--met/)
+  assert.match(html, /2\/3/)
+  assert.match(html, /0\/—/)
   assert.match(html, /carga semanal: 3\/3 rutinas asignadas/)
 })
 

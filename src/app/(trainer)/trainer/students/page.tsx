@@ -69,7 +69,7 @@ export default async function TrainerStudentsPage({ searchParams }: TrainerStude
             </label>
 
             <div className="student-roster-toolbar__actions">
-              <button className="sr-only" type="submit">Aplicar filtros</button>
+              <button className="student-roster-toolbar__submit" type="submit">Buscar</button>
               {query ? (
                 <Link className="student-roster-toolbar__clear" href="/trainer/students">
                   Limpiar

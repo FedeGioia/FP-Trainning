@@ -22,11 +22,12 @@ function EditIcon() {
   )
 }
 
-function MessageIcon() {
+function AssignmentFormIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" strokeWidth="2" />
-      <path d="m4 7 8 6 8-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <rect x="4" y="3" width="16" height="18" rx="2" stroke="currentColor" strokeWidth="2" />
+      <path d="M8 8h8M8 12h8M8 16h3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path d="m15.5 16 1.5 1.5 3-3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )
 }
@@ -77,16 +78,18 @@ export function StudentRosterTable({ students }: StudentRosterTableProps) {
                   <td className="student-roster-table__workouts-column">
                     <strong
                       className="student-roster-table__assigned-workouts"
-                      aria-label={`${student.weekly.completedCount} de ${student.weekly.scheduledCount} rutinas programadas completadas esta semana`}
+                      aria-label={student.weekly.goalTarget === null
+                        ? `${student.weekly.completedCount} rutinas completadas esta semana; sin objetivo semanal definido`
+                        : `${student.weekly.completedCount} de ${student.weekly.goalTarget} entrenamientos semanales completados`}
                       title={student.weekly.goalTarget === null
-                        ? `${student.weekly.completedCount}/${student.weekly.scheduledCount} completadas esta semana · sin objetivo semanal definido`
-                        : `${student.weekly.completedCount}/${student.weekly.scheduledCount} completadas esta semana · carga semanal: ${student.weekly.scheduledCount}/${student.weekly.goalTarget} rutinas asignadas`}
+                        ? `${student.weekly.completedCount} completadas esta semana · ${student.weekly.scheduledCount} rutinas cargadas esta semana · sin objetivo semanal definido`
+                        : `${student.weekly.completedCount}/${student.weekly.goalTarget} completadas esta semana · carga semanal: ${student.weekly.scheduledCount}/${student.weekly.goalTarget} rutinas asignadas`}
                     >
                       <span
                         className={`student-roster-table__weekly-goal-dot student-roster-table__weekly-goal-dot--${weeklyGoalDotState}`}
                         aria-hidden="true"
                       />
-                      {student.weekly.completedCount}/{student.weekly.scheduledCount}
+                      {student.weekly.completedCount}/{student.weekly.goalTarget ?? '—'}
                     </strong>
                   </td>
                   <td className="student-roster-table__actions-column">
@@ -105,7 +108,7 @@ export function StudentRosterTable({ students }: StudentRosterTableProps) {
                         aria-label={`Asignar una plantilla a ${student.name}`}
                         title="Asignar rutina"
                       >
-                        <MessageIcon />
+                        <AssignmentFormIcon />
                       </Link>
                       <Link
                         className="student-roster-table__action"
