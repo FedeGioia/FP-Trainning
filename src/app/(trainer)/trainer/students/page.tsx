@@ -52,7 +52,7 @@ export default async function TrainerStudentsPage({ searchParams }: TrainerStude
       <section className="trainer-students__content stack">
         <section className="student-roster-toolbar">
           <form className="student-roster-toolbar__form" action="/trainer/students" method="get">
-            <label className="field">
+            <label className="field student-roster-toolbar__field">
               <span>Buscar alumnos</span>
               <input name="q" type="search" placeholder="Nombre, email o programa" defaultValue={query} />
             </label>

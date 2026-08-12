@@ -7,6 +7,12 @@ type StudentRosterTableProps = {
   students: TrainerStudentRosterRow[]
 }
 
+function getWeeklyGoalDotState(weekly: TrainerStudentRosterRow['weekly']) {
+  if (weekly.goalTarget === null) return 'untracked'
+  if (weekly.completedCount >= weekly.goalTarget) return 'met'
+  return 'in-progress'
+}
+
 function MetricsIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -48,6 +54,8 @@ export function StudentRosterTable({ students }: StudentRosterTableProps) {
           </thead>
           <tbody>
             {students.map((student) => {
+              const weeklyGoalDotState = getWeeklyGoalDotState(student.weekly)
+
               return (
                 <tr key={student.id}>
                   <td className="student-roster-table__student student-roster-table__name-column">
@@ -74,6 +82,10 @@ export function StudentRosterTable({ students }: StudentRosterTableProps) {
                         ? `${student.weekly.completedCount}/${student.weekly.scheduledCount} completadas esta semana · sin objetivo semanal definido`
                         : `${student.weekly.completedCount}/${student.weekly.scheduledCount} completadas esta semana · objetivo: ${student.weekly.completedCount}/${student.weekly.goalTarget}`}
                     >
+                      <span
+                        className={`student-roster-table__weekly-goal-dot student-roster-table__weekly-goal-dot--${weeklyGoalDotState}`}
+                        aria-hidden="true"
+                      />
                       {student.weekly.completedCount}/{student.weekly.scheduledCount}
                     </strong>
                   </td>
