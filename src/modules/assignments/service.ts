@@ -602,20 +602,6 @@ export async function createManualAssignment(input: CreateManualAssignmentInput)
       }
 
       if (metricType === 'STRENGTH') {
-        const strengthFields = [
-          ['series', 'strengthSeries', series],
-          ['repeticiones', 'strengthRepetitions', repetitions],
-          ['peso', 'strengthWeight', weight],
-        ] as const
-        for (const [label, field, value] of strengthFields) {
-          if (value === null) {
-            issues.push({ path: `sections.${sectionIndex}.exercises.${exerciseIndex}.${field}`, message: `El ${label} es obligatorio.`, kind: 'required' })
-          }
-        }
-        if (series === null || repetitions === null || weight === null) {
-          continue
-        }
-
         normalizedExercises.push({
           exerciseId,
           metricType,

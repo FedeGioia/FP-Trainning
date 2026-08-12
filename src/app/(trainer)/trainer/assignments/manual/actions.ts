@@ -63,21 +63,16 @@ export async function createManualAssignmentAction(
     }
   })
 
-  const invalidNumericIssues: ValidationIssue[] = sections.flatMap((section, sectionIndex) =>
-    section.exercises.flatMap((exercise, exerciseIndex) => {
-      const numericFields: Array<[string, { raw: string; parsed: number | null }]> = [
-        ['strengthSeries', exercise.strengthSeries],
-        ['strengthRepetitions', exercise.strengthRepetitions],
-        ['strengthWeight', exercise.strengthWeight],
-      ]
+  const invalidNumericIssues = getInvalidNumericIssues(sections)
 
-      return numericFields.flatMap(([field, value]) =>
-        value.raw.trim() && value.parsed === null
-          ? [{ path: `sections.${sectionIndex}.exercises.${exerciseIndex}.${field}`, message: 'Ingresá un número válido.', kind: 'invalid' as const }]
-          : [],
-      )
-    }),
-  )
+  if (invalidNumericIssues.length > 0) {
+    return buildManualValidationState(
+      { studentId, programId, scheduledAt, title, notes },
+      sections,
+      { message: 'Corregí los campos numéricos inválidos.' },
+      invalidNumericIssues,
+    )
+  }
 
   const assignmentSections = sections.map((section) => ({
     title: section.title,
@@ -114,4 +109,22 @@ export async function createManualAssignmentAction(
   }
 
   redirect('/trainer/assignments?created=1')
+}
+
+export function getInvalidNumericIssues(sections: ParsedManualSection[]): ValidationIssue[] {
+  return sections.flatMap((section, sectionIndex) =>
+    section.exercises.flatMap((exercise, exerciseIndex) => {
+      const numericFields: Array<[string, { raw: string; parsed: number | null }]> = [
+        ['strengthSeries', exercise.strengthSeries],
+        ['strengthRepetitions', exercise.strengthRepetitions],
+        ['strengthWeight', exercise.strengthWeight],
+      ]
+
+      return numericFields.flatMap(([field, value]) =>
+        value.raw.trim() && value.parsed === null
+          ? [{ path: `sections.${sectionIndex}.exercises.${exerciseIndex}.${field}`, message: 'Ingresá un número válido.', kind: 'invalid' as const }]
+          : [],
+      )
+    }),
+  )
 }

@@ -242,6 +242,38 @@ async function main() {
       assert.equal(otherAssignments.length, 0)
     })
 
+    await test('createManualAssignment accepts blank and partial strength prescriptions', async () => {
+      const result = await createManualAssignment({
+        studentId: fixture.studentOwnerId,
+        programId: (await db.assignedRoutine.findUniqueOrThrow({ where: { id: fixture.assignmentId } })).programId,
+        scheduledAt: new Date().toISOString(),
+        trainerId: fixture.trainerOwnerId,
+        sections: [{
+          title: 'Carga a completar',
+          exercises: [
+            { exerciseId: fixture.exerciseId, prescription: {} },
+            { exerciseId: fixture.exerciseId, prescription: { repetitions: 8 } },
+          ],
+        }],
+      })
+
+      assert.equal(result.ok, true)
+      if (!result.ok) return
+
+      try {
+        const assignment = await db.assignedRoutine.findUniqueOrThrow({
+          where: { id: result.assignmentId },
+          include: { sections: { include: { exercises: { orderBy: { exerciseOrder: 'asc' } } } } },
+        })
+        const exercises = assignment.sections[0]?.exercises ?? []
+
+        assert.deepEqual(exercises[0]?.prescriptionSnapshot, { series: null, repetitions: null, weight: null })
+        assert.deepEqual(exercises[1]?.prescriptionSnapshot, { series: null, repetitions: 8, weight: null })
+      } finally {
+        await db.assignedRoutine.delete({ where: { id: result.assignmentId } })
+      }
+    })
+
     await test('getAssignmentDetailById rejects wrong student ownership', async () => {
       const assignment = await getAssignmentDetailById(fixture.assignmentId, { studentId: fixture.studentOtherId })
       assert.equal(assignment, null)

@@ -35,7 +35,7 @@
 ## Phase 7: Tests
 
 - [x] 7.1 Add unit tests in `tests/run.ts`: validate that `createAssignment` returns structured issues with correct paths for missing studentId, missing templateId, invalid scheduledAt.
-- [x] 7.2 Add unit tests: validate that `createManualAssignment` returns nested issues for missing section title, missing exerciseId, invalid metricType, missing STRENGTH fields, missing prescription for non-STRENGTH.
+- [x] 7.2 Add tests: validate that `createManualAssignment` returns nested issues for missing section title, missing exerciseId, invalid metricType, and missing prescription for non-STRENGTH; accept blank and partial STRENGTH prescriptions; reject non-empty invalid strength-number input.
 - [x] 7.3 Add unit tests for the refactored numeric parser: blank string → `{ raw: '', parsed: null }`, non-numeric text → `{ raw: 'abc', parsed: null }`, valid number → `{ raw: '60', parsed: 60 }`, comma decimal → `{ raw: '62,5', parsed: 62.5 }`.
 - [x] 7.4 Add unit tests for `ManualValidationState` construction from action failure: verify all submitted fields, raw numeric strings, and dynamic row order are preserved in the returned state object.
 

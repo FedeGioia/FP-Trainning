@@ -10,11 +10,13 @@ import { isSameCalendarDay } from '@/lib/date'
 import { getWeekDaysFrom, formatLocalDateKey } from '@/lib/date'
 import { createAssignment, createManualAssignment } from '@/modules/assignments/service'
 import { buildManualValidationState, parseOptionalNumber } from '@/app/(trainer)/trainer/assignments/manual/validation'
+import { getInvalidNumericIssues } from '@/app/(trainer)/trainer/assignments/manual/actions'
 import { buildTemplateValidationState } from '@/app/(trainer)/trainer/assignments/new/validation'
 import { buildCategoryTree, normalizeCategoryName, requireCategoryId } from '@/modules/exercises'
 import { isNavItemActive } from '@/components/layout/role-navigation'
 import { StudentRosterTable } from '@/components/trainer/student-roster-table'
 import { getCurrentWeekRange } from '@/modules/trainer-students'
+import { getStrengthResultPrefill } from '@/app/(student)/student/block/[id]/exercise/[exerciseId]/strength-prefill'
 
 async function test(name: string, fn: () => void | Promise<void>) {
   try {
@@ -139,6 +141,17 @@ await test('StudentRosterTable weekly dot reflects trainer workout loading again
   assert.match(html, /carga semanal: 3\/3 rutinas asignadas/)
 })
 
+await test('strength result inputs prefer saved results, then trainer targets, then blank', () => {
+  const expected = { series: 3, repetitions: 8, weight: 60 }
+  const current = { series: 4, repetitions: null, weight: 65 }
+
+  assert.equal(getStrengthResultPrefill(current, expected, 'series'), 4)
+  assert.equal(getStrengthResultPrefill(current, expected, 'repetitions'), 8)
+  assert.equal(getStrengthResultPrefill(current, expected, 'weight'), 65)
+  assert.equal(getStrengthResultPrefill(null, expected, 'series'), 3)
+  assert.equal(getStrengthResultPrefill(null, null, 'weight'), '')
+})
+
 await test('buildCategoryTree creates nested paths in parent-to-child order', () => {
   const tree = buildCategoryTree([
     { id: 'child', name: 'Tren superior', parentId: 'root' },
@@ -208,6 +221,20 @@ await test('parseOptionalNumber distinguishes blank, invalid, valid, and comma-d
   assert.deepEqual(parseOptionalNumber('abc'), { raw: 'abc', parsed: null })
   assert.deepEqual(parseOptionalNumber('60'), { raw: '60', parsed: 60 })
   assert.deepEqual(parseOptionalNumber('62,5'), { raw: '62,5', parsed: 62.5 })
+})
+
+await test('manual assignment numeric validation only rejects non-empty invalid strength values', () => {
+  const blankStrengthRow = {
+    exerciseId: 'squat', metricType: 'STRENGTH', prescriptionValue: '',
+    strengthSeries: parseOptionalNumber(''), strengthRepetitions: parseOptionalNumber(''), strengthWeight: parseOptionalNumber(''),
+    restLabel: '', methodLabel: '',
+  }
+  const invalidStrengthRow = { ...blankStrengthRow, strengthWeight: parseOptionalNumber('sesenta') }
+
+  assert.deepEqual(getInvalidNumericIssues([{ title: 'Fuerza', exercises: [blankStrengthRow] }]), [])
+  assert.deepEqual(getInvalidNumericIssues([{ title: 'Fuerza', exercises: [invalidStrengthRow] }]), [
+    { path: 'sections.0.exercises.0.strengthWeight', message: 'Ingresá un número válido.', kind: 'invalid' },
+  ])
 })
 
 await test('validation state builders preserve submitted template and manual form values', () => {

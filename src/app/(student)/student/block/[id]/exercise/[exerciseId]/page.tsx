@@ -5,6 +5,7 @@ import { ProgramBadge, getProgramToneClass } from '@/components/ui/program-badge
 import { getAssignmentDetailById } from '@/modules/assignments'
 
 import { saveStudentExerciseAction } from './actions'
+import { getStrengthResultPrefill } from './strength-prefill'
 
 function getMetricFieldLabel(metricType: string) {
   switch (metricType) {
@@ -159,7 +160,7 @@ export default async function StudentExercisePage({ params, searchParams }: Stud
                   type="number"
                   min="0"
                   step="1"
-                  defaultValue={exercise.currentStrength?.series ?? ''}
+                  defaultValue={getStrengthResultPrefill(exercise.currentStrength, exercise.expectedStrength, 'series')}
                   placeholder="Ej: 3"
                 />
               </label>
@@ -172,7 +173,7 @@ export default async function StudentExercisePage({ params, searchParams }: Stud
                   type="number"
                   min="0"
                   step="1"
-                  defaultValue={exercise.currentStrength?.repetitions ?? ''}
+                  defaultValue={getStrengthResultPrefill(exercise.currentStrength, exercise.expectedStrength, 'repetitions')}
                   placeholder="Ej: 8"
                 />
               </label>
@@ -186,7 +187,7 @@ export default async function StudentExercisePage({ params, searchParams }: Stud
                 type="number"
                 min="0"
                 step="0.5"
-                defaultValue={exercise.currentStrength?.weight ?? ''}
+                defaultValue={getStrengthResultPrefill(exercise.currentStrength, exercise.expectedStrength, 'weight')}
                 placeholder="Ej: 60"
               />
             </label>
