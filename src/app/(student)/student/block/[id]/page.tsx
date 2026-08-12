@@ -48,11 +48,16 @@ export default async function StudentBlockPage({ params, searchParams }: Student
     <div className="student-workout-page">
       <header className="student-mobile-topbar">
         <Link href="/student/today" className="student-icon-button" aria-label="Volver a hoy">←</Link>
-        <h1>{assignment.title}</h1>
+        <span aria-hidden="true" />
         <span className="student-icon-button student-icon-button--static" aria-hidden="true">▣</span>
       </header>
 
       <main className="student-workout-page__content">
+        <section className="student-workout-heading">
+          <span>Entrenamiento</span>
+          <h1>{assignment.title}</h1>
+        </section>
+
         {qs.error ? <p className="student-feedback student-feedback--error">{decodeURIComponent(qs.error)}</p> : null}
         {qs.saved ? <p className="student-feedback student-feedback--success">Resultados guardados correctamente.</p> : null}
 

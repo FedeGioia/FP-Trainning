@@ -96,7 +96,7 @@ export default async function StudentExercisePage({ params, searchParams }: Stud
     <div className="student-exercise-page">
       <header className="student-mobile-topbar">
         <Link href={`/student/block/${assignment.id}`} className="student-icon-button" aria-label="Volver al bloque">←</Link>
-        <h1>FitTrack</h1>
+        <span aria-hidden="true" />
         <span className="student-icon-button student-icon-button--static" aria-hidden="true" />
       </header>
 
@@ -104,8 +104,8 @@ export default async function StudentExercisePage({ params, searchParams }: Stud
         {qs.error ? <p className="student-feedback student-feedback--error">{decodeURIComponent(qs.error)}</p> : null}
 
         <section className="student-exercise-context">
-          <span>Ejercicio</span>
-          <h2>{exercise.name}</h2>
+          <span>{assignment.title}</span>
+          <h1>{exercise.name}</h1>
           {exercise.notes ? <p>{exercise.notes}</p> : null}
           {exercise.videoUrl ? (
             <a
