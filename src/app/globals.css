@@ -1494,9 +1494,12 @@ summary:focus-visible {
 }
 
 .student-roster-table__student-trigger {
-  display: block;
-  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  margin: -0.18rem -0.35rem;
+  padding: 0.18rem 0.35rem;
   border: 0;
+  border-radius: 6px;
   background: transparent;
   color: var(--text);
   cursor: pointer;
@@ -1505,12 +1508,17 @@ summary:focus-visible {
   line-height: 1.35;
   letter-spacing: -0.015em;
   text-align: left;
+  text-decoration-color: transparent;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.18em;
+  transition: background 160ms ease, color 160ms ease, text-decoration-color 160ms ease;
 }
 
 .student-roster-table__student-trigger:hover {
+  background: rgba(31, 111, 255, 0.08);
   color: var(--primary-strong);
   text-decoration: underline;
-  text-underline-offset: 0.18em;
+  text-decoration-color: currentColor;
 }
 
 .student-roster-table__badges {
