@@ -130,7 +130,7 @@ export default async function TrainerStudentDetailPage({ params, searchParams }:
               <span className="eyebrow">Perfil</span>
               <h2 id="student-profile-title">Datos y programas</h2>
             </div>
-            <form className="stack" action={updateStudentProfileAction} style={{ gap: '0.85rem' }}>
+            <form className="stack trainer-form" action={updateStudentProfileAction} style={{ gap: '0.85rem' }}>
               <input type="hidden" name="studentId" value={student.id} />
               <input type="hidden" name="returnTo" value={`/trainer/students/${student.id}`} />
 
@@ -179,7 +179,7 @@ export default async function TrainerStudentDetailPage({ params, searchParams }:
               <h2 id="student-access-title">Resetear contraseña</h2>
               <p className="muted">Definí una contraseña temporal. El alumno deberá cambiarla al iniciar sesión.</p>
             </div>
-            <form className="stack" action={resetStudentPasswordAction} style={{ gap: '0.85rem' }}>
+            <form className="stack trainer-form" action={resetStudentPasswordAction} style={{ gap: '0.85rem' }}>
               <input type="hidden" name="studentId" value={student.id} />
               <input type="hidden" name="returnTo" value={`/trainer/students/${student.id}`} />
               <label className="field">

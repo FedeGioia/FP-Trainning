@@ -2,6 +2,7 @@ import Link from 'next/link'
 import type { CSSProperties } from 'react'
 
 import { BACKFILL_CATEGORY_NAME, listCategoryTree, listExercises } from '@/modules/exercises'
+import { TrainerAction, TrainerEmptyState, TrainerMetricCard, TrainerNotice, TrainerPageHeader } from '@/components/trainer-ui'
 
 import { createCategoryAction, deleteCategoryAction, updateExerciseCategoryAction } from './actions'
 
@@ -38,7 +39,7 @@ export default async function TrainerExercisesPage({ searchParams }: TrainerExer
   return (
     <div className="exercise-library">
       <aside className="exercise-library__categories" aria-label="Gestión de categorías">
-        <div className="exercise-library__categories-header">
+        <div className="exercise-library__categories-header trainer-page-header">
           <div>
             <p className="exercise-library__eyebrow">Organización</p>
             <h1>Categorías</h1>
@@ -55,7 +56,7 @@ export default async function TrainerExercisesPage({ searchParams }: TrainerExer
         </div>
 
         <div className="exercise-library__category-list">
-          {categories.length === 0 ? <p className="exercise-library__empty">Todavía no hay categorías. Podés crear una o seguir usando la biblioteca.</p> : categories.map((category) => {
+          {categories.length === 0 ? <TrainerEmptyState className="exercise-library__empty">Todavía no hay categorías. Podés crear una o seguir usando la biblioteca.</TrainerEmptyState> : categories.map((category) => {
             const level = category.path.split(' / ').length - 1
             const protectedCategory = category.name === BACKFILL_CATEGORY_NAME && category.parentId === null
             return (
@@ -83,36 +84,33 @@ export default async function TrainerExercisesPage({ searchParams }: TrainerExer
       </aside>
 
       <section className="exercise-library__catalog">
-        <header className="exercise-library__header">
-          <div>
-            <p className="exercise-library__eyebrow">Biblioteca</p>
-            <h2>Ejercicios</h2>
-            <p>Gestioná y organizá tu catálogo de ejercicios.</p>
-          </div>
-          <div className="exercise-library__header-actions">
-            <label className="exercise-library__search"><span aria-hidden="true">⌕</span><span className="sr-only">Buscar ejercicios</span><input type="search" placeholder="Buscar ejercicios..." /></label>
-            <Link className="exercise-library__new-exercise" href="/trainer/exercises/new"><span aria-hidden="true">+</span> Nuevo ejercicio</Link>
-          </div>
-        </header>
+        <TrainerPageHeader
+          className="exercise-library__header"
+          eyebrow="Biblioteca"
+          title="Ejercicios"
+          titleAs="h2"
+          description="Gestioná y organizá tu catálogo de ejercicios."
+          actions={<><label className="exercise-library__search"><span aria-hidden="true">⌕</span><span className="sr-only">Buscar ejercicios</span><input type="search" placeholder="Buscar ejercicios..." /></label><TrainerAction className="exercise-library__new-exercise" href="/trainer/exercises/new" variant="primary"><span aria-hidden="true">+</span> Nuevo ejercicio</TrainerAction></>}
+        />
 
         {(params.created || params.categoryCreated || params.categoryDeleted || params.exerciseCategoryUpdated || params.categoryError) ? <div className="exercise-library__feedback" aria-live="polite">
-          {params.created ? <span className="exercise-library__notice exercise-library__notice--ok">Ejercicio creado correctamente.</span> : null}
-          {params.categoryCreated ? <span className="exercise-library__notice exercise-library__notice--ok">Categoría creada correctamente.</span> : null}
-          {params.categoryDeleted ? <span className="exercise-library__notice exercise-library__notice--ok">Categoría eliminada; sus ejercicios se reasignaron a Sin categoría.</span> : null}
-          {params.exerciseCategoryUpdated ? <span className="exercise-library__notice exercise-library__notice--ok">Categoría del ejercicio actualizada.</span> : null}
-          {params.categoryError ? <span className="exercise-library__notice exercise-library__notice--error">{decodeURIComponent(params.categoryError)}</span> : null}
+          {params.created ? <TrainerNotice className="exercise-library__notice exercise-library__notice--ok">Ejercicio creado correctamente.</TrainerNotice> : null}
+          {params.categoryCreated ? <TrainerNotice className="exercise-library__notice exercise-library__notice--ok">Categoría creada correctamente.</TrainerNotice> : null}
+          {params.categoryDeleted ? <TrainerNotice className="exercise-library__notice exercise-library__notice--ok">Categoría eliminada; sus ejercicios se reasignaron a Sin categoría.</TrainerNotice> : null}
+          {params.exerciseCategoryUpdated ? <TrainerNotice className="exercise-library__notice exercise-library__notice--ok">Categoría del ejercicio actualizada.</TrainerNotice> : null}
+          {params.categoryError ? <TrainerNotice className="exercise-library__notice exercise-library__notice--error" tone="error">{decodeURIComponent(params.categoryError)}</TrainerNotice> : null}
         </div> : null}
 
         <div className="exercise-library__stats" aria-label="Resumen de la biblioteca">
-          <div><span className="exercise-library__stat-icon">▤</span><p>Total de ejercicios<strong>{selectedExercises.length}</strong></p></div>
-          <div><span className="exercise-library__stat-icon exercise-library__stat-icon--muted">▶</span><p>Con video<strong>{selectedWithVideo}</strong></p></div>
-          <div><span className="exercise-library__stat-icon exercise-library__stat-icon--muted">◫</span><p>Tipos activos<strong>{selectedMetricTypes}</strong></p></div>
+          <TrainerMetricCard as="div"><span className="exercise-library__stat-icon">▤</span><p>Total de ejercicios<strong>{selectedExercises.length}</strong></p></TrainerMetricCard>
+          <TrainerMetricCard as="div"><span className="exercise-library__stat-icon exercise-library__stat-icon--muted">▶</span><p>Con video<strong>{selectedWithVideo}</strong></p></TrainerMetricCard>
+          <TrainerMetricCard as="div"><span className="exercise-library__stat-icon exercise-library__stat-icon--muted">◫</span><p>Tipos activos<strong>{selectedMetricTypes}</strong></p></TrainerMetricCard>
         </div>
 
         <div className="exercise-library__content">
-          {!selectedCategory ? <p className="exercise-library__empty">Todavía no hay categorías. Creá una categoría o agregá tu primer ejercicio para empezar a armar la biblioteca.</p> : <section className="exercise-library__group">
+          {!selectedCategory ? <TrainerEmptyState className="exercise-library__empty">Todavía no hay categorías. Creá una categoría o agregá tu primer ejercicio para empezar a armar la biblioteca.</TrainerEmptyState> : <section className="exercise-library__group">
               <h3>{selectedCategory.path}</h3>
-              {selectedExercises.length === 0 ? <p className="exercise-library__empty">Esta categoría todavía no tiene ejercicios.</p> :
+              {selectedExercises.length === 0 ? <TrainerEmptyState className="exercise-library__empty">Esta categoría todavía no tiene ejercicios.</TrainerEmptyState> :
               <div className="exercise-library__grid">
                 {selectedExercises.map((exercise) => <article key={exercise.id} className="exercise-library__card">
                   <div className="exercise-library__card-body">

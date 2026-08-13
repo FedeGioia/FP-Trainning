@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { listAssignments } from '@/modules/assignments'
 import type { AssignmentStatus } from '@/modules/assignments'
 import { ProgramBadge } from '@/components/ui/program-badge'
+import { TrainerAction, TrainerEmptyState, TrainerMetricCard, TrainerNotice, TrainerPageHeader, TrainerStatusBadge, TrainerSurface } from '@/components/trainer-ui'
 
 type TrainerAssignmentsPageProps = {
   searchParams?: Promise<{
@@ -35,43 +36,37 @@ export default async function TrainerAssignmentsPage({ searchParams }: TrainerAs
 
   return (
     <div className="trainer-assignments">
-      <section className="trainer-assignments__hero">
-        <div className="trainer-assignments__hero-copy">
-          <span className="trainer-assignments__eyebrow">Agenda</span>
-          <h1>Asignaciones de rutinas</h1>
-          <p>Gestioná y programá los entrenamientos de tus alumnos.</p>
-        </div>
-        <div className="trainer-assignments__actions">
-          <Link className="trainer-assignments__action trainer-assignments__action--secondary" href="/trainer/assignments/manual">
-            Rutina manual
-          </Link>
-          <Link className="trainer-assignments__action trainer-assignments__action--primary" href="/trainer/assignments/new">
-            Desde plantilla
-          </Link>
-        </div>
-      </section>
+      <TrainerSurface className="trainer-assignments__hero" aria-label="Asignaciones de rutinas">
+        <TrainerPageHeader
+          className="trainer-assignments__hero-copy"
+          eyebrow="Agenda"
+          title="Asignaciones de rutinas"
+          description="Gestioná y programá los entrenamientos de tus alumnos."
+          actions={<><TrainerAction className="trainer-assignments__action trainer-assignments__action--secondary" href="/trainer/assignments/manual">Rutina manual</TrainerAction><TrainerAction className="trainer-assignments__action trainer-assignments__action--primary" href="/trainer/assignments/new" variant="primary">Desde plantilla</TrainerAction></>}
+        />
+      </TrainerSurface>
 
-      {params.created ? <p className="trainer-assignments__notice">Asignación creada correctamente.</p> : null}
+      {params.created ? <TrainerNotice className="trainer-assignments__notice" role="status">Asignación creada correctamente.</TrainerNotice> : null}
 
       <section className="trainer-assignments__metrics" aria-label="Resumen de asignaciones">
-        <article className="trainer-assignments__metric">
+          <TrainerMetricCard className="trainer-assignments__metric">
           <span>Asignaciones activas</span>
           <strong>{assignments.length}</strong>
           <p>Bloques visibles en agenda</p>
-        </article>
-        <article className="trainer-assignments__metric">
+        </TrainerMetricCard>
+          <TrainerMetricCard className="trainer-assignments__metric">
           <span>Por iniciar</span>
           <strong>{planned}</strong>
           <p>Todavía no arrancadas por el alumno</p>
-        </article>
-        <article className="trainer-assignments__metric">
+        </TrainerMetricCard>
+          <TrainerMetricCard className="trainer-assignments__metric">
           <span>Programadas</span>
           <strong>{assignments.length}</strong>
           <p>Sesiones organizadas por fecha y hora</p>
-        </article>
+        </TrainerMetricCard>
       </section>
 
-      <section className="trainer-assignments__agenda">
+      <TrainerSurface className="trainer-assignments__agenda">
         <header className="trainer-assignments__agenda-header">
           <h2>Agenda visible</h2>
           <p>Revisá qué tiene cada alumno, cuándo le toca y cómo viene avanzando.</p>
@@ -85,7 +80,7 @@ export default async function TrainerAssignmentsPage({ searchParams }: TrainerAs
         <div className="trainer-assignments__list">
           {assignments.length > 0 ? (
             assignments.map((assignment) => (
-              <Link className="trainer-assignments__row" href={`/trainer/assignments/${assignment.id}`} key={assignment.id}>
+              <Link className="trainer-assignments__row trainer-list-row" href={`/trainer/assignments/${assignment.id}`} key={assignment.id}>
                 <ProgramBadge className="trainer-assignments__program" code={assignment.programCode} />
                 <div className="trainer-assignments__row-copy">
                   <strong>{assignment.title}</strong>
@@ -93,20 +88,20 @@ export default async function TrainerAssignmentsPage({ searchParams }: TrainerAs
                 </div>
                 <div className="trainer-assignments__row-meta">
                   <time dateTime={assignment.scheduledAt}>◷ {formatScheduledAt(assignment.scheduledAt)}</time>
-                  <span className={`trainer-assignments__status trainer-assignments__status--${assignment.status.toLowerCase()}`}>
+                  <TrainerStatusBadge className={`trainer-assignments__status trainer-assignments__status--${assignment.status.toLowerCase()}`}>
                     {assignmentStatusLabels[assignment.status]}
-                  </span>
+                  </TrainerStatusBadge>
                 </div>
               </Link>
             ))
           ) : (
-            <div className="trainer-assignments__empty">
+            <TrainerEmptyState className="trainer-assignments__empty">
               <strong>Todavía no hay asignaciones visibles.</strong>
               <span>Creá una rutina desde una plantilla o cargala manualmente.</span>
-            </div>
+            </TrainerEmptyState>
           )}
         </div>
-      </section>
+      </TrainerSurface>
     </div>
   )
 }

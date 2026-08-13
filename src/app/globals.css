@@ -889,10 +889,6 @@ summary:focus-visible {
   gap: 0.5rem;
   min-height: 120px;
   padding: 1.2rem;
-  border: 1px solid #d6e0ef;
-  border-radius: 16px;
-  background: #fff;
-  box-shadow: 0 10px 24px rgba(31, 51, 84, 0.05);
 }
 
 .trainer-dashboard__metric strong {
@@ -925,17 +921,12 @@ summary:focus-visible {
 
 .trainer-dashboard__work {
   display: grid;
-  gap: 0.6rem;
-  padding: 0.9rem;
-  border: 1px solid rgba(205, 215, 229, 0.92);
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.76);
+  gap: 0.75rem;
+  padding: 1.15rem;
 }
 
 .trainer-dashboard__work--primary {
-  border-color: #d6e0ef;
   background: #fff;
-  box-shadow: 0 10px 24px rgba(31, 51, 84, 0.05);
 }
 
 .trainer-dashboard__section-heading h2 {
@@ -1047,11 +1038,7 @@ summary:focus-visible {
 
 .trainer-dashboard__attention,
 .trainer-dashboard__week-summary {
-  border: 1px solid #d6e0ef;
-  border-radius: 16px;
-  background: #fff;
   overflow: hidden;
-  box-shadow: 0 10px 24px rgba(31, 51, 84, 0.05);
 }
 
 .trainer-dashboard__attention { border-color: #fed7d2; }
@@ -2149,7 +2136,69 @@ summary:focus-visible {
   border: 0;
 }
 
+/* Trainer workspace primitives: shared foundation for operational screens. */
+.role-shell--trainer {
+  --trainer-radius-panel: 18px;
+  --trainer-radius-subpanel: 13px;
+  --trainer-shadow-panel: 0 10px 24px rgba(31, 51, 84, 0.05);
+}
+
+.trainer-page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.trainer-page-header__content { max-width: 60ch; }
+.trainer-page-header__eyebrow { padding: 0; background: transparent; color: var(--primary-strong); font-size: 0.72rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
+.trainer-page-header__title { margin: 0.22rem 0 0; color: var(--text); font-size: clamp(1.7rem, 3vw, 2.35rem); line-height: 1.08; letter-spacing: -0.035em; }
+.trainer-page-header__description { margin: 0.35rem 0 0; color: var(--muted); font-size: 0.9rem; line-height: 1.5; }
+.trainer-page-header__actions { display: flex; flex-wrap: wrap; gap: 0.65rem; }
+
+.trainer-action { display: inline-flex; align-items: center; justify-content: center; min-height: 42px; padding: 0.65rem 0.9rem; border: 1px solid transparent; border-radius: 10px; box-shadow: none; font-size: 0.84rem; font-weight: 750; line-height: 1.2; transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease, background 160ms ease, color 160ms ease; }
+.trainer-action:hover { transform: translateY(-1px); }
+.trainer-action--primary { border-color: #2563eb; background: linear-gradient(180deg, #2876fa, #1b60df); box-shadow: 0 8px 18px rgba(31, 94, 218, 0.18); color: #fff; }
+.trainer-action--primary:hover { box-shadow: 0 11px 22px rgba(31, 94, 218, 0.24); color: #fff; }
+.trainer-action--secondary { border-color: #d1dbe8; background: #fff; color: #42526a; }
+.trainer-action--quiet { border-color: #d1dbe8; background: rgba(255, 255, 255, 0.72); color: #5d6b7e; }
+.trainer-action--secondary:hover, .trainer-action--quiet:hover { border-color: rgba(31, 111, 255, 0.3); background: rgba(31, 111, 255, 0.075); color: var(--primary-strong); }
+
+.trainer-surface { border: 1px solid #d6e0ef; border-radius: var(--trainer-radius-panel); background: #fff; box-shadow: var(--trainer-shadow-panel); }
+.trainer-metric-card { border: 1px solid #d6e0ef; border-radius: var(--trainer-radius-subpanel); background: #fff; box-shadow: var(--trainer-shadow-panel); }
+.trainer-status { display: inline-flex; align-items: center; justify-content: center; width: max-content; min-width: 0; padding: 0.25rem 0.5rem; border-radius: 999px; font-size: 0.68rem; font-weight: 800; letter-spacing: 0.04em; line-height: 1.2; text-transform: uppercase; }
+.role-shell--trainer .program-badge { min-height: 1.7rem; padding: 0.25rem 0.55rem; border-radius: 999px; font-size: 0.7rem; letter-spacing: 0.035em; line-height: 1.1; }
+.trainer-list-row { transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease, background 160ms ease; }
+.trainer-list-row:hover, .trainer-list-row:focus-visible { border-color: rgba(31, 111, 255, 0.34); box-shadow: 0 10px 22px rgba(31, 51, 84, 0.09); transform: translateY(-1px); }
+.trainer-empty-state { border: 1px dashed #c7d4e5; border-radius: var(--trainer-radius-subpanel); background: linear-gradient(135deg, #fff, #f8faff); box-shadow: none; }
+.trainer-notice { display: inline-flex; align-items: center; width: fit-content; padding: 0.5rem 0.7rem; border: 1px solid; border-radius: 10px; font-size: 0.82rem; font-weight: 650; line-height: 1.35; }
+.trainer-notice--ok { border-color: rgba(22, 163, 74, 0.2); background: rgba(22, 163, 74, 0.07); color: #166534; }
+.trainer-notice--error { border-color: rgba(220, 38, 38, 0.2); background: rgba(220, 38, 38, 0.06); color: #b91c1c; }
+.trainer-form .field { gap: 0.4rem; }
+.trainer-form .field > span, .trainer-form .field > legend { color: #42526a; font-size: 0.8rem; font-weight: 750; }
+.trainer-form .field input, .trainer-form .field textarea, .trainer-form .field select { border-color: #cbd7e6; background: #fff; box-shadow: inset 0 1px 2px rgba(31, 51, 84, 0.035); }
+.trainer-form .field input:hover, .trainer-form .field textarea:hover, .trainer-form .field select:hover { border-color: #b9c9dc; background: #fff; }
+.trainer-form .field input:focus-visible, .trainer-form .field textarea:focus-visible, .trainer-form .field select:focus-visible { border-color: rgba(31, 111, 255, 0.58); box-shadow: 0 0 0 4px rgba(31, 111, 255, 0.11), inset 0 1px 2px rgba(31, 51, 84, 0.025); }
+
+.trainer-dashboard__header-action.trainer-action { min-height: 42px; padding: 0.65rem 0.9rem; }
+.trainer-dashboard__metric.trainer-metric-card, .trainer-assignments__metric.trainer-metric-card { border-radius: var(--trainer-radius-subpanel); box-shadow: var(--trainer-shadow-panel); }
+.trainer-students__content.trainer-surface { border-radius: 22px; }
+.trainer-students__intro .trainer-page-header__title { font-size: clamp(1.7rem, 2.7vw, 2.05rem); }
+.trainer-students__new-student.trainer-action, .student-roster-toolbar__submit.trainer-action, .student-roster-toolbar__clear.trainer-action { min-height: 44px; }
+.trainer-assignments__hero.trainer-surface { border-radius: var(--trainer-radius-panel); }
+.trainer-assignments__agenda.trainer-surface { padding: 1.5rem; }
+.trainer-assignments__status.trainer-status { min-width: 86px; border-radius: 999px; }
+.exercise-library .trainer-page-header { align-items: center; }
+.exercise-library .trainer-page-header__title { font-size: clamp(1.25rem, 3vw, 2rem); }
+.exercise-library .trainer-page-header__description { font-size: 0.88rem; }
+.exercise-library__new-exercise.trainer-action { border-radius: 10px; }
+.exercise-library__stats > div.trainer-metric-card { border-radius: var(--trainer-radius-subpanel); box-shadow: var(--trainer-shadow-panel); }
+
 @media (max-width: 767px) {
+  .trainer-page-header { align-items: flex-start; flex-direction: column; }
+  .trainer-page-header__actions { width: 100%; }
+  .trainer-page-header__actions .trainer-action { flex: 1 1 0; }
+  .trainer-assignments__agenda.trainer-surface { padding: 1.15rem; }
   .role-shell--trainer .role-header {
     position: static;
     width: auto;
@@ -3036,23 +3085,20 @@ summary:focus-visible {
 
 .trainer-assignments {
   display: grid;
-  gap: 2rem;
-  max-width: 1180px;
+  gap: 1.25rem;
+  max-width: 1320px;
   margin: 0 auto;
 }
 
 .trainer-assignments__hero {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
-  gap: 1.5rem;
-  padding: 2rem;
-  border-radius: 18px;
-  background: #fff;
-  box-shadow: 0 10px 26px rgba(31, 51, 84, 0.06);
+  gap: 1rem;
+  padding: 1.35rem;
 }
 
-.trainer-assignments__hero-copy { max-width: 42rem; }
+.trainer-assignments__hero-copy { max-width: 60ch; }
 .trainer-assignments__eyebrow {
   display: inline-flex;
   padding: 0.28rem 0.7rem;
@@ -3064,32 +3110,29 @@ summary:focus-visible {
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
-.trainer-assignments__hero h1 { margin: 0.8rem 0 0.3rem; font-size: clamp(2rem, 4vw, 2.6rem); letter-spacing: -0.04em; line-height: 1.05; }
+.trainer-assignments__hero h1 { margin: 0.22rem 0 0; font-size: clamp(1.7rem, 3vw, 2.35rem); letter-spacing: -0.035em; line-height: 1.08; }
 .trainer-assignments__hero p,
 .trainer-assignments__agenda-header p,
 .trainer-assignments__metric p { margin: 0; color: var(--muted); }
-.trainer-assignments__actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
-.trainer-assignments__action { display: inline-flex; align-items: center; justify-content: center; min-height: 46px; padding: 0.75rem 1.1rem; border: 1px solid #2563eb; border-radius: 10px; font-size: 0.9rem; font-weight: 750; transition: transform 160ms ease, box-shadow 160ms ease; }
-.trainer-assignments__action:hover { transform: translateY(-1px); box-shadow: 0 10px 20px rgba(31, 94, 218, 0.16); }
-.trainer-assignments__action--primary { background: linear-gradient(180deg, #2563eb, #1459eb); color: #fff; }
-.trainer-assignments__action--secondary { background: #fff; color: #1459eb; }
-.trainer-assignments__notice { margin: -1rem 0 0; padding: 0.65rem 0.85rem; border: 1px solid #a7e2bd; border-radius: 10px; background: #f0fdf4; color: #166534; font-size: 0.88rem; font-weight: 650; }
+.trainer-assignments__actions { display: flex; flex-wrap: wrap; gap: 0.65rem; }
+.trainer-assignments__action.trainer-action { min-height: 42px; padding: 0.65rem 0.9rem; }
+.trainer-assignments__notice { margin: -1rem 0 0; }
 
 .trainer-assignments__metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
-.trainer-assignments__metric { display: grid; gap: 0.55rem; min-height: 166px; padding: 1.5rem; border: 1px solid #dce3ee; border-radius: 14px; background: #fff; box-shadow: 0 8px 20px rgba(31, 51, 84, 0.045); }
-.trainer-assignments__metric > span { color: #536176; font-size: 0.95rem; font-weight: 700; }
-.trainer-assignments__metric strong { font-size: 3rem; line-height: 1; letter-spacing: -0.05em; }
-.trainer-assignments__metric p { font-size: 0.86rem; line-height: 1.4; }
+.trainer-assignments__metric { display: grid; gap: 0.45rem; min-height: 120px; padding: 1.2rem; }
+.trainer-assignments__metric > span { color: #536176; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.07em; text-transform: uppercase; }
+.trainer-assignments__metric strong { font-size: 2rem; line-height: 1; letter-spacing: -0.035em; }
+.trainer-assignments__metric p { font-size: 0.8rem; line-height: 1.4; }
 
-.trainer-assignments__agenda-header { margin-bottom: 1.25rem; }
-.trainer-assignments__agenda-header h2 { margin: 0 0 0.25rem; font-size: 1.65rem; letter-spacing: -0.03em; }
-.trainer-assignments__search { display: flex; align-items: center; gap: 0.6rem; width: min(100%, 430px); min-height: 46px; margin-bottom: 1.25rem; padding: 0 0.9rem; border: 1px solid #cbd7e6; border-radius: 10px; background: #edf3ff; color: #687386; }
+.trainer-assignments__agenda-header { margin-bottom: 1rem; }
+.trainer-assignments__agenda-header h2 { margin: 0 0 0.25rem; font-size: 1.15rem; letter-spacing: -0.015em; }
+.trainer-assignments__search { display: flex; align-items: center; gap: 0.6rem; width: min(100%, 430px); min-height: 44px; margin-bottom: 1rem; padding: 0 0.85rem; border: 1px solid #cbd7e6; border-radius: 12px; background: #fff; color: #687386; box-shadow: inset 0 1px 2px rgba(31, 51, 84, 0.035); }
 .trainer-assignments__search > span { font-size: 1.4rem; line-height: 1; transform: rotate(-20deg); }
 .trainer-assignments__search input { width: 100%; border: 0; outline: 0; background: transparent; color: var(--text); }
 .trainer-assignments__search input::placeholder { color: #7a8698; }
-.trainer-assignments__list { display: grid; gap: 0.75rem; }
-.trainer-assignments__row { display: grid; grid-template-columns: 120px minmax(0, 1fr) auto; align-items: center; gap: 1rem; padding: 1rem; border: 1px solid #dce3ee; border-radius: 14px; background: #fff; transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease; }
-.trainer-assignments__row:hover { border-color: #a9c8ff; box-shadow: 0 10px 22px rgba(31, 51, 84, 0.09); transform: translateY(-1px); }
+.trainer-assignments__list { display: grid; gap: 0.45rem; }
+.trainer-assignments__row { display: grid; grid-template-columns: 112px minmax(0, 1fr) auto; align-items: center; gap: 0.9rem; padding: 0.8rem 0.9rem; border: 1px solid #dce3ee; border-radius: 13px; background: #fff; transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease, background 160ms ease; }
+.trainer-assignments__row:hover { border-color: #a9c8ff; }
 .trainer-assignments__program { width: 100%; min-height: 30px; font-size: 0.76rem; }
 .trainer-assignments__row-copy { display: grid; gap: 0.18rem; min-width: 0; }
 .trainer-assignments__row-copy strong { overflow: hidden; font-size: 1rem; letter-spacing: -0.01em; text-overflow: ellipsis; white-space: nowrap; }
@@ -3097,13 +3140,13 @@ summary:focus-visible {
 .trainer-assignments__row-meta time { color: var(--muted); font-size: 0.87rem; }
 .trainer-assignments__row-meta { display: flex; align-items: center; justify-content: flex-end; gap: 1.25rem; min-width: 255px; }
 .trainer-assignments__row-meta time { white-space: nowrap; }
-.trainer-assignments__status { display: inline-flex; justify-content: center; min-width: 86px; padding: 0.3rem 0.5rem; border-radius: 5px; font-size: 0.68rem; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; }
+.trainer-assignments__status { display: inline-flex; justify-content: center; min-width: 86px; }
 .trainer-assignments__status--completed { background: #dcfce7; color: #167044; }
 .trainer-assignments__status--in_progress { background: #dbeafe; color: #1d4ed8; }
 .trainer-assignments__status--planned { background: #fef3c7; color: #a16207; }
 .trainer-assignments__status--partial { background: #ffedd5; color: #c2410c; }
 .trainer-assignments__status--cancelled { background: #fee2e2; color: #b91c1c; }
-.trainer-assignments__empty { display: grid; gap: 0.25rem; padding: 1.25rem; border: 1px dashed #cbd7e6; border-radius: 14px; color: var(--muted); }
+.trainer-assignments__empty { display: grid; gap: 0.25rem; padding: 1.25rem; color: var(--muted); }
 .trainer-assignments__empty strong { color: var(--text); }
 
 @media (max-width: 767px) {
@@ -3915,6 +3958,129 @@ select[aria-invalid='true'] {
   width: 1.4rem;
   height: 1.4rem;
   stroke-width: 2.25;
+}
+
+/* Phase 2, step 4: restrained material and interaction polish for trainer workspaces. */
+.role-shell--trainer {
+  --trainer-shadow-hover: 0 14px 28px rgba(31, 51, 84, 0.1);
+  --trainer-focus-ring: 0 0 0 3px rgba(31, 111, 255, 0.18);
+}
+
+.role-shell--trainer :is(a, button, input, textarea, select, summary):focus-visible {
+  outline: 0;
+  box-shadow: var(--trainer-focus-ring);
+}
+
+.role-shell--trainer .trainer-surface,
+.role-shell--trainer .trainer-metric-card {
+  border-color: rgba(185, 190, 197, 0.76);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(252, 252, 251, 0.96));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.88), var(--trainer-shadow-panel);
+}
+
+.role-shell--trainer .trainer-metric-card {
+  position: relative;
+  overflow: hidden;
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.role-shell--trainer .trainer-metric-card::after {
+  position: absolute;
+  top: 0;
+  right: 1rem;
+  left: 1rem;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, rgba(31, 111, 255, 0.45), transparent);
+  content: '';
+  opacity: 0;
+  transition: opacity 160ms ease;
+}
+
+.role-shell--trainer .trainer-metric-card:hover {
+  border-color: rgba(31, 111, 255, 0.3);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), var(--trainer-shadow-hover);
+  transform: translateY(-1px);
+}
+
+.role-shell--trainer .trainer-metric-card:hover::after { opacity: 1; }
+
+.role-shell--trainer .trainer-page-header__title,
+.role-shell--trainer .trainer-dashboard__section-heading h2,
+.role-shell--trainer .trainer-student-detail__section-heading h2 {
+  text-wrap: balance;
+}
+
+.role-shell--trainer .trainer-page-header__description,
+.role-shell--trainer .trainer-dashboard__section-heading p,
+.role-shell--trainer .trainer-student-detail__identity p {
+  text-wrap: pretty;
+}
+
+.role-shell--trainer .trainer-list-row:focus-visible,
+.role-shell--trainer .student-roster-table tbody tr:focus-within {
+  position: relative;
+  z-index: 1;
+}
+
+.role-shell--trainer .trainer-dashboard__avatar,
+.role-shell--trainer .student-roster-table__avatar {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.46), 0 2px 5px rgba(31, 51, 84, 0.12);
+}
+
+.role-shell--trainer .trainer-dashboard__view-all,
+.role-shell--trainer .trainer-student-detail__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  text-underline-offset: 0.22em;
+}
+
+.role-shell--trainer .trainer-dashboard__view-all:hover,
+.role-shell--trainer .trainer-student-detail__back:hover {
+  text-decoration-thickness: 2px;
+}
+
+.role-shell--trainer .trainer-assignments__search:focus-within,
+.role-shell--trainer .exercise-library__search:focus-within {
+  border-color: rgba(31, 111, 255, 0.58);
+  box-shadow: var(--trainer-focus-ring), inset 0 1px 2px rgba(31, 51, 84, 0.025);
+}
+
+.role-shell--trainer .trainer-assignments__search > span,
+.role-shell--trainer .exercise-library__search > span[aria-hidden='true'] {
+  display: inline-grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background: rgba(31, 111, 255, 0.08);
+  color: var(--primary-strong);
+  font-size: 1rem;
+}
+
+.role-shell--trainer .trainer-student-detail__action:focus-visible {
+  border-color: var(--primary);
+  box-shadow: var(--trainer-focus-ring), var(--trainer-shadow-hover);
+}
+
+.role-shell--trainer .exercise-library__card:hover {
+  border-color: #98b9ee;
+  box-shadow: 0 12px 24px rgba(31, 51, 84, 0.1);
+  transform: translateY(-1px);
+}
+
+.role-shell--trainer .exercise-library__card {
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .role-shell--trainer *,
+  .role-shell--trainer *::before,
+  .role-shell--trainer *::after {
+    scroll-behavior: auto;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 .sr-only {

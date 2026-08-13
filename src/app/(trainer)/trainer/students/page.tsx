@@ -1,8 +1,8 @@
-import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
 import { auth } from '@/auth'
 import { PlaceholderPanel } from '@/components/ui/placeholder-panel'
+import { TrainerAction, TrainerNotice, TrainerPageHeader, TrainerSurface } from '@/components/trainer-ui'
 import { listTrainerStudentRoster } from '@/modules/trainer-students'
 import { StudentRosterTable } from '@/components/trainer/student-roster-table'
 
@@ -41,17 +41,15 @@ export default async function TrainerStudentsPage({ searchParams }: TrainerStude
     <div className="trainer-students stack">
       {params.created || params.updated || params.reset || params.error ? (
         <div className="trainer-students__feedback" aria-live="polite">
-          {params.created ? <span className="trainer-students__notice trainer-students__notice--ok">Alumno creado correctamente.</span> : null}
-          {params.updated ? <span className="trainer-students__notice trainer-students__notice--ok">Datos del alumno actualizados correctamente.</span> : null}
-          {params.reset ? <span className="trainer-students__notice trainer-students__notice--ok">Contraseña actualizada correctamente.</span> : null}
-          {params.error ? <span className="trainer-students__notice trainer-students__notice--error">{decodeURIComponent(params.error)}</span> : null}
+          {params.created ? <TrainerNotice className="trainer-students__notice">Alumno creado correctamente.</TrainerNotice> : null}
+          {params.updated ? <TrainerNotice className="trainer-students__notice">Datos del alumno actualizados correctamente.</TrainerNotice> : null}
+          {params.reset ? <TrainerNotice className="trainer-students__notice">Contraseña actualizada correctamente.</TrainerNotice> : null}
+          {params.error ? <TrainerNotice className="trainer-students__notice" tone="error">{decodeURIComponent(params.error)}</TrainerNotice> : null}
         </div>
       ) : null}
 
-      <section className="trainer-students__content stack">
-        <section className="trainer-students__intro">
-          <h1>Gestión de alumnos</h1>
-        </section>
+      <TrainerSurface className="trainer-students__content stack">
+        <TrainerPageHeader className="trainer-students__intro" eyebrow="Alumnos" title="Gestión de alumnos" />
 
         <section className="student-roster-toolbar">
           <form className="student-roster-toolbar__form" action="/trainer/students" method="get">
@@ -69,15 +67,11 @@ export default async function TrainerStudentsPage({ searchParams }: TrainerStude
             </label>
 
             <div className="student-roster-toolbar__actions">
-              <button className="student-roster-toolbar__submit" type="submit">Buscar</button>
+              <TrainerAction className="student-roster-toolbar__submit" type="submit">Buscar</TrainerAction>
               {query ? (
-                <Link className="student-roster-toolbar__clear" href="/trainer/students">
-                  Limpiar
-                </Link>
+                <TrainerAction className="student-roster-toolbar__clear" href="/trainer/students" variant="quiet">Limpiar</TrainerAction>
               ) : null}
-              <Link className="trainer-students__new-student" href="/trainer/students/new">
-                <span aria-hidden="true">+</span> Agregar alumno
-              </Link>
+              <TrainerAction className="trainer-students__new-student" href="/trainer/students/new" variant="primary"><span aria-hidden="true">+</span> Agregar alumno</TrainerAction>
             </div>
           </form>
 
@@ -87,14 +81,15 @@ export default async function TrainerStudentsPage({ searchParams }: TrainerStude
         </section>
 
         {students.length === 0 ? (
-          <PlaceholderPanel
-            title={query ? 'No encontramos alumnos' : 'Todavía no hay alumnos cargados'}
+            <PlaceholderPanel
+              className="trainer-empty-state"
+              title={query ? 'No encontramos alumnos' : 'Todavía no hay alumnos cargados'}
             description={query ? 'Probá con otro nombre, email o programa para encontrar al alumno que buscás.' : 'Creá el primer alumno para empezar a asignar rutinas, programas y accesos desde esta pantalla.'}
           />
         ) : (
           <StudentRosterTable students={students} />
         )}
-      </section>
+      </TrainerSurface>
     </div>
   )
 }

@@ -58,7 +58,7 @@ export function ManualAssignmentForm({ students, programs, exercises, categories
   const programOptions = selectedStudent ? programs.filter((program) => selectedStudent.programCodes.includes(program.code)) : []
 
   return (
-    <form action={formAction} className="card stack">
+    <form action={formAction} className="card stack trainer-form">
       {values?.formError ? <p className="status status--error" role="alert">{values.formError}</p> : null}
       <section className="form-panel stack">
         <div className="form-grid">

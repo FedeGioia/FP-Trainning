@@ -40,7 +40,7 @@ export function TemplateAssignmentForm({ students, templates, initialStudentId =
     : templates
 
   return (
-    <form action={formAction} className="card stack">
+    <form action={formAction} className="card stack trainer-form">
       {values?.formError ? <p className="status status--error" role="alert">{values.formError}</p> : null}
       {selectedStudent ? <p className="muted">Alumno seleccionado: {selectedStudent.name} · Plantillas compatibles con sus programas</p> : null}
 
