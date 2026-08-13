@@ -92,7 +92,7 @@ export default async function TrainerAssignmentDetailPage({ params, searchParams
         </div>
       </TrainerSurface>
 
-      {qs.error ? <TrainerNotice variant="error">{decodeURIComponent(qs.error)}</TrainerNotice> : null}
+      {qs.error ? <TrainerNotice tone="error">{decodeURIComponent(qs.error)}</TrainerNotice> : null}
       {qs.saved ? <TrainerNotice>Feedback guardado correctamente.</TrainerNotice> : null}
 
       <section className="trainer-assignment-detail__metrics" aria-label="Resumen de la asignación">
