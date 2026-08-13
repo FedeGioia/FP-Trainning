@@ -138,7 +138,7 @@ export async function listAssignments(now = new Date()): Promise<AssignmentSumma
     const tomorrowStart = new Date(todayStart)
     tomorrowStart.setDate(tomorrowStart.getDate() + 1)
 
-    const orderBy = [{ scheduledAt: 'asc' }, { id: 'asc' }] as const
+    const orderBy: Prisma.AssignedRoutineOrderByWithRelationInput[] = [{ scheduledAt: 'asc' }, { id: 'asc' }]
 
     const todaysAssignments = await db.assignedRoutine.findMany({
       where: {
