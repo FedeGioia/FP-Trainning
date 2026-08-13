@@ -10,6 +10,7 @@ type StrengthSet = {
 
 type StrengthResultFormProps = {
   action: (formData: FormData) => void | Promise<void>
+  saveAndNextAction: (formData: FormData) => void | Promise<void>
   assignmentId: string
   currentSets: StrengthSet[]
   expectedStrength: {
@@ -31,7 +32,7 @@ function getInitialSets(currentSets: StrengthSet[], expectedStrength: StrengthRe
   }))
 }
 
-export function StrengthResultForm({ action, assignmentId, currentSets, expectedStrength }: StrengthResultFormProps) {
+export function StrengthResultForm({ action, saveAndNextAction, assignmentId, currentSets, expectedStrength }: StrengthResultFormProps) {
   const [sets, setSets] = useState(() => getInitialSets(currentSets, expectedStrength))
 
   const updateSet = (index: number, field: keyof StrengthSet, value: number) => {
@@ -85,6 +86,9 @@ export function StrengthResultForm({ action, assignmentId, currentSets, expected
         </Link>
         <button className="student-exercise-button student-exercise-button--primary" type="submit">
           Guardar ejercicio
+        </button>
+        <button className="student-exercise-button student-exercise-button--primary" formAction={saveAndNextAction} type="submit">
+          Guardar y siguiente ejercicio
         </button>
       </section>
     </form>

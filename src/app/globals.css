@@ -1166,6 +1166,41 @@ summary:focus-visible {
 
 .student-calendar-shell {
   width: 100%;
+  gap: 0.8rem;
+}
+
+.student-week-calendar__header {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) 38px;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.student-week-calendar__period {
+  display: grid;
+  gap: 0.05rem;
+  min-width: 0;
+  text-align: center;
+}
+
+.student-week-calendar__period span,
+.student-week-calendar__period strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.student-week-calendar__period span {
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.student-week-calendar__period strong {
+  font-size: 1rem;
+  letter-spacing: -0.02em;
 }
 
 .student-week-calendar {
@@ -1185,7 +1220,22 @@ summary:focus-visible {
   border-radius: 18px;
   background: var(--surface);
   color: var(--primary);
-  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.06);
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.055);
+  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+
+.student-week-calendar__day:hover {
+  border-color: rgba(31, 111, 255, 0.38);
+  box-shadow: 0 10px 20px rgba(31, 51, 84, 0.1);
+  transform: translateY(-1px);
+}
+
+.student-week-calendar__day:active {
+  transform: translateY(0) scale(0.97);
+}
+
+.student-week-calendar__day.has-workout {
+  border-color: rgba(31, 111, 255, 0.22);
 }
 
 .student-week-calendar__arrow {
@@ -1235,12 +1285,49 @@ summary:focus-visible {
   height: 0.42rem;
   border-radius: 999px;
   background: #1f6fff;
+  box-shadow: 0 0 0 3px rgba(31, 111, 255, 0.1);
 }
 
 .student-week-calendar__workout-dot--fp-home { background: #f97316; }
 .student-week-calendar__workout-dot--fp-stretching { background: #7c3aed; }
 .student-week-calendar__workout-dot--fp-running { background: #16a34a; }
-.student-week-calendar__day.is-active .student-week-calendar__workout-dot { box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.42); }
+.student-week-calendar__day.is-active .student-week-calendar__workout-dot { box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.28); }
+
+.student-week-context {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(31, 111, 255, 0.12);
+}
+
+.student-week-context > div {
+  display: grid;
+  gap: 0.12rem;
+}
+
+.student-week-context__label,
+.student-section__eyebrow {
+  color: var(--primary-strong);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.student-week-context strong {
+  font-size: 0.9rem;
+  letter-spacing: -0.015em;
+}
+
+.student-week-context__hint {
+  max-width: 10rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+  line-height: 1.35;
+  text-align: right;
+}
 
 .student-quick-card {
   display: grid;
@@ -2592,6 +2679,42 @@ summary:focus-visible {
   gap: 1rem;
 }
 
+.student-section .section-header {
+  align-items: flex-end;
+  padding: 0.1rem 0.15rem;
+}
+
+.student-section .section-title {
+  margin: 0.22rem 0 0;
+  text-transform: capitalize;
+}
+
+.student-section .section-header p {
+  max-width: 36rem;
+  margin: 0.3rem 0 0;
+}
+
+.student-section__day-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  flex-shrink: 0;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid rgba(31, 111, 255, 0.2);
+  border-radius: 12px;
+  background: rgba(31, 111, 255, 0.06);
+  color: var(--primary-strong);
+  font-size: 0.8rem;
+  font-weight: 750;
+  transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
+}
+
+.student-section__day-link:hover {
+  border-color: rgba(31, 111, 255, 0.38);
+  background: rgba(31, 111, 255, 0.12);
+  transform: translateY(-1px);
+}
+
 .student-block-list {
   display: grid;
   gap: 0.9rem;
@@ -2928,16 +3051,27 @@ summary:focus-visible {
 .student-workout-progress__header p,
 .student-workout-progress__hint { color: #565e74; font-size: 0.9rem; }
 .student-workout-progress__header > span { padding: 0.4rem 0.7rem; border-radius: 999px; background: #e5eeff; color: #004ac6; font-size: 0.75rem; font-weight: 800; }
-.student-workout-progress__hint { margin-top: 1rem !important; }
+.student-workout-progress__eyebrow { display: block; margin-bottom: 0.25rem; color: #004ac6; font-size: 0.68rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
+.student-workout-progress__next { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.1rem 0.75rem; align-items: center; margin-top: 1.15rem; padding: 0.85rem 0.9rem; border: 1px solid #bfd3f8; border-radius: 0.65rem; background: #f4f7ff; color: #0b1c30; transition: border-color 160ms ease, background 160ms ease, transform 160ms ease; }
+.student-workout-progress__next:hover { border-color: #004ac6; background: #eaf1ff; transform: translateY(-1px); }
+.student-workout-progress__next span { color: #565e74; font-size: 0.68rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
+.student-workout-progress__next strong { overflow: hidden; font-size: 0.92rem; text-overflow: ellipsis; white-space: nowrap; }
+.student-workout-progress__next b { grid-row: 1 / span 2; grid-column: 2; display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 999px; background: #004ac6; color: #fff; }
+.student-workout-progress__complete { margin-top: 1.15rem !important; padding: 0.8rem 0.9rem; border-radius: 0.65rem; background: #e9f9f0; color: #078557; font-size: 0.85rem !important; font-weight: 700; }
 
 .student-workout-exercises,
 .student-workout-section { display: grid; gap: 1rem; }
 .student-workout-section > h2 { margin: 0; color: #004ac6; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.06em; }
-.student-workout-exercise { position: relative; overflow: hidden; border: 1px solid #c3c6d7; border-radius: 0.75rem; background: #fff; box-shadow: 0 3px 8px rgba(11, 28, 48, 0.08); }
+.student-workout-checklist { display: grid; gap: 0.75rem; margin: 0; padding: 0; list-style: none; }
+.student-workout-exercise { position: relative; overflow: hidden; border: 1px solid #c3c6d7; border-radius: 0.75rem; background: #fff; box-shadow: 0 3px 8px rgba(11, 28, 48, 0.08); transition: border-color 160ms ease, box-shadow 160ms ease; }
+.student-workout-exercise:has(.student-exercise-link:focus-visible) { border-color: #004ac6; box-shadow: 0 0 0 3px rgba(0, 74, 198, 0.12); }
 .student-workout-exercise::before { position: absolute; inset: 0 auto 0 0; width: 0.25rem; content: ''; background: #004ac6; }
 .student-workout-exercise--completed::before { background: #10b981; }
-.student-workout-exercise__body { display: grid; gap: 0.85rem; padding: 1.25rem 1.25rem 1.25rem 1.5rem; }
-.student-workout-exercise__meta { display: flex; align-items: center; flex-wrap: wrap; gap: 0.65rem; }
+.student-workout-exercise__body { display: grid; gap: 0.85rem; padding: 1rem 1rem 1rem 1.25rem; }
+.student-workout-exercise__header { display: flex; align-items: center; gap: 0.65rem; }
+.student-workout-exercise__marker { display: inline-grid; width: 1.85rem; height: 1.85rem; flex: 0 0 auto; place-items: center; border: 1px solid #b7c9e7; border-radius: 999px; background: #f4f7ff; color: #004ac6; font-size: 0.78rem; font-weight: 800; }
+.student-workout-exercise__marker--completed { border-color: #9cd8b8; background: #e9f9f0; color: #078557; }
+.student-workout-exercise__meta { display: flex; align-items: center; flex-wrap: wrap; gap: 0.45rem; min-width: 0; }
 .student-metric-badge { padding: 0.25rem 0.5rem; border-radius: 999px; background: #e5eeff; color: #004ac6; font-size: 0.68rem; font-weight: 800; letter-spacing: 0.05em; }
 .student-exercise-state { color: #565e74; font-size: 0.76rem; font-weight: 700; }
 .student-exercise-state.status--ok { color: #078557; background: transparent; border: 0; padding: 0; }
@@ -2945,7 +3079,7 @@ summary:focus-visible {
 .student-workout-exercise h3 { margin: 0; font-size: 1.05rem; }
 .student-workout-exercise__value { margin: -0.4rem 0 0; color: #565e74; font-size: 0.82rem; }
 .student-exercise-link,
-.student-exercise-button { display: inline-flex; min-height: 2.8rem; align-items: center; justify-content: center; padding: 0.7rem 1rem; border: 1px solid #004ac6; border-radius: 0.5rem; background: #004ac6; color: #fff; font-size: 0.82rem; font-weight: 800; text-align: center; }
+.student-exercise-button { display: inline-flex; min-height: 2.8rem; align-items: center; justify-content: center; gap: 0.4rem; padding: 0.7rem 1rem; border: 1px solid #004ac6; border-radius: 0.5rem; background: #004ac6; color: #fff; font-size: 0.82rem; font-weight: 800; text-align: center; }
 .student-exercise-link--outline,
 .student-exercise-button--secondary { border-color: #c3c6d7; background: transparent; color: #0b1c30; }
 .student-exercise-link:hover,
@@ -3034,7 +3168,7 @@ summary:focus-visible {
 
   .student-mobile-topbar { padding-right: 2rem; padding-left: 2rem; }
 
-  .student-exercise-form__actions { grid-template-columns: 1fr 1fr; }
+  .student-exercise-form__actions { grid-template-columns: repeat(3, 1fr); }
 }
 
 @media (max-width: 380px) {

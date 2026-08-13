@@ -92,6 +92,15 @@ export default async function StudentExercisePage({ params, searchParams }: Stud
     )
   }
 
+  const exercises = assignment.sections.flatMap((section) => section.exercises)
+  const nextExercise = exercises[exercises.findIndex((item) => item.id === exercise.id) + 1]
+  const saveAction = saveStudentExerciseAction.bind(null, { assignmentId: assignment.id, exerciseId: exercise.id })
+  const saveAndNextAction = saveStudentExerciseAction.bind(null, {
+    assignmentId: assignment.id,
+    exerciseId: exercise.id,
+    nextExerciseId: nextExercise?.id,
+  })
+
   return (
     <div className="student-exercise-page">
       <header className="student-mobile-topbar">
@@ -143,13 +152,14 @@ export default async function StudentExercisePage({ params, searchParams }: Stud
 
         {isStrengthMetric(exercise.metricType) ? (
           <StrengthResultForm
-            action={saveStudentExerciseAction.bind(null, { assignmentId: assignment.id, exerciseId: exercise.id })}
+            action={saveAction}
+            saveAndNextAction={saveAndNextAction}
             assignmentId={assignment.id}
             currentSets={exercise.currentStrengthSets ?? []}
             expectedStrength={exercise.expectedStrength}
           />
         ) : (
-          <form action={saveStudentExerciseAction.bind(null, { assignmentId: assignment.id, exerciseId: exercise.id })} className="student-exercise-form">
+          <form action={saveAction} className="student-exercise-form">
             <span className="student-exercise-form__kicker">📝 Tu registro de hoy</span>
             <label className="student-exercise-form__field">
               <span>{getMetricFieldLabel(exercise.metricType)}</span>
@@ -158,6 +168,7 @@ export default async function StudentExercisePage({ params, searchParams }: Stud
             <section className="student-exercise-form__actions">
               <Link className="student-exercise-button student-exercise-button--secondary" href={`/student/block/${assignment.id}`}>Cancelar</Link>
               <button className="student-exercise-button student-exercise-button--primary" type="submit">Guardar ejercicio</button>
+              <button className="student-exercise-button student-exercise-button--primary" formAction={saveAndNextAction} type="submit">Guardar y siguiente ejercicio</button>
             </section>
           </form>
         )}

@@ -8,9 +8,10 @@ import { saveAssignmentExerciseResult } from '@/modules/assignments'
 type ActionProps = {
   assignmentId: string
   exerciseId: string
+  nextExerciseId?: string
 }
 
-export async function saveStudentExerciseAction({ assignmentId, exerciseId }: ActionProps, formData: FormData) {
+export async function saveStudentExerciseAction({ assignmentId, exerciseId, nextExerciseId }: ActionProps, formData: FormData) {
   const session = await auth()
   const value = String(formData.get('value') ?? '')
   const strengthSets = new Map<number, { repetitions: string; weight: string }>()
@@ -40,6 +41,10 @@ export async function saveStudentExerciseAction({ assignmentId, exerciseId }: Ac
 
   if (!result.ok) {
     redirect(`/student/block/${assignmentId}/exercise/${exerciseId}?error=${encodeURIComponent(result.message)}`)
+  }
+
+  if (nextExerciseId) {
+    redirect(`/student/block/${assignmentId}/exercise/${nextExerciseId}`)
   }
 
   redirect(`/student/block/${assignmentId}?saved=1`)

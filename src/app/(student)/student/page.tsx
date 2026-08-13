@@ -5,7 +5,7 @@ import { PlaceholderPanel } from '@/components/ui/placeholder-panel'
 import { StudentWorkoutCard } from '@/components/student/student-workout-card'
 import { getStudentWorkoutStreak, listStudentAssignmentsInRange } from '@/modules/assignments'
 import { StudentWeekCalendar } from '@/components/student/student-week-calendar'
-import { getWeekDaysFrom, isSameCalendarDay, parseLocalDateKey } from '@/lib/date'
+import { formatLocalDateKey, getWeekDaysFrom, isSameCalendarDay, parseLocalDateKey } from '@/lib/date'
 
 function FireIcon() {
   return (
@@ -40,6 +40,7 @@ export default async function StudentDashboardPage({ searchParams }: StudentDash
   weekEnd.setDate(weekEnd.getDate() + 1)
   const assignments = await listStudentAssignmentsInRange(studentId, weekStart, weekEnd)
   const selectedDayAssignments = assignments.filter((assignment) => isSameCalendarDay(assignment.scheduledAt, selectedDate))
+  const scheduledDays = new Set(assignments.map((assignment) => formatLocalDateKey(new Date(assignment.scheduledAt)))).size
   const selectedDateLabel = selectedDate.toLocaleDateString('es-AR', {
     weekday: 'long',
     day: 'numeric',
@@ -65,14 +66,26 @@ export default async function StudentDashboardPage({ searchParams }: StudentDash
         </div>
 
         <StudentWeekCalendar selectedDate={selectedDate} hrefBase="/student" queryParamName="date" workouts={assignments} />
+
+        <div className="student-week-context">
+          <div>
+            <span className="student-week-context__label">Semana en curso</span>
+            <strong>{assignments.length} bloques en {scheduledDays} {scheduledDays === 1 ? 'día' : 'días'}</strong>
+          </div>
+          <span className="student-week-context__hint">Tocá un día para ver sus bloques</span>
+        </div>
       </section>
 
       <section className="student-section stack">
         <div className="section-header">
           <div>
-            <h2 className="section-title">Detalle de {selectedDateLabel}</h2>
-            <p className="muted">Entrenamientos asignados para el día seleccionado.</p>
+            <span className="student-section__eyebrow">Día seleccionado</span>
+            <h2 className="section-title">{selectedDateLabel}</h2>
+            <p className="muted">{selectedDayAssignments.length === 0 ? 'No hay bloques asignados para este día.' : `${selectedDayAssignments.length} ${selectedDayAssignments.length === 1 ? 'bloque disponible' : 'bloques disponibles'} para abrir cuando quieras.`}</p>
           </div>
+          <Link className="student-section__day-link" href={`/student/day/${formatLocalDateKey(selectedDate)}`}>
+            Ver día completo
+          </Link>
         </div>
 
         {selectedDayAssignments.length === 0 ? (

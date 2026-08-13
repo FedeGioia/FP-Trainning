@@ -54,6 +54,15 @@ function getWeekRangeLabel(days: Date[]) {
   })}`
 }
 
+function getMonthLabel(days: Date[]) {
+  const start = days[0]
+  const end = days[days.length - 1]
+  const startMonth = start.toLocaleDateString('es-AR', { month: 'long' })
+  const endMonth = end.toLocaleDateString('es-AR', { month: 'long' })
+
+  return start.getMonth() === end.getMonth() ? startMonth : `${startMonth} · ${endMonth}`
+}
+
 export function getWorkoutDotByDate(workouts: WorkoutDay[], date: Date) {
   return workouts
     .filter((workout) => isSameCalendarDay(workout.scheduledAt, date))
@@ -67,7 +76,7 @@ export function StudentWeekCalendar({ selectedDate, hrefBase = '/student', query
 
   return (
     <div className="student-calendar-shell stack" aria-label="Calendario semanal">
-      <div className="section-header" style={{ alignItems: 'center' }}>
+      <div className="student-week-calendar__header">
         <Link
           className="student-week-calendar__arrow"
           href={`${hrefBase}?${queryParamName}=${formatLocalDateKey(previousWeek)}`}
@@ -76,9 +85,10 @@ export function StudentWeekCalendar({ selectedDate, hrefBase = '/student', query
           <ArrowLeftIcon className="student-week-calendar__arrow-icon" />
         </Link>
 
-        <strong className="section-title" style={{ margin: 0, textAlign: 'center' }}>
-          {getWeekRangeLabel(days)}
-        </strong>
+        <div className="student-week-calendar__period">
+          <span>{getMonthLabel(days)}</span>
+          <strong>{getWeekRangeLabel(days)}</strong>
+        </div>
 
         <Link
           className="student-week-calendar__arrow"
@@ -89,7 +99,7 @@ export function StudentWeekCalendar({ selectedDate, hrefBase = '/student', query
         </Link>
       </div>
 
-      <div className="student-week-calendar">
+      <div className="student-week-calendar" role="list" aria-label={`Semana del ${getWeekRangeLabel(days)}`}>
         {days.map((date) => {
           const active = isSameCalendarDay(date, selectedDate)
           const workout = getWorkoutDotByDate(workouts, date)
@@ -97,9 +107,11 @@ export function StudentWeekCalendar({ selectedDate, hrefBase = '/student', query
           return (
             <Link
               key={formatLocalDateKey(date)}
-              className={`student-week-calendar__day${active ? ' is-active' : ''}`}
+              className={`student-week-calendar__day${active ? ' is-active' : ''}${workout ? ' has-workout' : ''}`}
               href={`${hrefBase}?${queryParamName}=${formatLocalDateKey(date)}`}
               aria-current={active ? 'date' : undefined}
+              aria-label={`${date.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })}${workout ? `, entrenamiento ${workout.programCode}` : ''}`}
+              role="listitem"
             >
               <span className="student-week-calendar__weekday">{getWeekdayLabel(date)}</span>
               <strong className="student-week-calendar__day-number">{date.getDate()}</strong>
