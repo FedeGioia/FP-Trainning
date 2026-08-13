@@ -7,7 +7,7 @@ import { ProgramCard } from '@/components/ui/program-card'
 import { canAccessAssignment } from '@/modules/assignments/ownership'
 import { calculateCurrentStreakFromDates } from '@/lib/streak'
 import { isSameCalendarDay } from '@/lib/date'
-import { getWeekDaysFrom, formatLocalDateKey } from '@/lib/date'
+import { getCalendarDayRange, getWeekDaysFrom, formatLocalDateKey } from '@/lib/date'
 import { createAssignment, createManualAssignment } from '@/modules/assignments/service'
 import { buildManualValidationState, getInvalidNumericIssues, parseOptionalNumber } from '@/app/(trainer)/trainer/assignments/manual/validation'
 import { buildTemplateValidationState } from '@/app/(trainer)/trainer/assignments/new/validation'
@@ -16,6 +16,7 @@ import { isNavItemActive } from '@/components/layout/role-navigation'
 import { StudentRosterTable } from '@/components/trainer/student-roster-table'
 import { getCurrentWeekRange } from '@/modules/trainer-students'
 import { getStrengthResultPrefill } from '@/app/(student)/student/block/[id]/exercise/[exerciseId]/strength-prefill'
+import { getWorkoutDotByDate } from '@/components/student/student-week-calendar'
 
 async function test(name: string, fn: () => void | Promise<void>) {
   try {
@@ -86,6 +87,24 @@ await test('getWeekDaysFrom returns a Sunday-to-Saturday range', () => {
   assert.equal(week.length, 7)
   assert.equal(formatLocalDateKey(week[0]), '2026-07-05')
   assert.equal(formatLocalDateKey(week[6]), '2026-07-11')
+})
+
+await test('getCalendarDayRange creates an inclusive start and exclusive next-day boundary', () => {
+  const range = getCalendarDayRange(new Date(2026, 6, 8, 16, 30, 0))
+
+  assert.deepEqual([range.start.getHours(), range.start.getMinutes()], [0, 0])
+  assert.deepEqual([range.end.getDate(), range.end.getHours(), range.end.getMinutes()], [9, 0, 0])
+})
+
+await test('weekly workout dots select the earliest workout and break ties by assignment id', () => {
+  const dot = getWorkoutDotByDate([
+    { id: 'b', scheduledAt: '2026-07-08T10:00:00.000Z', programCode: 'FP_RUNNING' },
+    { id: 'c', scheduledAt: '2026-07-08T08:00:00.000Z', programCode: 'FP_HOME' },
+    { id: 'a', scheduledAt: '2026-07-08T08:00:00.000Z', programCode: 'FP_TRAINING' },
+  ], new Date(2026, 6, 8, 12, 0, 0))
+
+  assert.equal(dot?.id, 'a')
+  assert.equal(getWorkoutDotByDate([], new Date(2026, 6, 8)), null)
 })
 
 await test('getCurrentWeekRange returns a Sunday-start, exclusive-next-Sunday window', () => {

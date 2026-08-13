@@ -34,17 +34,12 @@ export async function RoleShell({ role, title, description, navItems, navGroups,
                 </div>
               </div>
 
-              {role === 'trainer' ? (
-                <div className="role-header-actions">
-                  <span className="role-header-user">{session?.user?.name ?? role}</span>
-                  <SignOutForm className="role-sign-out" />
-                </div>
-              ) : (
+              {role !== 'trainer' ? (
                 <div className="role-header-chip">
                   <span className="muted">Modo</span>
                   <strong>{session?.user?.name ?? role}</strong>
                 </div>
-              )}
+              ) : null}
             </div>
 
             <div className="role-nav-card">
@@ -56,6 +51,14 @@ export async function RoleShell({ role, title, description, navItems, navGroups,
               ) : null}
               <RoleNavigation role={role} navItems={navItems} navGroups={navGroups} quickActions={quickActions} />
             </div>
+
+            {role === 'trainer' ? (
+              <div className="role-sidebar-profile">
+                <span className="role-sidebar-profile__label">Profesor</span>
+                <strong className="role-sidebar-profile__name">{session?.user?.name ?? role}</strong>
+                <SignOutForm className="role-sign-out" />
+              </div>
+            ) : null}
           </div>
         </header>
       ) : null}

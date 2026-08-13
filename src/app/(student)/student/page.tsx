@@ -2,11 +2,10 @@ import Link from 'next/link'
 
 import { auth } from '@/auth'
 import { PlaceholderPanel } from '@/components/ui/placeholder-panel'
-import { ProgramBadge, getProgramToneClass } from '@/components/ui/program-badge'
-import { getStudentWorkoutStreak } from '@/modules/assignments'
+import { StudentWorkoutCard } from '@/components/student/student-workout-card'
+import { getStudentWorkoutStreak, listStudentAssignmentsInRange } from '@/modules/assignments'
 import { StudentWeekCalendar } from '@/components/student/student-week-calendar'
-import { isSameCalendarDay, parseLocalDateKey } from '@/lib/date'
-import { listAssignmentsForStudent } from '@/modules/assignments'
+import { getWeekDaysFrom, isSameCalendarDay, parseLocalDateKey } from '@/lib/date'
 
 function FireIcon() {
   return (
@@ -35,7 +34,11 @@ export default async function StudentDashboardPage({ searchParams }: StudentDash
   const studentName = session?.user?.name ?? 'alumno'
   const streak = await getStudentWorkoutStreak(studentId)
   const selectedDate = parseLocalDateKey(params.date ?? '') ?? new Date()
-  const assignments = await listAssignmentsForStudent(studentId)
+  const weekDays = getWeekDaysFrom(selectedDate)
+  const weekStart = weekDays[0]!
+  const weekEnd = new Date(weekDays[weekDays.length - 1]!)
+  weekEnd.setDate(weekEnd.getDate() + 1)
+  const assignments = await listStudentAssignmentsInRange(studentId, weekStart, weekEnd)
   const selectedDayAssignments = assignments.filter((assignment) => isSameCalendarDay(assignment.scheduledAt, selectedDate))
   const selectedDateLabel = selectedDate.toLocaleDateString('es-AR', {
     weekday: 'long',
@@ -61,7 +64,7 @@ export default async function StudentDashboardPage({ searchParams }: StudentDash
           </div>
         </div>
 
-        <StudentWeekCalendar selectedDate={selectedDate} hrefBase="/student" queryParamName="date" />
+        <StudentWeekCalendar selectedDate={selectedDate} hrefBase="/student" queryParamName="date" workouts={assignments} />
       </section>
 
       <section className="student-section stack">
@@ -79,32 +82,7 @@ export default async function StudentDashboardPage({ searchParams }: StudentDash
           />
         ) : (
           <div className="student-day-list">
-            {selectedDayAssignments.map((assignment) => {
-              const time = new Date(assignment.scheduledAt).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })
-
-                return (
-                  <Link
-                    key={assignment.id}
-                    className={`student-day-card program-surface ${getProgramToneClass(assignment.programCode)}`}
-                    href={`/student/block/${assignment.id}`}
-                  >
-                    <div className="student-day-card__top">
-                      <div className="stack" style={{ gap: '0.25rem' }}>
-                        <ProgramBadge code={assignment.programCode} />
-                      <strong>{assignment.title}</strong>
-                    </div>
-                    <span className="student-time">{time}</span>
-                  </div>
-
-                  <p className="muted">{assignment.templateName ?? 'Bloque personalizado'}</p>
-
-                  <div className="role-nav">
-                    <span className="status status--muted">{assignment.sectionCount} secciones</span>
-                    <span className="status status--ok">{assignment.status}</span>
-                  </div>
-                </Link>
-              )
-            })}
+            {selectedDayAssignments.map((assignment) => <StudentWorkoutCard key={assignment.id} assignment={assignment} />)}
           </div>
         )}
       </section>

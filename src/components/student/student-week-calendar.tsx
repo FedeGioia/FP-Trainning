@@ -2,10 +2,17 @@ import Link from 'next/link'
 
 import { formatLocalDateKey, getWeekDaysFrom, isSameCalendarDay } from '@/lib/date'
 
+type WorkoutDay = {
+  id: string
+  scheduledAt: string
+  programCode: string
+}
+
 type StudentWeekCalendarProps = {
   selectedDate: Date
   hrefBase?: string
   queryParamName?: string
+  workouts?: WorkoutDay[]
 }
 
 function ArrowLeftIcon({ className }: { className?: string }) {
@@ -47,7 +54,13 @@ function getWeekRangeLabel(days: Date[]) {
   })}`
 }
 
-export function StudentWeekCalendar({ selectedDate, hrefBase = '/student', queryParamName = 'date' }: StudentWeekCalendarProps) {
+export function getWorkoutDotByDate(workouts: WorkoutDay[], date: Date) {
+  return workouts
+    .filter((workout) => isSameCalendarDay(workout.scheduledAt, date))
+    .sort((left, right) => left.scheduledAt.localeCompare(right.scheduledAt) || left.id.localeCompare(right.id))[0] ?? null
+}
+
+export function StudentWeekCalendar({ selectedDate, hrefBase = '/student', queryParamName = 'date', workouts = [] }: StudentWeekCalendarProps) {
   const days = getWeekDaysFrom(selectedDate)
   const previousWeek = addDays(selectedDate, -7)
   const nextWeek = addDays(selectedDate, 7)
@@ -79,6 +92,7 @@ export function StudentWeekCalendar({ selectedDate, hrefBase = '/student', query
       <div className="student-week-calendar">
         {days.map((date) => {
           const active = isSameCalendarDay(date, selectedDate)
+          const workout = getWorkoutDotByDate(workouts, date)
 
           return (
             <Link
@@ -89,6 +103,12 @@ export function StudentWeekCalendar({ selectedDate, hrefBase = '/student', query
             >
               <span className="student-week-calendar__weekday">{getWeekdayLabel(date)}</span>
               <strong className="student-week-calendar__day-number">{date.getDate()}</strong>
+              {workout ? (
+                <span
+                  className={`student-week-calendar__workout-dot student-week-calendar__workout-dot--${workout.programCode.toLowerCase().replaceAll('_', '-')}`}
+                  aria-label={`Entrenamiento de ${workout.programCode}`}
+                />
+              ) : null}
             </Link>
           )
         })}

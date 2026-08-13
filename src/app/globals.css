@@ -1229,6 +1229,19 @@ summary:focus-visible {
   line-height: 1;
 }
 
+.student-week-calendar__workout-dot {
+  display: block;
+  width: 0.42rem;
+  height: 0.42rem;
+  border-radius: 999px;
+  background: #1f6fff;
+}
+
+.student-week-calendar__workout-dot--fp-home { background: #f97316; }
+.student-week-calendar__workout-dot--fp-stretching { background: #7c3aed; }
+.student-week-calendar__workout-dot--fp-running { background: #16a34a; }
+.student-week-calendar__day.is-active .student-week-calendar__workout-dot { box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.42); }
+
 .student-quick-card {
   display: grid;
   gap: 0.3rem;
@@ -1335,6 +1348,31 @@ summary:focus-visible {
   max-width: 1320px;
   margin: 0 auto;
 }
+
+.student-workout-card {
+  min-height: 176px;
+  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+}
+
+.student-workout-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 32px rgba(31, 51, 84, 0.12);
+}
+
+.student-workout-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: center;
+  margin-top: auto;
+}
+
+.student-workout-card__status { border-color: transparent; font-weight: 700; }
+.student-workout-card__status--planned { color: #a16207; background: #fef3c7; }
+.student-workout-card__status--in_progress { color: #1d4ed8; background: #dbeafe; }
+.student-workout-card__status--completed { color: #167044; background: #dcfce7; }
+.student-workout-card__status--partial { color: #c2410c; background: #ffedd5; }
+.student-workout-card__status--cancelled { color: #b91c1c; background: #fee2e2; }
 
 .role-shell--trainer:has(.trainer-student-detail__content),
 .role-shell--trainer:has(.student-roster-toolbar),
@@ -3639,6 +3677,43 @@ select[aria-invalid='true'] {
   display: block;
   padding: 0;
   border: 0;
+}
+
+.role-shell--trainer .role-sidebar-profile {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: auto;
+  padding: 1rem 0.8rem 0;
+  border-top: 1px solid rgba(203, 211, 228, 0.18);
+}
+
+.role-shell--trainer .role-sidebar-profile__label {
+  color: var(--trainer-sidebar-muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.role-shell--trainer .role-sidebar-profile__name {
+  overflow: hidden;
+  color: #f8fafc;
+  font-size: 0.92rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.role-shell--trainer .role-sidebar-profile .role-sign-out {
+  justify-self: start;
+  margin-top: 0.25rem;
+  padding: 0;
+  color: var(--trainer-sidebar-muted);
+}
+
+.role-shell--trainer .role-sidebar-profile .role-sign-out:hover {
+  border-color: transparent;
+  background: transparent;
+  color: #fff;
 }
 
 .role-shell--trainer .role-nav--trainer {

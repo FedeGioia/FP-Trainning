@@ -107,46 +107,106 @@ type NormalizedManualSection = {
   }>
 }
 
-export async function listAssignments(): Promise<AssignmentSummary[]> {
+const assignmentSummaryInclude = {
+  student: true,
+  template: true,
+  program: true,
+  sections: true,
+  submission: true,
+} as const
+
+function toAssignmentSummary(assignment: Prisma.AssignedRoutineGetPayload<{ include: typeof assignmentSummaryInclude }>): AssignmentSummary {
+  return {
+    id: assignment.id,
+    title: assignment.title,
+    studentId: assignment.student.id,
+    studentName: assignment.student.name ?? assignment.student.email,
+    templateName: assignment.template?.name ?? null,
+    programCode: assignment.program.code,
+    scheduledAt: assignment.scheduledAt.toISOString(),
+    status: assignment.submission
+      ? mapSubmissionStatusToAssignmentStatus(assignment.submission.status)
+      : assignment.status,
+    sectionCount: assignment.sections.length,
+  }
+}
+
+export async function listAssignments(now = new Date()): Promise<AssignmentSummary[]> {
   try {
-    const assignments = await db.assignedRoutine.findMany({
-      orderBy: { scheduledAt: 'asc' },
-      include: {
-        student: true,
-        template: true,
-        program: true,
-        sections: true,
-        submission: true,
+    const todayStart = new Date(now)
+    todayStart.setHours(0, 0, 0, 0)
+    const tomorrowStart = new Date(todayStart)
+    tomorrowStart.setDate(tomorrowStart.getDate() + 1)
+
+    const orderBy = [{ scheduledAt: 'asc' }, { id: 'asc' }] as const
+
+    const todaysAssignments = await db.assignedRoutine.findMany({
+      where: {
+        scheduledAt: { gte: todayStart, lt: tomorrowStart },
       },
+      orderBy,
+      include: assignmentSummaryInclude,
       take: 24,
     })
 
-    return assignments.map((assignment) => ({
-      id: assignment.id,
-      title: assignment.title,
-      studentId: assignment.student.id,
-      studentName: assignment.student.name ?? assignment.student.email,
-      templateName: assignment.template?.name ?? null,
-      programCode: assignment.program.code,
-      scheduledAt: assignment.scheduledAt.toISOString(),
-      status: assignment.submission
-        ? mapSubmissionStatusToAssignmentStatus(assignment.submission.status)
-        : assignment.status,
-      sectionCount: assignment.sections.length,
-    }))
+    const remainingAssignments = todaysAssignments.length === 24
+      ? []
+      : await db.assignedRoutine.findMany({
+          where: {
+            OR: [
+              { scheduledAt: { lt: todayStart } },
+              { scheduledAt: { gte: tomorrowStart } },
+            ],
+          },
+          orderBy,
+          include: assignmentSummaryInclude,
+          take: 24 - todaysAssignments.length,
+        })
+    const assignments = [...todaysAssignments, ...remainingAssignments]
+
+    return assignments.map(toAssignmentSummary)
   } catch {
     return []
   }
 }
 
 export async function listAssignmentsForStudent(studentId?: string): Promise<AssignmentSummary[]> {
-  const assignments = await listAssignments()
-
   if (!studentId) {
     return []
   }
 
-  return assignments.filter((assignment) => assignment.studentId === studentId)
+  try {
+    const assignments = await db.assignedRoutine.findMany({
+      where: { studentId },
+      orderBy: [{ scheduledAt: 'asc' }, { id: 'asc' }],
+      include: assignmentSummaryInclude,
+    })
+
+    return assignments.map(toAssignmentSummary)
+  } catch {
+    return []
+  }
+}
+
+export async function listStudentAssignmentsInRange(studentId: string | undefined, start: Date, end: Date): Promise<AssignmentSummary[]> {
+  if (!studentId) {
+    return []
+  }
+
+  try {
+    const assignments = await db.assignedRoutine.findMany({
+      where: {
+        studentId,
+        scheduledAt: { gte: start, lt: end },
+      },
+      orderBy: [{ scheduledAt: 'asc' }, { id: 'asc' }],
+      include: assignmentSummaryInclude,
+    })
+
+    return assignments.map(toAssignmentSummary)
+  } catch {
+    return []
+  }
 }
 
 export async function getStudentWorkoutStreak(studentId?: string): Promise<number> {
