@@ -1,9 +1,7 @@
-import Link from 'next/link'
-
 import { listAssignments } from '@/modules/assignments'
-import type { AssignmentStatus } from '@/modules/assignments'
-import { ProgramBadge } from '@/components/ui/program-badge'
-import { TrainerAction, TrainerEmptyState, TrainerMetricCard, TrainerNotice, TrainerPageHeader, TrainerStatusBadge, TrainerSurface } from '@/components/trainer-ui'
+import { PlaceholderPanel } from '@/components/ui/placeholder-panel'
+import { AssignmentRosterTable } from '@/components/trainer/assignment-roster-table'
+import { TrainerAction, TrainerNotice, TrainerPageHeader, TrainerSurface } from '@/components/trainer-ui'
 
 type TrainerAssignmentsPageProps = {
   searchParams?: Promise<{
@@ -11,96 +9,42 @@ type TrainerAssignmentsPageProps = {
   }>
 }
 
-const assignmentStatusLabels: Record<AssignmentStatus, string> = {
-  PLANNED: 'Pendiente',
-  IN_PROGRESS: 'En curso',
-  COMPLETED: 'Completado',
-  PARTIAL: 'Parcial',
-  CANCELLED: 'Cancelada',
-}
-
-function formatScheduledAt(scheduledAt: string) {
-  return new Intl.DateTimeFormat('es-AR', {
-    weekday: 'short',
-    day: 'numeric',
-    month: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(new Date(scheduledAt))
-}
-
 export default async function TrainerAssignmentsPage({ searchParams }: TrainerAssignmentsPageProps) {
   const params = (await searchParams) ?? {}
   const assignments = await listAssignments()
-  const planned = assignments.filter((assignment) => assignment.status === 'PLANNED').length
 
   return (
-    <div className="trainer-assignments">
-      <TrainerSurface className="trainer-assignments__hero" aria-label="Asignaciones de rutinas">
-        <TrainerPageHeader
-          className="trainer-assignments__hero-copy"
-          eyebrow="Agenda"
-          title="Asignaciones de rutinas"
-          description="Gestioná y programá los entrenamientos de tus alumnos."
-          actions={<><TrainerAction className="trainer-assignments__action trainer-assignments__action--secondary" href="/trainer/assignments/manual">Rutina manual</TrainerAction><TrainerAction className="trainer-assignments__action trainer-assignments__action--primary" href="/trainer/assignments/new" variant="primary">Desde plantilla</TrainerAction></>}
-        />
-      </TrainerSurface>
-
+    <div className="trainer-assignments stack">
       {params.created ? <TrainerNotice className="trainer-assignments__notice" role="status">Asignación creada correctamente.</TrainerNotice> : null}
 
-      <section className="trainer-assignments__metrics" aria-label="Resumen de asignaciones">
-          <TrainerMetricCard className="trainer-assignments__metric">
-          <span>Asignaciones activas</span>
-          <strong>{assignments.length}</strong>
-          <p>Bloques visibles en agenda</p>
-        </TrainerMetricCard>
-          <TrainerMetricCard className="trainer-assignments__metric">
-          <span>Por iniciar</span>
-          <strong>{planned}</strong>
-          <p>Todavía no arrancadas por el alumno</p>
-        </TrainerMetricCard>
-          <TrainerMetricCard className="trainer-assignments__metric">
-          <span>Programadas</span>
-          <strong>{assignments.length}</strong>
-          <p>Sesiones organizadas por fecha y hora</p>
-        </TrainerMetricCard>
-      </section>
+      <TrainerSurface className="trainer-assignments__content stack" aria-label="Asignaciones de rutinas">
+        <TrainerPageHeader className="trainer-assignments__intro" eyebrow="Asignaciones" title="Gestión de rutinas" />
 
-      <TrainerSurface className="trainer-assignments__agenda">
-        <header className="trainer-assignments__agenda-header">
-          <h2>Agenda visible</h2>
-          <p>Revisá qué tiene cada alumno, cuándo le toca y cómo viene avanzando.</p>
-        </header>
+        <section className="assignment-roster-toolbar">
+          <div className="assignment-roster-toolbar__controls">
+            <label className="field assignment-roster-toolbar__field">
+              <span className="sr-only">Buscar por alumno o rutina</span>
+              <input aria-label="Buscar por alumno o rutina" placeholder="Buscar" type="search" />
+            </label>
 
-        <label className="trainer-assignments__search">
-          <span aria-hidden="true">⌕</span>
-          <input aria-label="Buscar por alumno o rutina" placeholder="Buscar por alumno o rutina..." type="search" />
-        </label>
+            <div className="assignment-roster-toolbar__actions">
+              <TrainerAction href="/trainer/assignments/manual">Rutina manual</TrainerAction>
+              <TrainerAction href="/trainer/assignments/new" variant="primary"><span aria-hidden="true">+</span> Desde plantilla</TrainerAction>
+            </div>
+          </div>
 
-        <div className="trainer-assignments__list">
-          {assignments.length > 0 ? (
-            assignments.map((assignment) => (
-              <Link className="trainer-assignments__row trainer-list-row" href={`/trainer/assignments/${assignment.id}`} key={assignment.id}>
-                <ProgramBadge className="trainer-assignments__program" code={assignment.programCode} />
-                <div className="trainer-assignments__row-copy">
-                  <strong>{assignment.title}</strong>
-                  <span>{assignment.studentName}</span>
-                </div>
-                <div className="trainer-assignments__row-meta">
-                  <time dateTime={assignment.scheduledAt}>◷ {formatScheduledAt(assignment.scheduledAt)}</time>
-                  <TrainerStatusBadge className={`trainer-assignments__status trainer-assignments__status--${assignment.status.toLowerCase()}`}>
-                    {assignmentStatusLabels[assignment.status]}
-                  </TrainerStatusBadge>
-                </div>
-              </Link>
-            ))
-          ) : (
-            <TrainerEmptyState className="trainer-assignments__empty">
-              <strong>Todavía no hay asignaciones visibles.</strong>
-              <span>Creá una rutina desde una plantilla o cargala manualmente.</span>
-            </TrainerEmptyState>
-          )}
-        </div>
+          <span className="muted assignment-roster-toolbar__helper">Revisá qué tiene cada alumno, cuándo le toca y cómo viene avanzando.</span>
+        </section>
+
+        {assignments.length === 0 ? (
+          <PlaceholderPanel
+            className="trainer-empty-state"
+            title="Todavía no hay asignaciones visibles"
+            description="Creá una rutina desde una plantilla o cargala manualmente."
+          />
+        ) : (
+          <AssignmentRosterTable assignments={assignments} />
+        )}
       </TrainerSurface>
     </div>
   )
